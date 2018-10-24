@@ -1,0 +1,51 @@
+---
+title: "EE Group Counts"
+output: html_eegroupcounts
+---
+ 
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(scales)
+library(ggplot2)
+library(ggthemes)
+
+counts.df <- ss1_5
+
+counts.df <- counts.df %>%
+  filter(LEVEL1ID == "26" & 
+    (BYCOND %in% c("M_Q117 = 1","M_Q116 = 1","M_Q118 = 1")|
+    is.na(BYCOND))) %>%
+  select(Dept_E,DESCRIP_E,SURVEYR,QUESTION,ANSCOUNT) %>%
+  group_by(SURVEYR,DESCRIP_E) %>%
+  summarise(maxANSCOUNT = max(ANSCOUNT)) %>%
+  ungroup() %>%
+  spread(DESCRIP_E,maxANSCOUNT) %>%
+  gather("EEgroup","AnswerCount", 3:5) %>%
+  mutate("%ofTBS" = round(.[[4]] / .[[2]] * 100,1)) %>%
+  gather("Measure","Value", 4:5)
+
+counts.df$Value <- as.numeric(counts.df$Value)
+counts.df$SURVEYR <- as.character(counts.df$SURVEYR)
+
+ee.plt <- ggplot(counts.df, aes(x=SURVEYR,y=Value,group=EEgroup,fill=EEgroup)) +
+  labs(title = "EE Group PSES Response Rates at TBS") +
+  geom_line(stat = "identity", colour = "grey60") +
+  geom_text(vjust = -1, colour = "grey30", aes(label = Value), size = 3) +
+  scale_y_continuous(expand = expand_scale(mult = c(0,0.2))) +
+  facet_grid(Measure~EEgroup, scales = "free_y") +
+  theme_fivethirtyeight()
+
+ee.plt
+
+#as_tibble(counts.df)
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

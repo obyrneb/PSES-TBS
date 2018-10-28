@@ -124,7 +124,7 @@ ggplot(data=demoMeans.df, aes(x=SURVEYR,y=value, fill = variable_E)) +
   scale_fill_manual(values = PNN_E.clrs, labels = c("Negative", "Neutral", "Positive", "TBS")) +
   #geom_errorbar(data = PNNmeans_E.df, aes(ymax=value, ymin=value), colour = "grey45") +
   #scale_colour_manual(values = PNNmeans_E.clrs) +
-  facet_grid(TITLE_E ~ DESCRIP_E, switch = "y", scales = "free_y",
+  facet_grid(TITLE_E ~ DESCRIP_E, switch = "y", #scales = "free_y",
              labeller = labeller(DESCRIP_E = label_wrap_gen(20), TITLE_E = label_wrap_gen(120)))  +
   theme(plot.title = element_text(size = 16, hjust = 0, colour = "grey40"),
         plot.subtitle = element_text(face = "bold", size = 8, colour = "grey40"),

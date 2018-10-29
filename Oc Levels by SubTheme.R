@@ -7,16 +7,13 @@ library(reshape2)
 library(stringr)
 library(scales)
 
-loadPSES <- function() { 
-  #Read all PSES 2017 Subsets
-  ss1 <- read.csv("datasets//2017_PSES_SAFF_Subset-1_Sous-ensemble-1.csv", na.strings = "9999")
-  ss2 <- read.csv("datasets//2017_PSES_SAFF_Subset-2_Sous-ensemble-2.csv", na.strings = "9999")
-  ss3 <- read.csv("datasets//2017_PSES_SAFF_Subset-3_Sous-ensemble-3.csv", na.strings = "9999")
-  ss4 <- read.csv("datasets//2017_PSES_SAFF_Subset-4_Sous-ensemble-4.csv", na.strings = "9999")
-  ss5 <- read.csv("datasets//2017_PSES_SAFF_Subset-5_Sous-ensemble-5.csv", na.strings = "9999")
-  mapQ <- read.csv("datasets//Question_Mappings.csv")
-  mapDemQ <- read.csv("datasets//Demo_Question_Mappings.csv")
-}
+ss1 <- read.csv("datasets//2017_PSES_SAFF_Subset-1_Sous-ensemble-1.csv", na.strings = "9999")
+ss2 <- read.csv("datasets//2017_PSES_SAFF_Subset-2_Sous-ensemble-2.csv", na.strings = "9999")
+ss3 <- read.csv("datasets//2017_PSES_SAFF_Subset-3_Sous-ensemble-3.csv", na.strings = "9999")
+ss4 <- read.csv("datasets//2017_PSES_SAFF_Subset-4_Sous-ensemble-4.csv", na.strings = "9999")
+ss5 <- read.csv("datasets//2017_PSES_SAFF_Subset-5_Sous-ensemble-5.csv", na.strings = "9999")
+mapQ <- read.csv("datasets//Question_Mappings.csv")
+mapDemQ <- read.csv("datasets//Demo_Question_Mappings.csv")
 
 #Combine subsets as appropriate
 ss1_3 <- rbind(ss1,ss2)
@@ -129,10 +126,6 @@ plotDemoByTheme <- function(language, wdth = 10, hght = 8) {
     demoMeans.df$DESCRIP_lang <- demoMeans.df$DESCRIP_E
     demoMeans.df$QSubTheme_lang <- demoMeans.df$QSubTheme_E
     demoMeans.df$DemQ_lang <- demoMeans.df$DemQ_E
-    TBSmeans.df$variable_lang <- TBSmeans.df$variable_E
-    TBSmeans.df$DESCRIP_lang <- TBSmeans.df$DESCRIP_E
-    TBSmeans.df$QSubTheme_lang <- TBSmeans.df$QSubTheme_E
-    TBSmeans.df$DemQ_lang <- TBSmeans.df$DemQ_E
     PNN_lang.clrs <- PNN_E.clrs
     PNN_lang.lbls <- PNN_E.lbls
     expl_lang <- expl_E
@@ -146,10 +139,6 @@ plotDemoByTheme <- function(language, wdth = 10, hght = 8) {
     demoMeans.df$DESCRIP_lang <- demoMeans.df$DESCRIP_F
     demoMeans.df$QSubTheme_lang <- demoMeans.df$QSubTheme_F
     demoMeans.df$DemQ_lang <- demoMeans.df$DemQ_F
-    TBSmeans.df$variable_lang <- TBSmeans.df$variable_F
-    TBSmeans.df$DESCRIP_lang <- TBSmeans.df$DESCRIP_F
-    TBSmeans.df$QSubTheme_lang <- TBSmeans.df$QSubTheme_F
-    TBSmeans.df$DemQ_lang <- TBSmeans.df$DemQ_F
     PNN_lang.clrs <- PNN_F.clrs
     PNN_lang.lbls <- PNN_F.lbls
     expl_lang <- expl_F
@@ -176,7 +165,7 @@ plotDemoByTheme <- function(language, wdth = 10, hght = 8) {
     labs(fill = "Response type", 
          subtitle = expl_lang,
          caption = cap_lang) +
-    facet_grid(QSubTheme_lang ~ DESCRIP_lang, switch = "y", scales = "free_y",
+    facet_grid(QSubTheme_lang ~ DESCRIP_lang, switch = "y", #scales = "free_y",
                labeller = labeller(DESCRIP_lang = label_wrap_gen(30), QSubTheme_lang = label_wrap_gen(15)))  +
     theme(plot.title = element_text(size = 16, hjust = 0, colour = "grey40"),
           plot.subtitle = element_text(face = "bold", size = textSize, colour = "grey40"),

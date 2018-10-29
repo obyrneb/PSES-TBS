@@ -126,7 +126,7 @@ ggplot(data=demoMeans.df, aes(x=SURVEYR,y=value, fill = variable_lang)) +
        subtitle = expl_lang,
        caption = cap_lang) +
   scale_fill_manual(values = PNN_lang.clrs, labels = PNN_lang.lbls) +
-  facet_grid(QUESTION ~ DESCRIP_lang, switch = "y", scales = "free_y",
+  facet_grid(QUESTION ~ DESCRIP_lang, switch = "y", #scales = "free_y",
              labeller = labeller(DESCRIP_lang = label_wrap_gen(30), QUESTION = label_wrap_gen()))  +
   theme(plot.title = element_text(size = 16, hjust = 0, colour = "grey40"),
         plot.subtitle = element_text(face = "bold", size = textSize, colour = "grey40"),

@@ -1,209 +1,209 @@
-QUESTION,QTheme_E,QSubTheme_E,QSection_E,QTheme_F,QSubTheme_F,QSection_F
-A_Q01,Workplace,Physical environment and equipment,My Job,Milieu de travail,Environnement physique et équipement,Mon travail
-A_Q02,Workplace,Use of official languages,My Job,Milieu de travail,Utilisation des langues officielles,Mon travail
-A_Q03,Workplace,Use of official languages,My Job,Milieu de travail,Utilisation des langues officielles,Mon travail
-A_Q04,Workplace,Physical environment and equipment,My Job,Milieu de travail,Environnement physique et équipement,Mon travail
-A_Q05,Workforce,Job fit and development,My Job,Effectif,Compatibilité entre la personne et l'emploi et perfectionnement,Mon travail
-A_Q06,Workforce,Job fit and development,My Job,Effectif,Compatibilité entre la personne et l'emploi et perfectionnement,Mon travail
-A_Q07,Workforce,Job fit and development,My Job,Effectif,Compatibilité entre la personne et l'emploi et perfectionnement,Mon travail
-A_Q08,Workplace,Physical environment and equipment,My Job,Milieu de travail,Environnement physique et équipement,Mon travail
-A_Q09,Workforce,Work-life balance and workload,My Job,Effectif,Équilibre travail-vie privée et charge de travail,Mon travail
-A_Q10,Workforce,Work-life balance and workload,My Job,Effectif,Équilibre travail-vie privée et charge de travail,Mon travail
-A_Q11,Employee engagement,Employee engagement,My Job,Mobilisation des employés,Mobilisation des employés,Mon travail
-A_Q12,Workforce,Performance management,My Job,Effectif,Gestion du rendement,Mon travail
-A_Q13,Workforce,Performance management,My Job,Effectif,Gestion du rendement,Mon travail
-A_Q14,Workforce,Performance management,My Job,Effectif,Gestion du rendement,Mon travail
-A_Q14,Workplace,Organizational goals,My Job,Milieu de travail,Objectifs organisationnels,Mon travail
-A_Q15,Employee engagement,Employee engagement,My Job,Mobilisation des employés,Mobilisation des employés,Mon travail
-A_Q16,Employee engagement,Employee engagement,My Job,Mobilisation des employés,Mobilisation des employés,Mon travail
-A_Q17,Workforce,Empowerment,My Job,Effectif,Habilitation,Mon travail
-A_Q18,Workforce,Empowerment,My Job,Effectif,Habilitation,Mon travail
-A_Q19,Workforce,Empowerment,My Job,Effectif,Habilitation,Mon travail
-A_Q20,Employee engagement,Employee engagement,My Job,Mobilisation des employés,Mobilisation des employés,Mon travail
-A_Q21,Workforce,Work-life balance and workload,My Job,Effectif,Équilibre travail-vie privée et charge de travail,Mon travail
-A_Q22a,Workplace,Organizational performance,My Job,Milieu de travail,Rendement organisationnel,Mon travail
-A_Q22b,Workplace,Organizational performance,My Job,Milieu de travail,Rendement organisationnel,Mon travail
-A_Q22c,Workplace,Organizational performance,My Job,Milieu de travail,Rendement organisationnel,Mon travail
-A_Q22d,Workplace,Organizational performance,My Job,Milieu de travail,Rendement organisationnel,Mon travail
-A_Q22e,Workplace,Organizational performance,My Job,Milieu de travail,Rendement organisationnel,Mon travail
-A_Q22f,Workplace,Organizational performance,My Job,Milieu de travail,Rendement organisationnel,Mon travail
-A_Q22g,Workplace,Organizational performance,My Job,Milieu de travail,Rendement organisationnel,Mon travail
-B_Q23,Workplace,Use of official languages,My Work Unit,Milieu de travail,Utilisation des langues officielles,Mon unité de travail
-B_Q24,Workplace,Ethical workplace,My Work Unit,Milieu de travail,Milieu de travail éthique,Mon unité de travail
-B_Q25,Workplace,Respectful workplace,My Work Unit,Milieu de travail,Milieu de travail respectueux,Mon unité de travail
-B_Q26,Workforce,Staffing,My Work Unit,Effectif,Dotation,Mon unité de travail
-B_Q27,Workforce,Staffing,My Work Unit,Effectif,Dotation,Mon unité de travail
-B_Q28,Workforce,Performance management,My Work Unit,Effectif,Gestion du rendement,Mon unité de travail
-B_Q29,Workplace,Respectful workplace,My Work Unit,Milieu de travail,Milieu de travail respectueux,Mon unité de travail
-C_Q30,Leadership,Immediate supervisor,My Immediate Supervisor,Leadership,Superviseur immédiat,Mon (ma) superviseur(e) immédiat(e)
-C_Q30,Workforce,Performance management,My Immediate Supervisor,Effectif,Gestion du rendement,Mon (ma) superviseur(e) immédiat(e)
-C_Q31,Leadership,Immediate supervisor,My Immediate Supervisor,Leadership,Superviseur immédiat,Mon (ma) superviseur(e) immédiat(e)
-C_Q32,Leadership,Immediate supervisor,My Immediate Supervisor,Leadership,Superviseur immédiat,Mon (ma) superviseur(e) immédiat(e)
-C_Q33,Workplace,Use of official languages,My Immediate Supervisor,Milieu de travail,Utilisation des langues officielles,Mon (ma) superviseur(e) immédiat(e)
-C_Q34,Workforce,Work-life balance and workload,My Immediate Supervisor,Effectif,Équilibre travail-vie privée et charge de travail,Mon (ma) superviseur(e) immédiat(e)
-C_Q35,Workplace well-being,A psychologically healthy workplace,My Immediate Supervisor,Bien-être en milieu de travail,Milieu de travail sain sur le plan psychologique,Mon (ma) superviseur(e) immédiat(e)
-C_Q36,Workplace well-being,A psychologically healthy workplace,My Immediate Supervisor,Bien-être en milieu de travail,Milieu de travail sain sur le plan psychologique,Mon (ma) superviseur(e) immédiat(e)
-C_Q37,Leadership,Immediate supervisor,My Immediate Supervisor,Leadership,Superviseur immédiat,Mon (ma) superviseur(e) immédiat(e)
-D_Q39,Workforce,Performance management,Senior Management,Effectif,Gestion du rendement,La haute direction
-D_Q40,Leadership,Senior management,Senior Management,Leadership,Haute direction,La haute direction
-D_Q41,Leadership,Senior management,Senior Management,Leadership,Haute direction,La haute direction
-D_Q42,Leadership,Senior management,Senior Management,Leadership,Haute direction,La haute direction
-D_Q43,Leadership,Senior management,Senior Management,Leadership,Haute direction,La haute direction
-D_Q44,Leadership,Senior management,Senior Management,Leadership,Haute direction,La haute direction
-E_Q45,Workplace,Organizational goals,My Organization,Milieu de travail,Objectifs organisationnels,Mon organisation
-E_Q46,Workplace,Ethical workplace,My Organization,Milieu de travail,Milieu de travail éthique,Mon organisation
-E_Q47,Workplace,Ethical workplace,My Organization,Milieu de travail,Milieu de travail éthique,Mon organisation
-E_Q48,Workplace,Ethical workplace,My Organization,Milieu de travail,Milieu de travail éthique,Mon organisation
-E_Q49,Workplace,Ethical workplace,My Organization,Milieu de travail,Milieu de travail éthique,Mon organisation
-E_Q50,Workplace,Use of official languages,My Organization,Milieu de travail,Utilisation des langues officielles,Mon organisation
-E_Q51,Workplace,Use of official languages,My Organization,Milieu de travail,Utilisation des langues officielles,Mon organisation
-E_Q52,Workforce,Job fit and development,My Organization,Effectif,Compatibilité entre la personne et l'emploi et perfectionnement,Mon organisation
-E_Q53,Workforce,Job fit and development,My Organization,Effectif,Compatibilité entre la personne et l'emploi et perfectionnement,Mon organisation
-E_Q54,Workforce,Empowerment,My Organization,Effectif,Habilitation,Mon organisation
-E_Q55,Workplace,Respectful workplace,My Organization,Milieu de travail,Milieu de travail respectueux,Mon organisation
-E_Q56,Workplace,Respectful workplace,My Organization,Milieu de travail,Milieu de travail respectueux,Mon organisation
-E_Q57,Workplace,Respectful workplace,My Organization,Milieu de travail,Milieu de travail respectueux,Mon organisation
-E_Q57,Employee engagement,Employee engagement,My Organization,Mobilisation des employés,Mobilisation des employés,Mon organisation
-E_Q58,Employee engagement,Employee engagement,My Organization,Mobilisation des employés,Mobilisation des employés,Mon organisation
-E_Q59,Employee engagement,Employee engagement,My Organization,Mobilisation des employés,Mobilisation des employés,Mon organisation
-E_Q60,Employee engagement,Employee engagement,My Organization,Mobilisation des employés,Mobilisation des employés,Mon organisation
-F_Q61,Workforce,Retention,Mobility and Retention,Effectif,Maintien en poste,Mobilité et maintien en poste
-F_Q62,Workforce,Retention,Mobility and Retention,Effectif,Maintien en poste,Mobilité et maintien en poste
-G_Q63,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q64a,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q64b,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q64c,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q64d,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q64e,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q64f,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q64g,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q65a,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q65b,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q65c,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q65d,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q65e,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q65f,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q65g,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q65h,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q65i,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q65j,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q65k,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q65l,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q65m,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q66a,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q66b,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q66c,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q66d,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q66e,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q66f,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q66g,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q66h,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q66i,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q67a,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q67b,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q67c,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q67d,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q67e,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q67f,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q67g,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q67h,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q67i,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q67j,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q67k,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q67l,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q67m,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q67n,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q67o,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q67p,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q68,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q69,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-G_Q70,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement
-H_Q71,Workplace,Collective agreements and labour relations,Labour Relations and Collective Agreements,Milieu de travail,Conventions collectives et relations patronales-syndicales,Relations patronales-syndicales et conventions collectives
-H_Q72,Workplace,Collective agreements and labour relations,Labour Relations and Collective Agreements,Milieu de travail,Conventions collectives et relations patronales-syndicales,Relations patronales-syndicales et conventions collectives
-H_Q73,Workplace,Collective agreements and labour relations,Labour Relations and Collective Agreements,Milieu de travail,Conventions collectives et relations patronales-syndicales,Relations patronales-syndicales et conventions collectives
-H_Q74,Workplace,Collective agreements and labour relations,Labour Relations and Collective Agreements,Milieu de travail,Conventions collectives et relations patronales-syndicales,Relations patronales-syndicales et conventions collectives
-I_Q75,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q76a,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q76b,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q76c,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q76d,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q76e,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q76f,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q76g,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q77a,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q77b,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q77c,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q77d,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q77e,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q77f,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q77g,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q77h,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q77i,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q77j,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q77k,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q77l,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q77m,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q77n,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q78a,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q78b,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q78c,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q78d,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q78e,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q78f,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q78g,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q78h,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q78i,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q79a,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q79b,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q79c,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q79d,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q79e,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q79f,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q79g,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q79h,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q79i,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q79j,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q79k,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q79l,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q79m,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q79n,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q79o,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q79p,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q80,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q81,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-I_Q82,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination
-J_Q83a,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q83b,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q83c,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q83d,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q83e,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q83f,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q83g,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q83h,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q83i,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q83j,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q83k,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q83l,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q83m,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q83n,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q83o,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q83p,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q83q,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q83r,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q84,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q85,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être
-J_Q86,Workplace well-being,A psychologically healthy workplace,Stress and well being,Bien-être en milieu de travail,Milieu de travail sain sur le plan psychologique,Stress et bien-être
-J_Q87,Workplace well-being,A psychologically healthy workplace,Stress and well being,Bien-être en milieu de travail,Milieu de travail sain sur le plan psychologique,Stress et bien-être
-K_Q88,Workplace,Duty to accommodate,Duty to Accommodate,Milieu de travail,Obligation de prendre des mesures d'adaptation,Obligation de prendre des mesures d'adaptation
-K_Q89,Workplace,Duty to accommodate,Duty to Accommodate,Milieu de travail,Obligation de prendre des mesures d'adaptation,Obligation de prendre des mesures d'adaptation
-K_Q90,Workplace,Duty to accommodate,Duty to Accommodate,Milieu de travail,Obligation de prendre des mesures d'adaptation,Obligation de prendre des mesures d'adaptation
-L_D93,Compensation,Pay or other compensation issues,Duty to Accommodate,Rémunération,Problèmes de paye ou de rémunération,Obligation de prendre des mesures d'adaptation
-L_Q91,Compensation,Pay or other compensation issues,Compensation,Rémunération,Problèmes de paye ou de rémunération,Rémunération
-L_Q92a,Compensation,Pay or other compensation issues,Compensation,Rémunération,Problèmes de paye ou de rémunération,Rémunération
-L_Q92b,Compensation,Pay or other compensation issues,Compensation,Rémunération,Problèmes de paye ou de rémunération,Rémunération
-L_Q92c,Compensation,Pay or other compensation issues,Compensation,Rémunération,Problèmes de paye ou de rémunération,Rémunération
-L_Q92d,Compensation,Pay or other compensation issues,Compensation,Rémunération,Problèmes de paye ou de rémunération,Rémunération
-L_Q92e,Compensation,Pay or other compensation issues,Compensation,Rémunération,Problèmes de paye ou de rémunération,Rémunération
-L_Q92f,Compensation,Pay or other compensation issues,Compensation,Rémunération,Problèmes de paye ou de rémunération,Rémunération
-L_Q94,Compensation,Support to resolve pay or other compensation issues,Compensation,Rémunération,Soutien afin de régler les problèmes de paye ou autre rémunération,Rémunération
-L_Q95,Compensation,Support to resolve pay or other compensation issues,Compensation,Rémunération,Soutien afin de régler les problèmes de paye ou autre rémunération,Rémunération
+QUESTION,QTheme_E,QSubTheme_E,QSection_E,QTheme_F,QSubTheme_F,QSection_F,TakingAction_AreasOfImprovement
+C_Q35,Workplace well-being,A psychologically healthy workplace,My Immediate Supervisor,Bien-être en milieu de travail,Milieu de travail sain sur le plan psychologique,Mon (ma) superviseur(e) immédiat(e),Civility & Respect
+C_Q36,Workplace well-being,A psychologically healthy workplace,My Immediate Supervisor,Bien-être en milieu de travail,Milieu de travail sain sur le plan psychologique,Mon (ma) superviseur(e) immédiat(e),Civility & Respect
+J_Q86,Workplace well-being,A psychologically healthy workplace,Stress and well being,Bien-être en milieu de travail,Milieu de travail sain sur le plan psychologique,Stress et bien-être,Civility & Respect
+J_Q87,Workplace well-being,A psychologically healthy workplace,Stress and well being,Bien-être en milieu de travail,Milieu de travail sain sur le plan psychologique,Stress et bien-être,Civility & Respect
+H_Q71,Workplace,Collective agreements and labour relations,Labour Relations and Collective Agreements,Milieu de travail,Conventions collectives et relations patronales-syndicales,Relations patronales-syndicales et conventions collectives,
+H_Q72,Workplace,Collective agreements and labour relations,Labour Relations and Collective Agreements,Milieu de travail,Conventions collectives et relations patronales-syndicales,Relations patronales-syndicales et conventions collectives,
+H_Q73,Workplace,Collective agreements and labour relations,Labour Relations and Collective Agreements,Milieu de travail,Conventions collectives et relations patronales-syndicales,Relations patronales-syndicales et conventions collectives,
+H_Q74,Workplace,Collective agreements and labour relations,Labour Relations and Collective Agreements,Milieu de travail,Conventions collectives et relations patronales-syndicales,Relations patronales-syndicales et conventions collectives,
+I_Q75,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q76a,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q76b,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q76c,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q76d,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q76e,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q76f,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q76g,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q77a,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q77b,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q77c,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q77d,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q77e,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q77f,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q77g,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q77h,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q77i,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q77j,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q77k,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q77l,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q77m,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q77n,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q78a,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q78b,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q78c,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q78d,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q78e,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q78f,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q78g,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q78h,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q78i,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q79a,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q79b,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q79c,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q79d,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q79e,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q79f,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q79g,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q79h,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q79i,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q79j,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q79k,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q79l,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q79m,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q79n,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q79o,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q79p,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q80,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q81,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+I_Q82,Workplace,Discrimination,Discrimination,Milieu de travail,Discrimination,Discrimination,Equity Seeking Groups
+K_Q88,Workplace,Duty to accommodate,Duty to Accommodate,Milieu de travail,Obligation de prendre des mesures d'adaptation,Obligation de prendre des mesures d'adaptation,
+K_Q89,Workplace,Duty to accommodate,Duty to Accommodate,Milieu de travail,Obligation de prendre des mesures d'adaptation,Obligation de prendre des mesures d'adaptation,
+K_Q90,Workplace,Duty to accommodate,Duty to Accommodate,Milieu de travail,Obligation de prendre des mesures d'adaptation,Obligation de prendre des mesures d'adaptation,
+A_Q11,Employee engagement,Employee engagement,My Job,Mobilisation des employés,Mobilisation des employés,Mon travail,
+A_Q15,Employee engagement,Employee engagement,My Job,Mobilisation des employés,Mobilisation des employés,Mon travail,
+A_Q16,Employee engagement,Employee engagement,My Job,Mobilisation des employés,Mobilisation des employés,Mon travail,
+A_Q20,Employee engagement,Employee engagement,My Job,Mobilisation des employés,Mobilisation des employés,Mon travail,
+E_Q57,Employee engagement,Employee engagement,My Organization,Mobilisation des employés,Mobilisation des employés,Mon organisation,
+E_Q58,Employee engagement,Employee engagement,My Organization,Mobilisation des employés,Mobilisation des employés,Mon organisation,
+E_Q59,Employee engagement,Employee engagement,My Organization,Mobilisation des employés,Mobilisation des employés,Mon organisation,
+E_Q60,Employee engagement,Employee engagement,My Organization,Mobilisation des employés,Mobilisation des employés,Mon organisation,
+A_Q17,Workforce,Empowerment,My Job,Effectif,Habilitation,Mon travail,
+A_Q18,Workforce,Empowerment,My Job,Effectif,Habilitation,Mon travail,
+A_Q19,Workforce,Empowerment,My Job,Effectif,Habilitation,Mon travail,
+E_Q54,Workforce,Empowerment,My Organization,Effectif,Habilitation,Mon organisation,
+B_Q24,Workplace,Ethical workplace,My Work Unit,Milieu de travail,Milieu de travail éthique,Mon unité de travail,Civility & Respect
+E_Q46,Workplace,Ethical workplace,My Organization,Milieu de travail,Milieu de travail éthique,Mon organisation,Civility & Respect
+E_Q47,Workplace,Ethical workplace,My Organization,Milieu de travail,Milieu de travail éthique,Mon organisation,Civility & Respect
+E_Q48,Workplace,Ethical workplace,My Organization,Milieu de travail,Milieu de travail éthique,Mon organisation,Civility & Respect
+E_Q49,Workplace,Ethical workplace,My Organization,Milieu de travail,Milieu de travail éthique,Mon organisation,Civility & Respect
+G_Q63,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q64a,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q64b,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q64c,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q64d,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q64e,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q64f,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q64g,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q65a,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q65b,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q65c,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q65d,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q65e,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q65f,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q65g,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q65h,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q65i,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q65j,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q65k,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q65l,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q65m,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q66a,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q66b,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q66c,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q66d,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q66e,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q66f,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q66g,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q66h,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q66i,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q67a,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q67b,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q67c,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q67d,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q67e,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q67f,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q67g,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q67h,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q67i,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q67j,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q67k,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q67l,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q67m,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q67n,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q67o,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q67p,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q68,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q69,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+G_Q70,Workplace,Harassment,Harassment,Milieu de travail,Harcèlement,Harcèlement,Civility & Respect
+C_Q30,Leadership,Immediate supervisor,My Immediate Supervisor,Leadership,Superviseur immédiat,Mon (ma) superviseur(e) immédiat(e),People Management
+C_Q31,Leadership,Immediate supervisor,My Immediate Supervisor,Leadership,Superviseur immédiat,Mon (ma) superviseur(e) immédiat(e),People Management
+C_Q32,Leadership,Immediate supervisor,My Immediate Supervisor,Leadership,Superviseur immédiat,Mon (ma) superviseur(e) immédiat(e),People Management
+C_Q37,Leadership,Immediate supervisor,My Immediate Supervisor,Leadership,Superviseur immédiat,Mon (ma) superviseur(e) immédiat(e),People Management
+A_Q05,Workforce,Job fit and development,My Job,Effectif,Compatibilité entre la personne et l'emploi et perfectionnement,Mon travail,People Management
+A_Q06,Workforce,Job fit and development,My Job,Effectif,Compatibilité entre la personne et l'emploi et perfectionnement,Mon travail,People Management
+A_Q07,Workforce,Job fit and development,My Job,Effectif,Compatibilité entre la personne et l'emploi et perfectionnement,Mon travail,People Management
+E_Q52,Workforce,Job fit and development,My Organization,Effectif,Compatibilité entre la personne et l'emploi et perfectionnement,Mon organisation,People Management
+E_Q53,Workforce,Job fit and development,My Organization,Effectif,Compatibilité entre la personne et l'emploi et perfectionnement,Mon organisation,People Management
+A_Q14,Workplace,Organizational goals,My Job,Milieu de travail,Objectifs organisationnels,Mon travail,Culture of Urgency
+E_Q45,Workplace,Organizational goals,My Organization,Milieu de travail,Objectifs organisationnels,Mon organisation,Culture of Urgency
+A_Q22a,Workplace,Organizational performance,My Job,Milieu de travail,Rendement organisationnel,Mon travail,Culture of Urgency
+A_Q22b,Workplace,Organizational performance,My Job,Milieu de travail,Rendement organisationnel,Mon travail,Culture of Urgency
+A_Q22c,Workplace,Organizational performance,My Job,Milieu de travail,Rendement organisationnel,Mon travail,Culture of Urgency
+A_Q22d,Workplace,Organizational performance,My Job,Milieu de travail,Rendement organisationnel,Mon travail,Culture of Urgency
+A_Q22e,Workplace,Organizational performance,My Job,Milieu de travail,Rendement organisationnel,Mon travail,Culture of Urgency
+A_Q22f,Workplace,Organizational performance,My Job,Milieu de travail,Rendement organisationnel,Mon travail,Culture of Urgency
+A_Q22g,Workplace,Organizational performance,My Job,Milieu de travail,Rendement organisationnel,Mon travail,Culture of Urgency
+L_D93,Compensation,Pay or other compensation issues,Duty to Accommodate,Rémunération,Problèmes de paye ou de rémunération,Obligation de prendre des mesures d'adaptation,Pay
+L_Q91,Compensation,Pay or other compensation issues,Compensation,Rémunération,Problèmes de paye ou de rémunération,Rémunération,Pay
+L_Q92a,Compensation,Pay or other compensation issues,Compensation,Rémunération,Problèmes de paye ou de rémunération,Rémunération,Pay
+L_Q92b,Compensation,Pay or other compensation issues,Compensation,Rémunération,Problèmes de paye ou de rémunération,Rémunération,Pay
+L_Q92c,Compensation,Pay or other compensation issues,Compensation,Rémunération,Problèmes de paye ou de rémunération,Rémunération,Pay
+L_Q92d,Compensation,Pay or other compensation issues,Compensation,Rémunération,Problèmes de paye ou de rémunération,Rémunération,Pay
+L_Q92e,Compensation,Pay or other compensation issues,Compensation,Rémunération,Problèmes de paye ou de rémunération,Rémunération,Pay
+L_Q92f,Compensation,Pay or other compensation issues,Compensation,Rémunération,Problèmes de paye ou de rémunération,Rémunération,Pay
+A_Q12,Workforce,Performance management,My Job,Effectif,Gestion du rendement,Mon travail,Performance Management
+A_Q13,Workforce,Performance management,My Job,Effectif,Gestion du rendement,Mon travail,Performance Management
+A_Q14,Workforce,Performance management,My Job,Effectif,Gestion du rendement,Mon travail,Performance Management
+B_Q28,Workforce,Performance management,My Work Unit,Effectif,Gestion du rendement,Mon unité de travail,Performance Management
+C_Q30,Workforce,Performance management,My Immediate Supervisor,Effectif,Gestion du rendement,Mon (ma) superviseur(e) immédiat(e),Performance Management
+D_Q39,Workforce,Performance management,Senior Management,Effectif,Gestion du rendement,La haute direction,Performance Management
+A_Q01,Workplace,Physical environment and equipment,My Job,Milieu de travail,Environnement physique et équipement,Mon travail,
+A_Q04,Workplace,Physical environment and equipment,My Job,Milieu de travail,Environnement physique et équipement,Mon travail,
+A_Q08,Workplace,Physical environment and equipment,My Job,Milieu de travail,Environnement physique et équipement,Mon travail,
+B_Q25,Workplace,Respectful workplace,My Work Unit,Milieu de travail,Milieu de travail respectueux,Mon unité de travail,Civility & Respect
+B_Q29,Workplace,Respectful workplace,My Work Unit,Milieu de travail,Milieu de travail respectueux,Mon unité de travail,Civility & Respect
+E_Q55,Workplace,Respectful workplace,My Organization,Milieu de travail,Milieu de travail respectueux,Mon organisation,Civility & Respect
+E_Q56,Workplace,Respectful workplace,My Organization,Milieu de travail,Milieu de travail respectueux,Mon organisation,Civility & Respect
+E_Q57,Workplace,Respectful workplace,My Organization,Milieu de travail,Milieu de travail respectueux,Mon organisation,Civility & Respect
+F_Q61,Workforce,Retention,Mobility and Retention,Effectif,Maintien en poste,Mobilité et maintien en poste,
+F_Q62,Workforce,Retention,Mobility and Retention,Effectif,Maintien en poste,Mobilité et maintien en poste,
+D_Q40,Leadership,Senior management,Senior Management,Leadership,Haute direction,La haute direction,
+D_Q41,Leadership,Senior management,Senior Management,Leadership,Haute direction,La haute direction,
+D_Q42,Leadership,Senior management,Senior Management,Leadership,Haute direction,La haute direction,
+D_Q43,Leadership,Senior management,Senior Management,Leadership,Haute direction,La haute direction,
+D_Q44,Leadership,Senior management,Senior Management,Leadership,Haute direction,La haute direction,
+B_Q26,Workforce,Staffing,My Work Unit,Effectif,Dotation,Mon unité de travail,People Management
+B_Q27,Workforce,Staffing,My Work Unit,Effectif,Dotation,Mon unité de travail,People Management
+L_Q94,Compensation,Support to resolve pay or other compensation issues,Compensation,Rémunération,Soutien afin de régler les problèmes de paye ou autre rémunération,Rémunération,Pay
+L_Q95,Compensation,Support to resolve pay or other compensation issues,Compensation,Rémunération,Soutien afin de régler les problèmes de paye ou autre rémunération,Rémunération,Pay
+A_Q02,Workplace,Use of official languages,My Job,Milieu de travail,Utilisation des langues officielles,Mon travail,
+A_Q03,Workplace,Use of official languages,My Job,Milieu de travail,Utilisation des langues officielles,Mon travail,
+B_Q23,Workplace,Use of official languages,My Work Unit,Milieu de travail,Utilisation des langues officielles,Mon unité de travail,
+C_Q33,Workplace,Use of official languages,My Immediate Supervisor,Milieu de travail,Utilisation des langues officielles,Mon (ma) superviseur(e) immédiat(e),
+E_Q50,Workplace,Use of official languages,My Organization,Milieu de travail,Utilisation des langues officielles,Mon organisation,
+E_Q51,Workplace,Use of official languages,My Organization,Milieu de travail,Utilisation des langues officielles,Mon organisation,
+A_Q09,Workforce,Work-life balance and workload,My Job,Effectif,Équilibre travail-vie privée et charge de travail,Mon travail,Culture of Urgency
+A_Q10,Workforce,Work-life balance and workload,My Job,Effectif,Équilibre travail-vie privée et charge de travail,Mon travail,Culture of Urgency
+A_Q21,Workforce,Work-life balance and workload,My Job,Effectif,Équilibre travail-vie privée et charge de travail,Mon travail,Culture of Urgency
+C_Q34,Workforce,Work-life balance and workload,My Immediate Supervisor,Effectif,Équilibre travail-vie privée et charge de travail,Mon (ma) superviseur(e) immédiat(e),Culture of Urgency
+J_Q83a,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q83b,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q83c,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q83d,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q83e,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q83f,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q83g,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q83h,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q83i,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q83j,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q83k,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q83l,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q83m,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q83n,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q83o,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q83p,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q83q,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q83r,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q84,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency
+J_Q85,Workplace well-being,Work-related stress,Stress and well being,Bien-être en milieu de travail,Stress lié au travail,Stress et bien-être,Culture of Urgency

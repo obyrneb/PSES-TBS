@@ -27,6 +27,8 @@ Qs <- Qs %>%
   filter(TakingAction_AreasOfImprovement != "") %>%
   arrange(TakingAction_AreasOfImprovement,QSubTheme_E,QUESTION)
 
+write.csv(Qs, file = "Taking_Action_-_PSES_Question_Mapping.csv")
+
 as_tibble(Qs)
 ```
 

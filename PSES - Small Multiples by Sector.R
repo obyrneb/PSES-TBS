@@ -16,7 +16,7 @@ SectorData <- read.csv()
 #SectorData$QUESTION <- factor(SectorData$QUESTION)
 
 #Create table for Positive, Neutral and Negative rankings by sector
-df <- subset(ss5.df, LEVEL1ID == "26" & (LEVEL3ID != "000" | LEVEL2ID == "000"),
+df <- subset(ss5, LEVEL1ID == "26" & (LEVEL3ID != "000" | LEVEL2ID == "000"),
               #& !(QUESTION %in% c("F_Q61","F_Q62","K_Q88","K_Q89","K_Q90")),
               select=c(DESCRIP_E,DESCRIP_F,QUESTION,TITLE_E,TITLE_F,POSITIVE,NEUTRAL,NEGATIVE))
   

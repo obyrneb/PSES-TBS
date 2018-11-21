@@ -115,7 +115,7 @@ sectorMeans.df$DesProp_F <- fct_relevel(sectorMeans.df$DesProp_F,
 # LABELS
 #---------------
 #English captions and labels
-expl_E <- "Each cell of this chart displays the proportion of responses for a particular question theme and demographic category. The bars over each column represent the average value for this question theme for TBS. Question themes are sorted from least negative to most negative (the red column) for OCHRO as a whole."
+expl_E <- "Each cell of this chart displays the proportion of responses for a particular question theme and demographic category. The bars over each column represent the average value for this question theme for TBS and the Public Service. Question themes are sorted from least negative to most negative (the red column) for OCHRO as a whole. Cells highlighted in yellow indicate the negative proportion of responses is at least 10 points higher than the TBS average."
 expl_E <- paste0(strwrap(expl_E, 100), sep="", collapse="\n")
 ttl_E <- "PSES@TBS 2017 - OCHRO Sectors"
 cap_E <- "2017 Public Service Employee Survey Open Datasets"
@@ -129,7 +129,7 @@ PNN_E.clrs <- c("Negative" = "#CD202C", "Neutral" = "#63CECA", "Positive" = "#CC
                 "Treasury Board of Canada Secretariat (100%)" = "#d1e7ee", "Public Service" = "#fabcb3")
 
 #French Captions and labels
-expl_F <- "Chaque cellule de ce graphique affiche la proportion de réponses pour un thème de question et une catégorie démographique particuliers. Les barres sur chaque colonne représentent la valeur moyenne pour ce thème de question pour le SCT. Les thèmes de la question sont triés du moins négatif au plus négatif (la colonne rouge) pour le tout du BDPRH."
+expl_F <- "Chaque cellule de ce graphique affiche la proportion de réponses pour un thème de question et une catégorie démographique particuliers. Les barres sur chaque colonne représentent la valeur moyenne pour ce thème de question pour le SCT et la Fonction publique. Les thèmes de la question sont triés du moins négatif au plus négatif (la colonne rouge) pour le tout du BDPRH.Les cellules surlignées en jaune indiquent que la proportion négative de réponses est supérieure d'au moins 10 points à la moyenne du SCT."
 expl_F <- paste0(strwrap(expl_F, 100), sep="", collapse="\n")
 ttl_F <- "SAFF@SCT 2017 - Secteurs du BDPRH" 
 cap_F <- "Ensemble de données ouvertes du Sondage auprès des fonctionnaires fédéraux de 2017"
@@ -190,8 +190,8 @@ plotOCHRO <- function(language, wdth = 10, hght = 8, textSize = 9) {
     ttl_lang <- ttl_E
     cap_lang <- cap_E
     file_lang <- file_E
-    TBSmean_lang <- "TBS mean across all levels"
-    PSmean_lang <- "PS mean by level"
+    TBSmean_lang <- "TBS mean"
+    PSmean_lang <- "PS mean"
     TBS_lang <- "Treasury Board of Canada Secretariat (100%)"
     PS_lang <- "Public Service"
   } else if (language == "F") {
@@ -224,10 +224,10 @@ plotOCHRO <- function(language, wdth = 10, hght = 8, textSize = 9) {
     geom_rect(data = subset(TBSmeans.df,DESCRIP_lang == PS_lang),
               aes(fill = DESCRIP_lang),xmin = -Inf,xmax = Inf,
               ymin = -Inf,ymax = Inf,alpha = 0.3) +
-    geom_rect(data = subset(TBSmeans.df,DemoQ %in% c("LEVEL3ID")),
+    geom_rect(data = subset(TBSmeans.df,DemoQ %in% c("LEVEL3ID","M_Q103A","M_Q104")),
               fill = "grey80",xmin = -Inf,xmax = Inf,
               ymin = -Inf,ymax = Inf,alpha = 0.3) +
-    geom_rect(data = subset(TBSmeans.df,TBSmeanDiff >= 8 & variable == "NEGATIVE"),
+    geom_rect(data = subset(TBSmeans.df,TBSmeanDiff >= 10 & variable == "NEGATIVE"),
               fill = "#e3f800",xmin = -Inf,xmax = Inf,
               ymin = -Inf,ymax = Inf,alpha = 0.8) +
     geom_bar(stat = "identity") +

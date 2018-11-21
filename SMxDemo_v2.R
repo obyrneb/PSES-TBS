@@ -18,14 +18,14 @@ mapQ <- read.csv("datasets//Question_Mappings.csv")
 }
 
 #Combine subsets as appropriate
-ss1_5 <- rbind(ss1,ss2)
+ss1_2 <- rbind(ss1,ss2)
 #ss1_5 <- rbind(ss1_5,ss3)
 #ss1_5 <- rbind(ss1_5,ss4)
 #ss1_5 <- rbind(ss1_5,ss5)
 
 
 #Extract TBS data only
-ss.df <- subset(ss1_5, (LEVEL1ID == "26" & LEVEL2ID == "0"),
+ss.df <- subset(ss1_2, (LEVEL1ID == "26" & LEVEL2ID == "0"),
                 select=c(LEVEL1ID,SURVEYR,BYCOND,DESCRIP_E,DESCRIP_F,QUESTION,TITLE_E,TITLE_F,POSITIVE,NEUTRAL,NEGATIVE,SCORE100,ANSCOUNT))
 
 #Create question subsections

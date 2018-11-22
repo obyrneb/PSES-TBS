@@ -1,0 +1,48 @@
+---
+title: "PSES Question Correlations"
+output: html_notebook
+---
+
+Load libraries and data
+```{r}
+library(tidyr)
+library(dplyr)
+library(Hmisc)
+library(corrgram)
+library(tibble)
+
+ss1 <- read.csv("datasets//2017_PSES_SAFF_Subset-1_Sous-ensemble-1.csv", na.strings = "9999")
+ss2 <- read.csv("datasets//2017_PSES_SAFF_Subset-2_Sous-ensemble-2.csv", na.strings = "9999")
+ss3 <- read.csv("datasets//2017_PSES_SAFF_Subset-3_Sous-ensemble-3.csv", na.strings = "9999")
+ss4 <- read.csv("datasets//2017_PSES_SAFF_Subset-4_Sous-ensemble-4.csv", na.strings = "9999")
+ss5 <- read.csv("datasets//2017_PSES_SAFF_Subset-5_Sous-ensemble-5.csv", na.strings = "9999")
+
+# These are extra files where some addtional demographic and question information has been mapped
+mapQ <- read.csv("datasets//Question_Mappings.csv")
+mapDemQ <- read.csv("datasets//Demo_Question_Mappings.csv")
+
+
+```
+
+
+```{r}
+# Create demographic and organizational subsets. We will treat them differently to procude unique.
+s100.df <- bind_rows(ss2,ss3,ss4,ss5) %>%
+  filter(SURVEYR == 2017) %>%
+  mutate(id = paste0(LEVEL1ID,"-",LEVEL2ID,"-",BYCOND)) %>%
+  select(id,QUESTION,SCORE100) %>%
+  distinct() %>%
+  spread(QUESTION,SCORE100)
+
+s100.mx <- as.matrix(select(s100.df,-id))
+
+corrs <- rcorr(s100.mx, type="pearson")
+
+corrs_r <- data.frame(corrs$r) %>% rownames_to_column("var1") %>% gather(var2,r)
+corrs_n <- data.frame(corrs$n)
+corrs_P <- data.frame(corrs$P)
+
+corrs
+
+```
+

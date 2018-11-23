@@ -100,8 +100,13 @@ correlations_high <- filter(correlations_noDiag, estimate >= 0.85)
 
 corrNet <- graph_from_data_frame(correlations_high)
 
-ggnet2(corrNet, label.size = 2, size = 10, label = TRUE,
-       edge.size = "estimate" ,color = "grey15", label.color = "white") 
+ggnet2(corrNet, 
+       label.size = 3, 
+       label = TRUE,
+       label.color = "grey20",
+       #edge.size = "estimate",
+       color = "gold",
+       size = "degree") 
 #  theme(panel.background = element_rect(fill = "grey15"))
 ```
 

@@ -9,7 +9,7 @@ library(scales)
 library(forcats)
 library(magrittr)
 
-loadPSES <- function() { 
+#loadPSES <- function() { 
   # Read all PSES 2017 Subsets. THese are already downloaded.
   ss1 <- read.csv("datasets//2017_PSES_SAFF_Subset-1_Sous-ensemble-1.csv", na.strings = "9999")
   ss2 <- read.csv("datasets//2017_PSES_SAFF_Subset-2_Sous-ensemble-2.csv", na.strings = "9999")
@@ -19,7 +19,7 @@ loadPSES <- function() {
   # These are extra files where some addtional demographic and question information has been mapped
   mapQ <- read.csv("datasets//Question_Mappings.csv")
   mapDemQ <- read.csv("datasets//Demo_Question_Mappings.csv")
-}
+#}
 
 # Combine subsets as appropriate. Uncomment up to the point we need to stop.
 ss1_2 <- rbind(ss1,ss2)
@@ -62,7 +62,7 @@ sectorMeans.df <- aggregate(data = ss.df, cbind(ANSCOUNT,SCORE100,NEGATIVE,NEUTR
 # so we can graph them together. This is why we output to another dataframe (TBSprops.df), which we merge below.
 TBSprops.df <- sectorMeans.df %>%
   filter(LEVEL1ID == "26") %>%
-  group_by(DemoQ, DESCRIP_E) %>%
+  dplyr::group_by(DemoQ, DESCRIP_E) %>%
   mutate(ngrp = sum(ANSCOUNT)) %>%
   group_by(DemoQ) %>%
   mutate(npop = sum(ANSCOUNT)) %>%
@@ -152,7 +152,7 @@ PSmeans.df <- filter(sectorMeans.df, LEVEL1ID == "0" | BYCOND == "TBS")
 # Create TBS mean column to allow each small multiple to be compared to the TBS mean via geom_errorbar
 TBSmeans.df <- TBSmeans.df %>%
   arrange(QSubTheme_E, variable, DESCRIP_E) %>%
-  group_by(QSubTheme_E, variable) %>%
+  dplyr::group_by(QSubTheme_E, variable) %>%
   mutate(TBSmean = value[2]) %>%
   mutate(TBSmeanDiff = value - TBSmean)
 
@@ -161,7 +161,7 @@ TBSmeans.df <- TBSmeans.df %>%
 PSoverall <- PSmeans.df %>%
   filter(BYCOND %in% c("PS","TBS")) %>%
   arrange(QSubTheme_E, variable) %>%
-  group_by(QSubTheme_E, variable) %>%
+  dplyr::group_by(QSubTheme_E, variable) %>%
   mutate(value = value[1])
 
 PSdetail <- filter(PSmeans.df, !(BYCOND %in% c("PS","TBS")))
@@ -240,7 +240,7 @@ plotOCHRO <- function(language, wdth = 10, hght = 8, textSize = 9) {
     labs(fill = "Response type", 
          subtitle = expl_lang,
          caption = cap_lang) +
-    facet_grid(QSubTheme_lang ~ DESCRIP_lang, switch = "y", scales = "free_y",
+    facet_grid(QSubTheme_lang ~ DESCRIP_lang, switch = "y", #scales = "free_y",
                labeller = labeller(DESCRIP_lang = label_wrap_gen(8), QSubTheme_lang = label_wrap_gen(15)))  +
     theme(plot.title = element_text(size = 20, hjust = 0, colour = "grey40"),
           plot.subtitle = element_text(face = "bold", size = textSize, colour = "grey40"),

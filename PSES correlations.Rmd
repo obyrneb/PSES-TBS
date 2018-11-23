@@ -10,6 +10,13 @@ library(dplyr)
 library(Hmisc)
 library(corrgram)
 library(tibble)
+library(broom)
+library(network)
+library(sna)
+library(GGally)
+library(ggplot2)
+library(geomnet)
+library(ggrepel)
 
 ss1 <- read.csv("datasets//2017_PSES_SAFF_Subset-1_Sous-ensemble-1.csv", na.strings = "9999")
 ss2 <- read.csv("datasets//2017_PSES_SAFF_Subset-2_Sous-ensemble-2.csv", na.strings = "9999")
@@ -27,22 +34,94 @@ mapDemQ <- read.csv("datasets//Demo_Question_Mappings.csv")
 
 ```{r}
 # Create demographic and organizational subsets. We will treat them differently to procude unique.
-s100.df <- bind_rows(ss2,ss3,ss4,ss5) %>%
+
+PSEScorr <- function(PSESdata) {
+  data.df <- PSESdata %>%
+    filter(SURVEYR == 2017) %>%
+    mutate(id = paste0(LEVEL1ID,"-",LEVEL2ID,"-",BYCOND)) %>%
+    select(id,QUESTION,SCORE5) %>%
+    distinct() %>%
+    spread(QUESTION,SCORE5)
+    
+  data.mx <- as.matrix(select(data.df,-id))
+
+  correlations.rcorr <- rcorr(data.mx, type="pearson")
+  
+  
+  # correlations.df <- tidy(correlations.rcorr,FALSE) %>% rename(var1 = column1, var2 = column2)
+  
+  correlations.df
+  }
+
+corr_all <- PSEScorr(bind_rows(ss2,ss3,ss4,ss5))
+corr_dem <- PSEScorr(bind_rows(ss2,ss3,ss4))
+corr_org <- PSEScorr(ss5)
+
+ggplot(data = filter(corr_org, estimate >= 0.85), aes(from_id = var1, to_id = var2)) +
+  geom_net(colour = "blue", layout.alg = "fruchtermanreingold", labelon = TRUE, repel = TRUE,
+           size = 2, directed = FALSE, vjust = 0.5, labelcolour = "grey60", ecolour = "grey40",
+           aes(linewidth = 10*(estimate-0.75))) + 
+  theme_net()
+
+```
+
+```{r}
+score5.df <- ss5 %>%
   filter(SURVEYR == 2017) %>%
   mutate(id = paste0(LEVEL1ID,"-",LEVEL2ID,"-",BYCOND)) %>%
-  select(id,QUESTION,SCORE100) %>%
+  select(id,QUESTION,SCORE5) %>%
   distinct() %>%
-  spread(QUESTION,SCORE100)
+  spread(QUESTION,SCORE5)
 
-s100.mx <- as.matrix(select(s100.df,-id))
+score5.mx <- as.matrix(select(score5.df,-id))
+corrs <- rcorr(score5.mx, type="pearson")
 
-corrs <- rcorr(s100.mx, type="pearson")
+corrs_r <- data.frame(corrs$r) %>% rownames_to_column("var1") %>% gather(var2,r,-var1)
+corrs_n <- data.frame(corrs$n) %>% rownames_to_column("var1") %>% gather(var2,n,-var1)
+corrs_P <- data.frame(corrs$P) %>% rownames_to_column("var1") %>% gather(var2,P,-var1)
+n <- corrs_n$n
+P <- corrs_P$P
+correlations_wDiag <- add_column(corrs_r,n,P)
 
-corrs_r <- data.frame(corrs$r) %>% rownames_to_column("var1") %>% gather(var2,r)
-corrs_n <- data.frame(corrs$n)
-corrs_P <- data.frame(corrs$P)
+correlations_noDiag <- tidy(corrs,FALSE) %>% rename(var1 = column1, var2 = column2)
 
-corrs
+ggplot(data = filter(correlations_wDiag, r >= 0.9), aes(from_id = var1, to_id = var2)) +
+  geom_net(colour = "blue", layout.alg = "fruchtermanreingold", labelon = TRUE, repel = TRUE,
+           size = 20, directed = FALSE, vjust = 0.5, labelcolour = "grey60", ecolour = "grey40",
+           aes(linewidth = 10*(r-0.75))) + 
+  theme_net()
+```
 
+```{r}
+library(intergraph)
+library(igraph)
+
+correlations_high <- filter(correlations_noDiag, estimate >= 0.85)
+
+corrNet <- graph_from_data_frame(correlations_high)
+
+ggnet2(corrNet, label.size = 2, size = 10, label = TRUE,
+       edge.size = "estimate" ,color = "grey15", label.color = "white") 
+#  theme(panel.background = element_rect(fill = "grey15"))
+```
+
+
+```{r}
+# A qplot approach
+
+library(qgraph)
+
+data.df <- ss5 %>%
+  filter(SURVEYR == 2017) %>%
+  mutate(id = paste0(LEVEL1ID,"-",LEVEL2ID,"-",BYCOND)) %>%
+  select(id,QUESTION,SCORE5) %>%
+  distinct() %>%
+  spread(QUESTION,SCORE5)
+    
+data.mx <- as.matrix(select(data.df,-id))
+
+corMat <- cor_auto(data.mx)
+
+Graph_pcor <- qgraph(corMat, graph = "pcor", layout = "spring")
 ```
 

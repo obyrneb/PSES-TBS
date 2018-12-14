@@ -1,0 +1,50 @@
+,QUESTION,HarSubQ_Num,HarSubQ_E,HarSubQ_F,Qshort_F,Qshort_E
+1,G_Q63,Q63,Occurence,Évènement,Harcèlement dans les deux dernières années,Harassment in the past two years
+2,G_Q64a,Q64,Source,Source,Collègues,Co-workers
+3,G_Q64b,Q64,Source,Source,Supérieur(e)s,Authority over me
+4,G_Q64c,Q64,Source,Source,Employé(e)s relevant de moi,Working for me
+5,G_Q64d,Q64,Source,Source,"Personnes envers lesquelles j’ai une responsabilité de garde (p. ex., détenu(e)s, contrevenant(e)s, patient(e)s, personnes sous garde)",Custodial responsibility
+6,G_Q64e,Q64,Source,Source,Personnes d’autres ministères ou organismes,From other departments
+7,G_Q64f,Q64,Source,Source,Membres du public (personnes ou organisations),The public
+8,G_Q64g,Q64,Source,Source,Autre,Other
+9,G_Q65a,Q65,Nature,Nature,Comportement agressif,Aggressive behaviour
+10,G_Q65b,Q65,Nature,Nature,Contrôle excessif,Excessive control
+11,G_Q65c,Q65,Nature,Nature,Être exclu(e) ou ignoré(e),Being excluded
+12,G_Q65d,Q65,Nature,Nature,Humiliation,Humiliation
+13,G_Q65e,Q65,Nature,Nature,Interférence dans le travail ou retenue de ressources,Interference or withholding
+14,G_Q65f,Q65,Nature,Nature,Commentaire désobligeant,Offensive remark
+15,G_Q65g,Q65,Nature,Nature,Attaque personnelle,Personal attack
+16,G_Q65h,Q65,Nature,Nature,Violence physique,Physical violence
+17,G_Q65i,Q65,Nature,Nature,Commentaire ou geste à caractère sexuel,Sexual comment or gesture
+18,G_Q65j,Q65,Nature,Nature,Menace,Threat
+19,G_Q65k,Q65,Nature,Nature,Traitement injuste,Unfair treatment
+20,G_Q65l,Q65,Nature,Nature,Hurlement ou cri,Yelling or shouting
+21,G_Q65m,Q65,Nature,Nature,Autre,Other
+22,G_Q66a,Q66,Actions,Actions,J’ai discuté du problème avec mon (ma) superviseur(e) ou un cadre supérieur.,Discussed with supervisor
+23,G_Q66b,Q66,Actions,Actions,J’ai discuté du problème avec la ou les personne(s) par laquelle (lesquelles) j’ai été harcelé(e).,Discussed with offender
+24,G_Q66c,Q66,Actions,Actions,J’ai communiqué avec un(e) conseiller(ère) en ressources humaines de mon ministère ou organisme.,Contacted HR advisor
+25,G_Q66d,Q66,Actions,Actions,J’ai communiqué avec mon (ma) représentant(e) syndical(e).,Contacted union
+26,G_Q66e,Q66,Actions,Actions,J’ai eu recours à un processus informel de résolution des conflits.,Informal conflict resolution
+27,G_Q66f,Q66,Actions,Actions,J’ai déposé un grief ou une plainte officielle.,Grievance or complaint
+28,G_Q66g,Q66,Actions,Actions,J’ai réglé la question de façon informelle par moi-même.,Informally on my own
+29,G_Q66h,Q66,Actions,Actions,Autre,Other
+30,G_Q66i,Q66,Actions,Actions,Je n’ai pris aucune mesure.,Took no action
+31,G_Q67a,Q67,No action,Aucune action,La situation a été réglée.,The issue was resolved.
+32,G_Q67b,Q67,No action,Aucune action,Je ne pensais pas que l’incident était assez grave.,I did not think the incident was serious enough.
+33,G_Q67c,Q67,No action,Aucune action,Le comportement s’est arrêté.,The behaviour stopped.
+34,G_Q67d,Q67,No action,Aucune action,La personne s’est excusée.,The individual apologized.
+35,G_Q67e,Q67,No action,Aucune action,La direction est intervenue.,Management intervened.
+36,G_Q67f,Q67,No action,Aucune action,La personne a quitté ou changé d'emploi.,The individual left or changed jobs.
+37,G_Q67g,Q67,No action,Aucune action,J'ai changé d'emploi.,I changed jobs.
+38,G_Q67h,Q67,No action,Aucune action,"Je ne savais pas quoi faire, où aller ou à qui parler.","I did not know what to do, where to go or whom to ask."
+39,G_Q67i,Q67,No action,Aucune action,J'étais trop bouleversé(e).,I was too distraught.
+40,G_Q67j,Q67,No action,Aucune action,"J’avais des préoccupations au sujet du processus formel de plaintes (p. ex., la confidentialité, le temps que prendrait le processus).","I had concerns about the formal complaint process (e.g., confidentiality, how long it would take)."
+41,G_Q67k,Q67,No action,Aucune action,On m’a conseillé(e) d’éviter de déposer une plainte.,I was advised against filing a complaint.
+42,G_Q67l,Q67,No action,Aucune action,"J’avais peur des représailles (p. ex., limiter l’avancement de ma carrière ou porter l’étiquette de fauteur de troubles).","I was afraid of reprisal (e.g., having limited career advancement, being labelled a troublemaker)."
+43,G_Q67m,Q67,No action,Aucune action,Quelqu'un m'a menacé(e).,Someone threatened me.
+44,G_Q67n,Q67,No action,Aucune action,Je ne croyais pas que cela ferait une différence.,I did not believe it would make a difference.
+45,G_Q67o,Q67,No action,Aucune action,Le délai prévu pour déposer un grief ou une plainte officielle avait expiré.,The time limit to file a grievance or a formal complaint had passed.
+46,G_Q67p,Q67,No action,Aucune action,Autre,Other
+47,G_Q68,Q68,At TBS,Au SCT,Survenu au SCT,Occured at TBS
+48,G_Q69,Q69,Satisfaction,Satisfaction,Satisfait(e) de la manière dont les problèmes de harcèlement sont réglés au SCT,Satisfactied with how harassment is resolved at TBS
+49,G_Q70,Q70,Prevention,Prévention,Le SCT met tout en œuvre pour prévenir le harcèlement,TBS works hard to prevent harassment

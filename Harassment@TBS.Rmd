@@ -1,0 +1,223 @@
+---
+title: "Harassment@TBS"
+output: html_document
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(forcats)
+library(stringr)
+library(grid)
+library(gridExtra)
+library(cowplot)
+
+theme_set(theme_minimal())
+
+metaQ <- read.csv("datasets//Question_Mappings.csv", na.strings=9999)
+metaHarQ <- read.csv("datasets//Harassment_Question_Mappings.csv", encoding = "UTF-8", na.strings=9999)
+PSESdata <- read.csv("datasets//2017_PSES_SAFF_Subset-5_Sous-ensemble-5.csv", na.strings=9999)
+```
+
+## Retrieve TBS data and merge with metadata files
+ 
+```{r echo=FALSE}
+
+TBSdata <- PSESdata %>%
+  filter(LEVEL1ID == 26 & (LEVEL3ID != 0 | LEVEL2ID == 0) & LEVEL2ID != 999) %>%
+  select(QUESTION,LEVEL2ID,TITLE_E,TITLE_F,DESCRIP_E,DESCRIP_F,SURVEYR,POSITIVE,NEUTRAL,NEGATIVE,SCORE100,AGREE) %>%
+  merge(metaQ) %>%
+  merge(metaHarQ)
+  #filter(QSection_E == "Harassment")
+```
+
+## Create a graph plotting answeres to Question 63 on harassment and order from highest to lowest agreement. 
+
+```{r echo=FALSE}
+TBS63 <- filter(TBSdata, QUESTION %in% c("G_Q63")) %>%
+  arrange(AGREE) %>%
+  mutate(DESCRIP_E = factor(DESCRIP_E, unique(DESCRIP_E))) %>%
+  mutate(TBScompare = ifelse(AGREE > 16,"higher","equal or less"))
+
+TBSplot <- ggplot(TBS63, aes(x = DESCRIP_E, y = AGREE)) +
+  labs(fill = "TBS comparison",
+       x="Sectors", 
+       y="% answering yes") +
+  scale_x_discrete(labels=c("Treasury Board of Canada Secretariat"=
+                              expression(bold(`Treasury Board of Canada Secretariat`)), parse=TRUE)) +
+  geom_col(aes(fill = TBScompare)) +
+  #geom_hline(yintercept = 16, linetype = 2, colour = "grey50") +
+  geom_text(nudge_y=1.8, size=3, colour="grey30", aes(label=AGREE)) +
+  coord_flip() +
+  theme(
+    axis.title.y = element_blank(),
+    text = element_text(colour="grey30"),
+    panel.grid = element_blank(),
+    axis.text.x = element_blank()
+  )
+
+TBSplot <- grid.arrange(TBSplot, ncol = 1, 
+                        top = textGrob(paste0(strwrap(TBS63$TITLE_E[[1]],80), sep="", collapse="\n"), 
+                                       gp=gpar(col ="grey30", fontsize = 14)))
+
+#TBSplot <- ggplot_gtable(ggplot_build(TBSplot))
+#TBSplot$layout[which(TBSplot$layout$name == "title"), c("l", "r")] <- c(1, max(TBSplot$layout$r))
+
+ggsave("plots//Harassment (Q63) by TBS Sector.png", plot = TBSplot)
+
+knitr::include_graphics("plots//Harassment (Q63) by TBS Sector.png")
+```
+
+## Create a detail graph for each of the "higher" sectors.
+
+```{r echo=FALSE}
+
+focusSectors <- filter(TBSdata, QUESTION == "G_Q63" & AGREE > 20) %>%
+  distinct(DESCRIP_E)
+
+hData <- filter(TBSdata, DESCRIP_E == "Internal Audit Sector" & HarSubQ_Num %in% c("Q64","Q65","Q66")) %>%
+  arrange(AGREE) %>%
+  mutate(Qshort_E = factor(Qshort_E, unique(Qshort_E)))
+
+sourceData <- filter(TBSdata, LEVEL2ID == 0 & HarSubQ_Num == "Q64") %>%
+  arrange(AGREE) %>%
+  mutate(Qshort_E = factor(Qshort_E, unique(Qshort_E)))
+
+natureData <- filter(TBSdata, LEVEL2ID == 0 & HarSubQ_Num == "Q65") %>%
+  arrange(AGREE) %>%
+  mutate(Qshort_E = factor(Qshort_E, unique(Qshort_E)))
+
+actionData <- filter(TBSdata, LEVEL2ID == 0 & HarSubQ_Num == "Q66")%>%
+  arrange(AGREE) %>%
+  mutate(Qshort_E = factor(Qshort_E, unique(Qshort_E)))
+
+
+plot1 <- ggplot(sourceData, aes(x=Qshort_E, y=AGREE)) +
+  labs(title = "Sources", 
+    x="Sectors", 
+    y="% answering yes") +
+  geom_col(fill = "#66c2a5") +
+  geom_text(nudge_y=3, size=3, colour="grey30", aes(label=AGREE)) +
+  coord_flip() +
+  theme(
+    axis.title.y = element_blank(),
+    text = element_text(colour="grey30"),
+    panel.grid = element_blank(),
+    legend.position = "none",
+    axis.text.x = element_blank())
+
+plot2 <- ggplot(natureData, aes(x=Qshort_E, y=AGREE)) +
+  labs(title = "Nature",
+    x="Sectors", 
+    y="% answering yes") +
+  geom_col(fill = "#fc8d62") +
+  geom_text(nudge_y=3, size=3, colour="grey30", aes(label=AGREE)) +
+  coord_flip() +
+  theme(
+    axis.title.y = element_blank(),
+    text = element_text(colour="grey30"),
+    panel.grid = element_blank(),
+    legend.position = "none",
+    axis.text.x = element_blank())
+
+plot3 <- ggplot(actionData, aes(x=Qshort_E, y=AGREE)) +
+  labs(title = "Actions taken",
+    x="Sectors", 
+    y="% answering yes") +
+  geom_col(fill = "#8da0cb") +
+  geom_text(nudge_y=3, size=3, colour="grey30", aes(label=AGREE)) +
+  coord_flip() +
+  theme(
+    axis.title.y = element_blank(),
+    text = element_text(colour="grey30"),
+    panel.grid = element_blank(),
+    legend.position = "none",
+    axis.text.x = element_blank())
+
+title.grb <- textGrob("Harassment questions sources, nature and actions taken at TBS", gp=gpar(fontsize=16, col ="grey30"))
+
+# Create combined graph using cowplots library
+harQplot <- plot_grid(plot1, plot2, plot3, align = "h", ncol = 3, rel_widths = c(1, 1, 1))
+
+harQplot <- grid.arrange(harQplot, ncol = 1, top = title.grb)
+
+ggsave(filename = "plots//Harassment sources, nature and actions taken at TBS.png",
+plot = harQplot, width = 10, height = 4)
+
+#asfocusSectors[,"DESCRIP_E"]
+
+
+```
+
+```{r echo=FALSE}
+for (sector in focusSectors[,"DESCRIP_E"]){
+  
+  sourceData <- filter(TBSdata, DESCRIP_E == sector & HarSubQ_Num == "Q64") %>%
+  arrange(AGREE) %>%
+  mutate(DESCRIP_E = factor(DESCRIP_E, unique(DESCRIP_E)))
+  
+  natureData <- filter(TBSdata, DESCRIP_E == sector & HarSubQ_Num == "Q65") %>%
+  arrange(AGREE) %>%
+  mutate(DESCRIP_E = factor(DESCRIP_E, unique(DESCRIP_E)))
+  
+  actionData <- filter(TBSdata, DESCRIP_E == sector & HarSubQ_Num == "Q66")%>%
+  arrange(AGREE) %>%
+  mutate(DESCRIP_E = factor(DESCRIP_E, unique(DESCRIP_E)))
+  
+  
+  plot1 <- ggplot(sourceData, aes(x=QUESTION, y=AGREE)) +
+    labs(title = "Sources", 
+      x="Sectors", 
+      y="% answering yes") +
+    geom_col() +
+    geom_text(nudge_y=1.8, size=3, colour="grey30", aes(label=AGREE)) +
+    coord_flip() +
+    theme(
+      axis.title.y = element_blank(),
+      text = element_text(colour="grey30"),
+      panel.grid = element_blank(),
+      axis.text.x = element_blank())
+  
+  plot2 <- ggplot(natureData, aes(x=QUESTION, y=AGREE)) +
+    labs(title = "Nature",
+      x="Sectors", 
+      y="% answering yes") +
+    geom_col() +
+    geom_text(nudge_y=1.8, size=3, colour="grey30", aes(label=AGREE)) +
+    coord_flip() +
+    theme(
+      axis.title.y = element_blank(),
+      text = element_text(colour="grey30"),
+      panel.grid = element_blank(),
+      axis.text.x = element_blank())
+  
+  plot3 <- ggplot(actionData, aes(x=QUESTION, y=AGREE)) +
+    labs(title = "Actions taken",
+      x="Sectors", 
+      y="% answering yes") +
+    geom_col() +
+    geom_text(nudge_y=1.8, size=3, colour="grey30", aes(label=AGREE)) +
+    coord_flip() +
+    theme(
+      axis.title.y = element_blank(),
+      text = element_text(colour="grey30"),
+      panel.grid = element_blank(),
+      axis.text.x = element_blank())
+
+  title.grb <- textGrob(paste0("Harassment questions - ", sector), gp=gpar(fontsize=16, col ="grey45"))
+  
+  # Create combined graph using cowplots library
+  harQplot <- plot_grid(plot1, plot2, plot3, align = "h", ncol = 3, rel_widths = c(1, 1, 1))
+  
+  harQplot <- grid.arrange(harQplot, ncol = 1, top = title.grb)
+  
+  ggsave(filename = paste0("plots//Harassment questions - ", sector,".png"), plot = harQplot)
+}
+
+
+
+
+```

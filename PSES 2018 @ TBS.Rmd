@@ -33,14 +33,19 @@ pses2017 <- bind_rows(ss1,ss2,ss3,ss4,ss5)
 
 ## Process Data
 
+### Select data
+
 Select only TBS data. TBS's LEVEL1ID is 26 and LEVEL2ID == "0" includes aggregate Public Service data.
 ```{r}
-TBS.df <- subset(pses2017, (LEVEL1ID == "26" & LEVEL2ID == "0"),
+TBS.df <- subset(pses2017, LEVEL1ID %in% c("26","0") & SURVEYR == 2017,
                 select=c(LEVEL1ID,SURVEYR,BYCOND,DESCRIP_E,DESCRIP_F,
                          QUESTION,TITLE_E,TITLE_F,POSITIVE,NEUTRAL,NEGATIVE,SCORE100,ANSCOUNT))
 ```
 
-Create question subsections, themes and demographic categories. Then aggregate questions by theme and demographic.
+### Merge Data from Other Sources
+
+Create question subsections, themes and demographic categories using mappping tables I have created. Note that they only contain TBS-relevant mapping data. Addtional work would need to be done to generalize them form use by other departments.
+
 ```{r}
 # Create question subsections by extracting the leading character from QUESTION, e.g., "A" from "A_Q01"
 TBS.df$QSection <- substr(ss.df$QUESTION,0,1)
@@ -48,8 +53,9 @@ TBS.df$QSection <- factor(ss.df$QSection)
 
 # Create demographic question subsections by extracting the leading code from BYCOND preceding "=" 
 # Also replace NA with "TBS"
-TBS.df$BYCOND[is.na(ss.df$BYCOND)] <- "TBS" 
-TBS.df$DemoQ <- word(ss.df$BYCOND, 1, sep = " =")
+TBS.df$BYCOND[TBS.df$DESCRIP_E == "Treasury Board of Canada Secretariat"] <- "TBS"
+TBS.df$BYCOND[TBS.df$DESCRIP_E == "Public Service"] <- "PS" 
+TBS.df$DemoQ <- word(TBS.df$BYCOND, 1, sep = " =")
 
 # Add question and demographic sections from mapping tables
 TBS.df <- merge(ss.df, mapQ, by = "QUESTION")
@@ -57,9 +63,13 @@ TBS.df <- merge(ss.df, mapDemQ, by = "BYCOND")
 
 ```
 
+### Aggregate Data
+
 Since there are over a hundred questions in the survey, they can't all be be displayed on a single page (or even 2!). Consequently, we need a way to summarize them into fewer categories. We have the option of sections or themes, which we derived earlier.
 
 Here, I've gone with themes, as they were used as the basis for Statistics Canada's suplied analysis. (Makes you wonder why the theme data isn't provided in the dataset or the documentation.)
+
+These will be plotted on the vertical axis.
 ```{r}
 # Aggregate by demographic and question theme
 TBSagg.df <- aggregate(data = ss.df, cbind(ANSCOUNT,SCORE100,NEGATIVE,NEUTRAL,POSITIVE) ~ 
@@ -80,6 +90,7 @@ TBSprops.df <- TBSagg.df %>%
   mutate(DesProp_E = paste0(DESCRIP_E, " (", round((prop*100),0),"%)")) %>%
   mutate(DesProp_F = paste0(DESCRIP_F, " (", round((prop*100),0),"%)")) %>%
   distinct(DESCRIP_E, DesProp_E, DesProp_F) %>%
+  # Here, we're just adding an empty line for the Public Service - percentages are only relevant for TBS.
   rbind(c("Public Service","Public Service","Fonction publique"))
 
 # Add demographic sections from mapping tables (the "mapDemQ" lookup table is based on TBS data
@@ -92,7 +103,14 @@ TBSagg.df <- merge(TBSagg.df, TBSprops.df, by = "DESCRIP_E")
 
 # Transform the positive-neutral-negative crosstab into a list 
 TBSagg.df <- gather(TBSagg.df, key = "sentiment", value = "prop", NEGATIVE,NEUTRAL,POSITIVE)
+```
 
+## Select Demographic Categories
+
+We have now processed the totality of TBS data. Wenow need to slect what demograhpic categories to display. Again, space is a consideration. 
+
+These will be plotted on the horizontal axis.
+```{r}
 # Order SubThemes by least to most negative  
 subThemeOrder <- TBSagg.df %>%
   filter(BYCOND == "M_Q103A = 011" & variable == "NEGATIVE") %>%
@@ -121,18 +139,165 @@ TBSagg.df$DesProp_F <- fct_relevel(TBSagg.df$DesProp_F, c("Fonction publique",
 
 
 ```{r}
+# LABELS
+#---------------
+#English captions and labels
+expl_E <- "Each cell of this chart displays the proportion of responses for a particular question theme and demographic category. The bars over each column represent the average value for this question theme for TBS. Question themes are sorted from least negative to most negative (the red column) for the AS group at TBS."
+expl_E <- paste0(strwrap(expl_E, 100), sep="", collapse="\n")
+ttl_E <- "PSES@TBS 2017 - AS & CR Groups"
+cap_E <- "2017 Public Service Employee Survey Open Datasets"
+file_E <- paste0(ttl_E,".pdf")
+TBSagg.df$variable_E <- mapvalues(TBSagg.df$variable, 
+                                     c("NEGATIVE","NEUTRAL","POSITIVE"),
+                                     c("Negative","Neutral","Positive"))
+PNN_E.lbls <- c("Negative" = "Negative", "Neutral" = "Neutral", "Positive" = "Positive", 
+                "Public Service" ="PS", "Treasury Board of Canada Secretariat (100%)" ="TBS")
+PNN_E.clrs <- c("Negative" = "#CD202C", "Neutral" = "#63CECA", "Positive" = "#CCDC00", 
+                "Treasury Board of Canada Secretariat (100%)" = "#d1e7ee", "Public Service" = "#fabcb3")
+
+#French Captions and labels
+expl_F <- "Chaque cellule de ce graphique affiche la proportion de réponses pour un thème de question et une catégorie démographique particuliers. Les barres sur chaque colonne représentent la valeur moyenne pour ce thème de question pour le SCT. Les thèmes de la question sont triés du moins négatif au plus négatif (la colonne rouge) pour le groupe AS du SCT."
+expl_F <- paste0(strwrap(expl_F, 100), sep="", collapse="\n")
+ttl_F <- "SAFF@SCT 2017 - Groupes AS & CR" 
+cap_F <- "Ensemble de données ouvertes du Sondage auprès des fonctionnaires fédéraux de 2017"
+file_F <- paste0(ttl_F,".pdf")
+TBSagg.df$variable_F <- mapvalues(TBSagg.df$variable, 
+                                     c("NEGATIVE","NEUTRAL","POSITIVE"),
+                                     c("Négatif","Neutre","Positif"))
+PNN_F.lbls <- c("Négatif" = "Négatif", "Neutre" = "Neutre", "Positif" = "Positif",
+                "Fonction publique" = "FP","Secrétariat du Conseil du Trésor du Canada (100%)" = "SCT")
+PNN_F.clrs <- c("Négatif" = "#CD202C", "Neutre" = "#63CECA", "Positif" = "#CCDC00",
+                "Secrétariat du Conseil du Trésor du Canada (100%)" = "#d1e7ee", "Fonction publique" = "#fabcb3")
+#---------------
 ```
 
 
 ```{r}
+# Create separate TBS and PS dataframes
+TBSagg_noPS.df <- filter(TBSagg.df, LEVEL1ID == "26" | BYCOND == "PS")
+TBSagg_PS.df <- filter(TBSagg.df, LEVEL1ID == "0" | BYCOND == "TBS")
+
+# Create TBS mean column to allow each small multiple to be compared to the TBS mean via geom_errorbar
+TBSagg_noPS.df <- TBSagg_noPS.df %>%
+  arrange(QSubTheme_E, variable, DESCRIP_E) %>%
+  group_by(QSubTheme_E, variable) %>%
+  mutate(TBSmean = value[2]) %>%
+  mutate(TBSmeanDiff = value - TBSmean)
+
+# Compute PS overall means to compare to the PS, TBS and Sector data
+
+PSoverall <- TBSagg_PS.df %>%
+  filter(BYCOND %in% c("PS","TBS")) %>%
+  arrange(QSubTheme_E, variable, OrderKey) %>%
+  group_by(QSubTheme_E, variable) %>%
+  mutate(value = value[1])
+
+PSdetail <- filter(TBSagg_PS.df, !(BYCOND %in% c("PS","TBS")))
+
+TBSagg_PS.df <- bind_rows(PSoverall, PSdetail)
 ```
 
 
 ```{r}
+# Define a plotting function for all subthemes. Inputs are language (E or F) and graph dimensions in inches.
+plotIS <- function(language, wdth = 10, hght = 8, textSize = 9) {
+  
+  if (language == "E") {
+    TBSagg_noPS.df$variable_lang <- TBSagg_noPS.df$variable_E
+    TBSagg_noPS.df$DESCRIP_lang <- TBSagg_noPS.df$DesProp_E
+    TBSagg_noPS.df$QSubTheme_lang <- TBSagg_noPS.df$QSubTheme_E
+    TBSagg_noPS.df$DemQ_lang <- TBSagg_noPS.df$DemQ_E
+    TBSagg_PS.df$variable_lang <- TBSagg_PS.df$variable_E
+    TBSagg_PS.df$DESCRIP_lang <- TBSagg_PS.df$DesProp_E
+    TBSagg_PS.df$QSubTheme_lang <- TBSagg_PS.df$QSubTheme_E
+    TBSagg_PS.df$DemQ_lang <- TBSagg_PS.df$DemQ_E
+    PNN_lang.clrs <- PNN_E.clrs
+    PNN_lang.lbls <- PNN_E.lbls
+    expl_lang <- expl_E
+    ttl_lang <- ttl_E
+    cap_lang <- cap_E
+    file_lang <- file_E
+    TBSmean_lang <- "TBS mean across all levels"
+    PSmean_lang <- "PS mean by level"
+    TBS_lang <- "Treasury Board of Canada Secretariat (100%)"
+    PS_lang <- "Public Service"
+  } else if (language == "F") {
+    TBSagg_noPS.df$variable_lang <- TBSagg_noPS.df$variable_F
+    TBSagg_noPS.df$DESCRIP_lang <- TBSagg_noPS.df$DesProp_F
+    TBSagg_noPS.df$QSubTheme_lang <- TBSagg_noPS.df$QSubTheme_F
+    TBSagg_noPS.df$DemQ_lang <- TBSagg_noPS.df$DemQ_F
+    TBSagg_PS.df$variable_lang <- TBSagg_PS.df$variable_F
+    TBSagg_PS.df$DESCRIP_lang <- TBSagg_PS.df$DesProp_F
+    TBSagg_PS.df$QSubTheme_lang <- TBSagg_PS.df$QSubTheme_F
+    TBSagg_PS.df$DemQ_lang <- TBSagg_PS.df$DemQ_F
+    PNN_lang.clrs <- PNN_F.clrs
+    PNN_lang.lbls <- PNN_F.lbls
+    expl_lang <- expl_F
+    ttl_lang <- ttl_F
+    cap_lang <- cap_F
+    file_lang <- file_F
+    TBSmean_lang <- "moyenne SCT pour tous les niveaux"
+    PSmean_lang <- "moyenne FP par niveau"
+    TBS_lang <- "Secrétariat du Conseil du Trésor du Canada (100%)"
+    PS_lang <- "Fonction publique"
+  } else {
+    return("Invalid language selection. Choose E (English) or F (French).")
+  }
+  
+  ggplot(data=TBSagg_noPS.df, aes(x=variable_lang, y=value, fill = variable_lang)) +
+    geom_rect(data = subset(TBSagg_noPS.df,DESCRIP_lang == TBS_lang),
+              aes(fill = DESCRIP_lang),xmin = -Inf,xmax = Inf,
+              ymin = -Inf,ymax = Inf,alpha = 0.3) +
+    geom_rect(data = subset(TBSagg_noPS.df,DESCRIP_lang == PS_lang),
+              aes(fill = DESCRIP_lang),xmin = -Inf,xmax = Inf,
+              ymin = -Inf,ymax = Inf,alpha = 0.3) +
+    geom_rect(data = subset(TBSagg_noPS.df,DemoQ %in% c("M_Q103A")),
+              fill = "grey80",xmin = -Inf,xmax = Inf,
+              ymin = -Inf,ymax = Inf,alpha = 0.3) +
+    geom_rect(data = subset(TBSagg_noPS.df,TBSmeanDiff >= 8 & variable == "NEGATIVE"),
+              fill = "#e3f800",xmin = -Inf,xmax = Inf,
+              ymin = -Inf,ymax = Inf,alpha = 0.8) +
+    geom_bar(stat = "identity") +
+    scale_fill_manual(values = PNN_lang.clrs, labels = PNN_lang.lbls) +
+    geom_errorbar(aes(ymax=TBSmean, ymin=TBSmean, linetype = TBSmean_lang), colour = "grey20") +
+    geom_errorbar(data = TBSagg_PS.df, 
+                  aes(ymax=value, ymin=value, linetype = PSmean_lang), colour = "grey20") +
+    scale_linetype_manual(values=c("dotted", "solid")) +
+    ggtitle(ttl_lang) +
+    labs(fill = "Response type", 
+         subtitle = expl_lang,
+         caption = cap_lang) +
+    facet_grid(QSubTheme_lang ~ DESCRIP_lang, switch = "y", scales = "free_y",
+               labeller = labeller(DESCRIP_lang = label_wrap_gen(8), QSubTheme_lang = label_wrap_gen(15)))  +
+    theme(plot.title = element_text(size = 20, hjust = 0, colour = "grey40"),
+          plot.subtitle = element_text(face = "bold", size = textSize, colour = "grey40"),
+          plot.caption = element_text(face = "italic", size = textSize, colour = "grey45"),
+          axis.title = element_blank(),
+          axis.text.y = element_blank(),
+          axis.text.x = element_blank(),
+          axis.ticks = element_blank(),
+          panel.background = element_rect(fill = "grey95"),
+          panel.grid = element_blank(),
+          panel.spacing.y = unit(0, "mm"),
+          panel.spacing.x = unit(0.5, "mm"),
+          strip.text.y = element_text(angle = 180, size = textSize, colour = "grey40", inherit.blank = FALSE),
+          strip.text.x = element_text(angle = 0, size = textSize, colour = "grey40", inherit.blank = FALSE),
+          strip.background = element_blank(),
+          legend.text = element_text(size = textSize, colour = "grey45"),
+          legend.title = element_blank(),
+          legend.position = "bottom")
+  
+  ggsave(file_lang, height = hght, width = wdth)
+  
+  return()
+  
+}
 ```
 
 
 ```{r}
+plotIS("E", 8, 13.5, 8)
+plotIS("F", 8, 13.5, 8)
 ```
 
 

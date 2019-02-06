@@ -1,0 +1,140 @@
+---
+title: "PSES 2018 @ TBS"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(readxl)
+library(scales)
+```
+
+```{r}
+```
+
+## Load Data
+
+Read all PSES 2017 subsets and combine them into a single PSES 2017 table.
+```{r load data}
+ss1 <- read_csv("datasets//2017_PSES_SAFF_Subset-1_Sous-ensemble-1.csv", na = "9999")
+ss2 <- read_csv("datasets//2017_PSES_SAFF_Subset-2_Sous-ensemble-2.csv", na = "9999")
+ss3 <- read_csv("datasets//2017_PSES_SAFF_Subset-3_Sous-ensemble-3.csv", na = "9999")
+ss4 <- read_csv("datasets//2017_PSES_SAFF_Subset-4_Sous-ensemble-4.csv", na = "9999")
+ss5 <- read_csv("datasets//2017_PSES_SAFF_Subset-5_Sous-ensemble-5.csv", na = "9999")
+mapQ <- read_csv("datasets//Question_Mappings.csv")
+mapDemQ <- read.csv("datasets//Demo_Question_Mappings.csv")
+
+pses2017 <- bind_rows(ss1,ss2,ss3,ss4,ss5)
+```
+
+## Process Data
+
+Select only TBS data. TBS's LEVEL1ID is 26 and LEVEL2ID == "0" includes aggregate Public Service data.
+```{r}
+TBS.df <- subset(pses2017, (LEVEL1ID == "26" & LEVEL2ID == "0"),
+                select=c(LEVEL1ID,SURVEYR,BYCOND,DESCRIP_E,DESCRIP_F,
+                         QUESTION,TITLE_E,TITLE_F,POSITIVE,NEUTRAL,NEGATIVE,SCORE100,ANSCOUNT))
+```
+
+Create question subsections, themes and demographic categories. Then aggregate questions by theme and demographic.
+```{r}
+# Create question subsections by extracting the leading character from QUESTION, e.g., "A" from "A_Q01"
+TBS.df$QSection <- substr(ss.df$QUESTION,0,1)
+TBS.df$QSection <- factor(ss.df$QSection)
+
+# Create demographic question subsections by extracting the leading code from BYCOND preceding "=" 
+# Also replace NA with "TBS"
+TBS.df$BYCOND[is.na(ss.df$BYCOND)] <- "TBS" 
+TBS.df$DemoQ <- word(ss.df$BYCOND, 1, sep = " =")
+
+# Add question and demographic sections from mapping tables
+TBS.df <- merge(ss.df, mapQ, by = "QUESTION")
+TBS.df <- merge(ss.df, mapDemQ, by = "BYCOND")
+
+```
+
+Since there are over a hundred questions in the survey, they can't all be be displayed on a single page (or even 2!). Consequently, we need a way to summarize them into fewer categories. We have the option of sections or themes, which we derived earlier.
+
+Here, I've gone with themes, as they were used as the basis for Statistics Canada's suplied analysis. (Makes you wonder why the theme data isn't provided in the dataset or the documentation.)
+```{r}
+# Aggregate by demographic and question theme
+TBSagg.df <- aggregate(data = ss.df, cbind(ANSCOUNT,SCORE100,NEGATIVE,NEUTRAL,POSITIVE) ~ 
+                            LEVEL1ID + QSubTheme_E + QSubTheme_F + DemoQ + DemQ_E + DemQ_F + BYCOND +
+                            DESCRIP_E + DESCRIP_F + SURVEYR, mean)
+
+# Calculate proportions for each TBS demographic group and append to the descriptors (DesProp_E and DesProp_F).
+# We will want the description fields with TBS-only proportions to be common to both PS and TBS data
+# so we can graph them together. This is why we output to another dataframe (TBSprops.df), which we merge below.
+TBSprops.df <- TBSagg.df %>%
+  filter(LEVEL1ID == "26") %>%
+  group_by(DemoQ, DESCRIP_E) %>%
+  mutate(ngrp = sum(ANSCOUNT)) %>%
+  group_by(DemoQ) %>%
+  mutate(npop = sum(ANSCOUNT)) %>%
+  ungroup() %>%
+  mutate(prop = ngrp/npop) %>%
+  mutate(DesProp_E = paste0(DESCRIP_E, " (", round((prop*100),0),"%)")) %>%
+  mutate(DesProp_F = paste0(DESCRIP_F, " (", round((prop*100),0),"%)")) %>%
+  distinct(DESCRIP_E, DesProp_E, DesProp_F) %>%
+  rbind(c("Public Service","Public Service","Fonction publique"))
+
+# Add demographic sections from mapping tables (the "mapDemQ" lookup table is based on TBS data
+# and will therefore filter out all PS data not shared by TBS, e.g., non-TBS occupational groups)
+TBSagg.df <- merge(TBSagg.df, mapDemQ, by = "BYCOND")
+
+# As mentioned above, we merge  the TBSprops.df dataframe to the orginal dataframe to keep descriptors consistent
+# between PS and tBS data. The preceding merge with "mapDemQ" has already stripped away non-shared descriptions.
+TBSagg.df <- merge(TBSagg.df, TBSprops.df, by = "DESCRIP_E")
+
+# Transform the positive-neutral-negative crosstab into a list 
+TBSagg.df <- gather(TBSagg.df, key = "sentiment", value = "prop", NEGATIVE,NEUTRAL,POSITIVE)
+
+# Order SubThemes by least to most negative  
+subThemeOrder <- TBSagg.df %>%
+  filter(BYCOND == "M_Q103A = 011" & variable == "NEGATIVE") %>%
+  arrange(value)
+TBSagg.df <- TBSagg.df %>%
+  mutate(QSubTheme_E = factor(QSubTheme_E, unique(subThemeOrder$QSubTheme_E))) %>%
+  mutate(QSubTheme_F = factor(QSubTheme_F, unique(subThemeOrder$QSubTheme_F)))
+
+# Select demographic groups to plot: AS & CR groups, plus PS and TBS summary columns for comparison
+TBSagg.df <- subset(TBSagg.df, BYCOND %in% c("M_Q103A = 011","M_Q103A = 023","TBS","PS") | 
+                         DemQ_E %in% c("AS","CR")) 
+
+# Order occupational levels by overall group and then ascending level using the existing "OrderKey" column
+# from the mapDemQ lookup table.
+TBSagg.df <- TBSagg.df %>% 
+  arrange(OrderKey) %>%
+  mutate(DesProp_E = factor(DesProp_E, unique(DesProp_E))) %>%
+  mutate(DesProp_F = factor(DesProp_F, unique(DesProp_F)))
+
+# Make PS and TBS overall the first levels (don't forget the percentages appended to the descriptors!)
+TBSagg.df$DesProp_E <- fct_relevel(TBSagg.df$DesProp_E, c("Public Service",
+                                                                "Treasury Board of Canada Secretariat (100%)"))
+TBSagg.df$DesProp_F <- fct_relevel(TBSagg.df$DesProp_F, c("Fonction publique",
+                                                                "Secrétariat du Conseil du Trésor du Canada (100%)"))
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```

@@ -334,6 +334,7 @@ This chunk simply calls the above function to create two plots, one in French an
 ```{r}
 plotPSES("E", 8, 13.5, 8)
 plotPSES("F", 8, 13.5, 8)
+
 ```
 
 

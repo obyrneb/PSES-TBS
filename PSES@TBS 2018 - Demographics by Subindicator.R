@@ -36,15 +36,21 @@ if(!exists("pses2018")) {
   ss3 <- read.csv(ss3File, na.strings = "9999")
   ss4 <- read.csv(ss4File, na.strings = "9999")
   #ss5 <- read.csv(ss5File, na.strings = "9999")
-  pses2018 <- bind_rows(ss1,ss2,ss3,ss4) # Add ss5 here once released
+  indicatorMap <- read.csv(file.path(mainDir,dataDir,"PSES2018_Indicator_Mapping.csv")) %>%
+    select(-TITLE_E,-TITLE_F)
+  pses2018 <- bind_rows(ss1,ss2,ss3,ss4) %>% # Add ss5 here once released
+    left_join(indicatorMap, by = "QUESTION")
+  
 }
 #------------
 
 # AGGREGATE DATA
 #------------
 TBS.df <- subset(pses2018, LEVEL1ID %in% c("26","0") & SURVEYR == 2018,
-                 select=c(LEVEL1ID,SURVEYR,BYCOND,DESCRIP_E,DESCRIP_F, SUBINDICATORENG, SUBINDICATORFRA,
-                          QUESTION,TITLE_E,TITLE_F,POSITIVE,NEUTRAL,NEGATIVE,SCORE100,ANSCOUNT))
+                 select=c(LEVEL1ID,SURVEYR,BYCOND,DESCRIP_E,DESCRIP_F,
+                          SUBINDICATORID, SUBINDICATORENG, SUBINDICATORFRA,
+                          QUESTION,TITLE_E,TITLE_F,
+                          POSITIVE,NEUTRAL,NEGATIVE,SCORE100,ANSCOUNT))
 
 TBS.df$QSection <- substr(TBS.df$QUESTION,0,1)
 TBS.df$QSection <- factor(TBS.df$QSection)
@@ -57,7 +63,7 @@ TBS.df$DemoQ <- word(TBS.df$BYCOND, 1, sep = " =")
 
 # Aggregate by demographic and question theme
 TBSagg.df <- aggregate(data = TBS.df, cbind(ANSCOUNT,SCORE100,NEGATIVE,NEUTRAL,POSITIVE) ~ 
-                         LEVEL1ID + SUBINDICATORENG + SUBINDICATORFRA + DemoQ + 
+                         LEVEL1ID + SUBINDICATORID + SUBINDICATORENG + SUBINDICATORFRA + DemoQ + 
                          #DemQ_E + DemQ_F + 
                          BYCOND + DESCRIP_E + DESCRIP_F + SURVEYR, mean)
 
@@ -74,9 +80,9 @@ TBSprops.df <- TBSagg.df %>%
   mutate(prop = ngrp/npop) %>%
   mutate(DesProp_E = paste0(DESCRIP_E, " (", round((prop*100),0),"%)")) %>%
   mutate(DesProp_F = paste0(DESCRIP_F, " (", round((prop*100),0),"%)")) %>%
-  distinct(DESCRIP_E, DesProp_E, DesProp_F) %>%
+  distinct(BYCOND, DesProp_E, DesProp_F) %>%
   # Here, we're just adding an empty line for the Public Service - percentages are only relevant for TBS.
-  rbind(c("Public Service","Public Service","Fonction publique"))
+  rbind(c("PS","Public Service","Fonction publique"))
 
 # Add demographic sections from mapping tables (the "mapDemQ" lookup table is based on TBS data
 # and will therefore filter out all PS data not shared by TBS, e.g., non-TBS occupational groups)
@@ -84,7 +90,7 @@ TBSprops.df <- TBSagg.df %>%
 
 # As mentioned above, we merge  the TBSprops.df dataframe to the orginal dataframe to keep descriptors consistent
 # between PS and tBS data. The preceding merge with "mapDemQ" has already stripped away non-shared descriptions.
-TBSagg.df <- merge(TBSagg.df, TBSprops.df, by = "DESCRIP_E")
+TBSagg.df <- merge(TBSagg.df, TBSprops.df, by = "BYCOND")
 
 # Transform the positive-neutral-negative crosstab into a list 
 TBSagg.df <- gather(TBSagg.df, key = "sentiment", value = "prop", NEGATIVE,NEUTRAL,POSITIVE)
@@ -175,6 +181,7 @@ TBSagg_noPS.df <- TBSagg_noPS.df %>%
   right_join(TBSagg_noPS.df, by = c("SUBINDICATORENG", "sentiment")) %>%
   select(names(TBSagg_noPS.df), TBSmean) %>%
   mutate(TBSmeanDiff = prop - TBSmean) %>%
+  #mutate(TBSmean = prop[which(BYCOND == "TBS")])%>%
   ungroup() %>%
   arrange(SUBINDICATORENG, sentiment, DESCRIP_E)
 
@@ -187,7 +194,7 @@ PSoverall <- PSoverall %>%
   select(SUBINDICATORENG, sentiment, PSmean = prop) %>%
   right_join(PSoverall, by = c("SUBINDICATORENG", "sentiment")) %>%
   select(names(PSoverall), PSmean) %>%
-  #mutate(prop = prop[which(BYCOND == "PS")])%>%
+  #mutate(PSmean = prop[which(BYCOND == "PS")])%>%
   ungroup() %>%
   arrange(SUBINDICATORENG, sentiment)
 

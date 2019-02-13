@@ -20,7 +20,7 @@ library(scales)
 ## Load Data
 
 Read all PSES 2017 subsets and combine them into a single PSES 2017 table.
-```{r load data}
+
 ss1 <- read.csv("datasets//2017_PSES_SAFF_Subset-1_Sous-ensemble-1.csv", na.strings = "9999")
 ss2 <- read.csv("datasets//2017_PSES_SAFF_Subset-2_Sous-ensemble-2.csv", na.strings = "9999")
 ss3 <- read.csv("datasets//2017_PSES_SAFF_Subset-3_Sous-ensemble-3.csv", na.strings = "9999")
@@ -30,6 +30,19 @@ mapQ <- read.csv("datasets//Question_Mappings.csv")
 mapDemQ <- read.csv("datasets//Demo_Question_Mappings.csv")
 
 pses2017 <- bind_rows(ss1,ss2,ss3,ss4,ss5)
+
+pses2018 <- "datasets//PSES_TBS_temp.xlsx" %>%
+  excel_sheets() %>%
+  set_names() %>% 
+  map_df(~ read_excel(path = "datasets//PSES_TBS_temp.xlsx", sheet = .x, na = "9999"), .id = "sheet")
+```{r load data}
+pses2018 <- bind_rows("datasets//PSES_TBS_temp.xlsx" %>%
+                       excel_sheets() %>%
+                       set_names() %>%
+                       map(read_excel, path = "datasets//PSES_TBS_temp.xlsx"))
+
+pses2018[pses2018 == 9999] <- NA
+
 ```
 
 ## Process Data
@@ -38,8 +51,8 @@ pses2017 <- bind_rows(ss1,ss2,ss3,ss4,ss5)
 
 Select only TBS data. TBS's LEVEL1ID is 26 and LEVEL2ID == "0" includes aggregate Public Service data.
 ```{r}
-TBS.df <- subset(pses2017, LEVEL1ID %in% c("26","0") & SURVEYR == 2017,
-                select=c(LEVEL1ID,SURVEYR,BYCOND,DESCRIP_E,DESCRIP_F,
+TBS.df <- subset(pses2018, LEVEL1ID %in% c("26","0") & SURVEYR == 2018,
+                select=c(LEVEL1ID,SURVEYR,BYCOND,DESCRIP_E,DESCRIP_F, SUBINDICATORENG, SUBINDICATORFRA,
                          QUESTION,TITLE_E,TITLE_F,POSITIVE,NEUTRAL,NEGATIVE,SCORE100,ANSCOUNT))
 ```
 
@@ -59,7 +72,7 @@ TBS.df$BYCOND[TBS.df$DESCRIP_E == "Public Service"] <- "PS"
 TBS.df$DemoQ <- word(TBS.df$BYCOND, 1, sep = " =")
 
 # Add question and demographic sections from mapping tables
-TBS.df <- merge(TBS.df, mapQ, by = "QUESTION")
+#TBS.df <- merge(TBS.df, mapQ, by = "QUESTION")
 #TBS.df <- merge(TBS.df, mapDemQ, by = "BYCOND")
 
 ```
@@ -74,7 +87,7 @@ These will be plotted on the vertical axis.
 ```{r}
 # Aggregate by demographic and question theme
 TBSagg.df <- aggregate(data = TBS.df, cbind(ANSCOUNT,SCORE100,NEGATIVE,NEUTRAL,POSITIVE) ~ 
-                         LEVEL1ID + QSubTheme_E + QSubTheme_F + DemoQ + 
+                         LEVEL1ID + SUBINDICATORENG + SUBINDICATORFRA + DemoQ + 
                          #DemQ_E + DemQ_F + 
                          BYCOND + DESCRIP_E + DESCRIP_F + SURVEYR, mean)
 
@@ -97,7 +110,7 @@ TBSprops.df <- TBSagg.df %>%
 
 # Add demographic sections from mapping tables (the "mapDemQ" lookup table is based on TBS data
 # and will therefore filter out all PS data not shared by TBS, e.g., non-TBS occupational groups)
-TBSagg.df <- merge(TBSagg.df, mapDemQ, by = "BYCOND")
+#TBSagg.df <- merge(TBSagg.df, mapDemQ, by = "BYCOND")
 
 # As mentioned above, we merge  the TBSprops.df dataframe to the orginal dataframe to keep descriptors consistent
 # between PS and tBS data. The preceding merge with "mapDemQ" has already stripped away non-shared descriptions.
@@ -114,21 +127,21 @@ We have now processed the totality of TBS data. Wenow need to slect what demogra
 These will be plotted on the horizontal axis.
 ```{r}
 # Order SubThemes by least to most negative  
-subThemeOrder <- TBSagg.df %>%
-  filter(BYCOND == "M_Q103A = 011" & sentiment == "NEGATIVE") %>%
+subIndicatorOrder <- TBSagg.df %>%
+  filter(BYCOND == "TBS" & sentiment == "NEGATIVE") %>%
   arrange(prop)
 TBSagg.df <- TBSagg.df %>%
-  mutate(QSubTheme_E = factor(QSubTheme_E, unique(subThemeOrder$QSubTheme_E))) %>%
-  mutate(QSubTheme_F = factor(QSubTheme_F, unique(subThemeOrder$QSubTheme_F)))
+  mutate(SUBINDICATORENG = factor(SUBINDICATORENG, unique(subIndicatorOrder$SUBINDICATORENG))) %>%
+  mutate(SUBINDICATORFRA = factor(SUBINDICATORFRA, unique(subIndicatorOrder$SUBINDICATORFRA)))
 
 # Select demographic groups to plot: AS & CR groups, plus PS and TBS summary columns for comparison
-TBSagg.df <- subset(TBSagg.df, BYCOND %in% c("M_Q103A = 011","M_Q103A = 023","TBS","PS") | 
-                         DemQ_E %in% c("AS","CR")) 
+TBSagg.df <- subset(TBSagg.df, DemoQ %in% c("Q27","Q78A","Q87","Q88","Q89") | 
+                         BYCOND %in% c("TBS","PS")) 
 
 # Order occupational levels by overall group and then ascending level using the existing "OrderKey" column
 # from the mapDemQ lookup table.
 TBSagg.df <- TBSagg.df %>% 
-  arrange(OrderKey) %>%
+  arrange(BYCOND) %>%
   mutate(DesProp_E = factor(DesProp_E, unique(DesProp_E))) %>%
   mutate(DesProp_F = factor(DesProp_F, unique(DesProp_F)))
 
@@ -147,8 +160,8 @@ These will be used to build the bilingual plots further down.
 expl_E <- "Each cell of this chart displays the proportion of responses for a particular question theme and demographic category. The bars over each column represent the average value for this question theme for TBS. Question themes are sorted from least negative to most negative (the red column) for the AS group at TBS."
 #expl_E <- paste0(strwrap(expl_E, 100), sep="", collapse="\n")
 expl_E <- str_wrap(expl_E, 100)
-ttl_E <- "PSES@TBS 2017 - AS & CR Groups"
-cap_E <- "2017 Public Service Employee Survey Open Datasets"
+ttl_E <- "PSES@TBS 2018 - Occupational and Employment Equity Groups"
+cap_E <- "2018 Public Service Employee Survey Open Datasets"
 file_E <- paste0(ttl_E,".pdf")
 TBSagg.df$sentiment_E <- mapvalues(TBSagg.df$sentiment, 
                                      c("NEGATIVE","NEUTRAL","POSITIVE"),
@@ -168,8 +181,8 @@ PNN_E.clrs <- c("Negative" = "#CD202C",
 expl_F <- "Chaque cellule de ce graphique affiche la proportion de réponses pour un thème de question et une catégorie démographique particuliers. Les barres sur chaque colonne représentent la valeur moyenne pour ce thème de question pour le SCT. Les thèmes de la question sont triés du moins négatif au plus négatif (la colonne rouge) pour le groupe AS du SCT."
 #expl_F <- paste0(strwrap(expl_F, 100), sep="", collapse="\n")
 expl_F <- str_wrap(expl_F, 100)
-ttl_F <- "SAFF@SCT 2017 - Groupes AS & CR" 
-cap_F <- "Ensemble de données ouvertes du Sondage auprès des fonctionnaires fédéraux de 2017"
+ttl_F <- "SAFF@SCT 2018 - Groupes professionnels et d'équité en emploi" 
+cap_F <- "Ensemble de données ouvertes du Sondage auprès des fonctionnaires fédéraux de 2018"
 file_F <- paste0(ttl_F,".pdf")
 TBSagg.df$sentiment_F <- mapvalues(TBSagg.df$sentiment, 
                                      c("NEGATIVE","NEUTRAL","POSITIVE"),
@@ -196,27 +209,27 @@ TBSagg_PS.df <- filter(TBSagg.df, LEVEL1ID == "0" | BYCOND == "TBS")
 
 # Create TBS mean column to allow each small multiple to be compared to the TBS mean via geom_errorbar
 TBSagg_noPS.df <- TBSagg_noPS.df %>%
-  group_by(QSubTheme_E, sentiment) %>%
+  group_by(SUBINDICATORENG, sentiment) %>%
   filter(BYCOND == "TBS") %>%
-  select(QSubTheme_E, sentiment, TBSmean = prop) %>%
-  right_join(TBSagg_noPS.df, by = c("QSubTheme_E", "sentiment")) %>%
+  select(SUBINDICATORENG, sentiment, TBSmean = prop) %>%
+  right_join(TBSagg_noPS.df, by = c("SUBINDICATORENG", "sentiment")) %>%
   select(names(TBSagg_noPS.df), TBSmean) %>%
   mutate(TBSmeanDiff = prop - TBSmean) %>%
   ungroup() %>%
-  arrange(QSubTheme_E, sentiment, DESCRIP_E)
+  arrange(SUBINDICATORENG, sentiment, DESCRIP_E)
 
 # Compute PS overall means to compare to the PS, TBS and Sector data
 PSoverall <- filter(TBSagg_PS.df, BYCOND %in% c("PS","TBS"))
    
 PSoverall <- PSoverall %>%
-  group_by(QSubTheme_E, sentiment) %>%
+  group_by(SUBINDICATORENG, sentiment) %>%
   filter(BYCOND =="PS") %>%
-  select(QSubTheme_E, sentiment, PSmean = prop) %>%
-  right_join(PSoverall, by = c("QSubTheme_E", "sentiment")) %>%
+  select(SUBINDICATORENG, sentiment, PSmean = prop) %>%
+  right_join(PSoverall, by = c("SUBINDICATORENG", "sentiment")) %>%
   select(names(PSoverall), PSmean) %>%
   #mutate(prop = prop[which(BYCOND == "PS")])%>%
   ungroup() %>%
-  arrange(QSubTheme_E, sentiment)
+  arrange(SUBINDICATORENG, sentiment)
 
 PSdetail <- filter(TBSagg_PS.df, !(BYCOND %in% c("PS","TBS")))
 
@@ -239,12 +252,12 @@ plotPSES <- function(language, wdth = 10, hght = 8, textSize = 9) {
   if (language == "E") {
     TBSagg_noPS.df$sentiment_lang <- TBSagg_noPS.df$sentiment_E
     TBSagg_noPS.df$DESCRIP_lang <- TBSagg_noPS.df$DesProp_E
-    TBSagg_noPS.df$QSubTheme_lang <- TBSagg_noPS.df$QSubTheme_E
-    TBSagg_noPS.df$DemQ_lang <- TBSagg_noPS.df$DemQ_E
+    TBSagg_noPS.df$SUBINDICATOR_lang <- TBSagg_noPS.df$SUBINDICATORENG
+    #TBSagg_noPS.df$DemQ_lang <- TBSagg_noPS.df$DemQ_E
     TBSagg_PS.df$sentiment_lang <- TBSagg_PS.df$sentiment_E
     TBSagg_PS.df$DESCRIP_lang <- TBSagg_PS.df$DesProp_E
-    TBSagg_PS.df$QSubTheme_lang <- TBSagg_PS.df$QSubTheme_E
-    TBSagg_PS.df$DemQ_lang <- TBSagg_PS.df$DemQ_E
+    TBSagg_PS.df$SUBINDICATOR_lang <- TBSagg_PS.df$SUBINDICATORENG
+    #TBSagg_PS.df$DemQ_lang <- TBSagg_PS.df$DemQ_E
     PNN_lang.clrs <- PNN_E.clrs
     PNN_lang.lbls <- PNN_E.lbls
     expl_lang <- expl_E
@@ -258,12 +271,12 @@ plotPSES <- function(language, wdth = 10, hght = 8, textSize = 9) {
   } else if (language == "F") {
     TBSagg_noPS.df$sentiment_lang <- TBSagg_noPS.df$sentiment_F
     TBSagg_noPS.df$DESCRIP_lang <- TBSagg_noPS.df$DesProp_F
-    TBSagg_noPS.df$QSubTheme_lang <- TBSagg_noPS.df$QSubTheme_F
-    TBSagg_noPS.df$DemQ_lang <- TBSagg_noPS.df$DemQ_F
+    TBSagg_noPS.df$SUBINDICATOR_lang <- TBSagg_noPS.df$SUBINDICATORFRA
+    #TBSagg_noPS.df$DemQ_lang <- TBSagg_noPS.df$DemQ_F
     TBSagg_PS.df$sentiment_lang <- TBSagg_PS.df$sentiment_F
     TBSagg_PS.df$DESCRIP_lang <- TBSagg_PS.df$DesProp_F
-    TBSagg_PS.df$QSubTheme_lang <- TBSagg_PS.df$QSubTheme_F
-    TBSagg_PS.df$DemQ_lang <- TBSagg_PS.df$DemQ_F
+    TBSagg_PS.df$SUBINDICATOR_lang <- TBSagg_PS.df$SUBINDICATORFRA
+    #TBSagg_PS.df$DemQ_lang <- TBSagg_PS.df$DemQ_F
     PNN_lang.clrs <- PNN_F.clrs
     PNN_lang.lbls <- PNN_F.lbls
     expl_lang <- expl_F
@@ -301,8 +314,8 @@ plotPSES <- function(language, wdth = 10, hght = 8, textSize = 9) {
     labs(fill = "Response type", 
          subtitle = expl_lang,
          caption = cap_lang) +
-    facet_grid(QSubTheme_lang ~ DESCRIP_lang, switch = "y", #scales = "free_y",
-               labeller = labeller(DESCRIP_lang = label_wrap_gen(8), QSubTheme_lang = label_wrap_gen(15)))  +
+    facet_grid(SUBINDICATOR_lang ~ DESCRIP_lang, switch = "y", #scales = "free_y",
+               labeller = labeller(DESCRIP_lang = label_wrap_gen(20), SUBINDICATOR_lang = label_wrap_gen(15)))  +
     theme(plot.title = element_text(size = 20, hjust = 0, colour = "grey40"),
           plot.subtitle = element_text(face = "bold", size = textSize, colour = "grey40"),
           plot.caption = element_text(face = "italic", size = textSize, colour = "grey45"),
@@ -315,7 +328,7 @@ plotPSES <- function(language, wdth = 10, hght = 8, textSize = 9) {
           panel.spacing.y = unit(0, "mm"),
           panel.spacing.x = unit(0.5, "mm"),
           strip.text.y = element_text(angle = 180, size = textSize, colour = "grey40", inherit.blank = FALSE),
-          strip.text.x = element_text(angle = 0, size = textSize, colour = "grey40", inherit.blank = FALSE),
+          strip.text.x = element_text(angle = 90, size = textSize, colour = "grey40", inherit.blank = FALSE),
           strip.background = element_blank(),
           legend.text = element_text(size = textSize, colour = "grey45"),
           legend.title = element_blank(),

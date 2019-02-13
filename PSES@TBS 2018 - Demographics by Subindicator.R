@@ -1,67 +1,51 @@
----
-title: "PSES 2018 @ TBS"
-output:
-  html_document: default
-  pdf_document: default
----
-
-```{r setup, include=FALSE, echo=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-
 library(plyr)
 library(tidyverse)
 library(readxl)
 library(scales)
-```
 
-```{r}
-```
+# LOAD DATA
+#------------
+mainDir <- getwd()
+dataDir <- "datasets"
+plotDir <- "plots"
+ss1File <- file.path(mainDir,dataDir,"pses2018_ss1.csv")
+ss2File <- file.path(mainDir,dataDir,"pses2018_ss2.csv")
+ss3File <- file.path(mainDir,dataDir,"pses2018_ss3.csv")
+ss4File <- file.path(mainDir,dataDir,"pses2018_ss4.csv")
+ss5File <- file.path(mainDir,dataDir,"pses2018_ss5.csv")
+ss1URL <- "https://www.canada.ca/content/dam/tbs-sct/documents/datasets/pses-saff/2018/2018_PSES_SAFF_Subset-1_Sous-ensemble-1.csv"
+ss2URL <- "https://www.canada.ca/content/dam/tbs-sct/documents/datasets/pses-saff/2018/2018_PSES_SAFF_Subset-2_Sous-ensemble-2.csv"
+ss3URL <- "https://www.canada.ca/content/dam/tbs-sct/documents/datasets/pses-saff/2018/2018_PSES_SAFF_Subset-3_Sous-ensemble-3.csv"
+ss4URL <- "https://www.canada.ca/content/dam/tbs-sct/documents/datasets/pses-saff/2018/2018_PSES_SAFF_Subset-4_Sous-ensemble-4.csv"
+ss5URL <- "" # Due for release in March 2018
 
-## Load Data
+ifelse(!dir.exists(file.path(mainDir, dataDir)), dir.create(file.path(mainDir, dataDir)), FALSE)
+ifelse(!dir.exists(file.path(mainDir, plotDir)), dir.create(file.path(mainDir, plotDir)), FALSE)
 
-Read all PSES 2017 subsets and combine them into a single PSES 2017 table.
+if(!file.exists(c(ss1File,ss2File,ss3File,ss4File))) { # Add ss5File here once released
+  download.file(ss1URL,ss1File)
+  download.file(ss2URL,ss2File)
+  download.file(ss3URL,ss3File)
+  download.file(ss4URL,ss4File)
+  #download.file(ss5URL,file.path(mainDIr, dataDir, ss5File))
+}
 
-ss1 <- read.csv("datasets//2017_PSES_SAFF_Subset-1_Sous-ensemble-1.csv", na.strings = "9999")
-ss2 <- read.csv("datasets//2017_PSES_SAFF_Subset-2_Sous-ensemble-2.csv", na.strings = "9999")
-ss3 <- read.csv("datasets//2017_PSES_SAFF_Subset-3_Sous-ensemble-3.csv", na.strings = "9999")
-ss4 <- read.csv("datasets//2017_PSES_SAFF_Subset-4_Sous-ensemble-4.csv", na.strings = "9999")
-ss5 <- read.csv("datasets//2017_PSES_SAFF_Subset-5_Sous-ensemble-5.csv", na.strings = "9999")
-mapQ <- read.csv("datasets//Question_Mappings.csv")
-mapDemQ <- read.csv("datasets//Demo_Question_Mappings.csv")
+if(!exists("pses2018")) {
+  ss1 <- read.csv(ss1File, na.strings = "9999")
+  ss2 <- read.csv(ss2File, na.strings = "9999")
+  ss3 <- read.csv(ss3File, na.strings = "9999")
+  ss4 <- read.csv(ss4File, na.strings = "9999")
+  #ss5 <- read.csv(ss5File, na.strings = "9999")
+  pses2018 <- bind_rows(ss1,ss2,ss3,ss4) # Add ss5 here once released
+}
+#------------
 
-pses2017 <- bind_rows(ss1,ss2,ss3,ss4,ss5)
-
-pses2018 <- "datasets//PSES_TBS_temp.xlsx" %>%
-  excel_sheets() %>%
-  set_names() %>% 
-  map_df(~ read_excel(path = "datasets//PSES_TBS_temp.xlsx", sheet = .x, na = "9999"), .id = "sheet")
-```{r load data}
-pses2018 <- bind_rows("datasets//PSES_TBS_temp.xlsx" %>%
-                       excel_sheets() %>%
-                       set_names() %>%
-                       map(read_excel, path = "datasets//PSES_TBS_temp.xlsx"))
-
-pses2018[pses2018 == 9999] <- NA
-
-```
-
-## Process Data
-
-### Select data
-
-Select only TBS data. TBS's LEVEL1ID is 26 and LEVEL2ID == "0" includes aggregate Public Service data.
-```{r}
+# AGGREGATE DATA
+#------------
 TBS.df <- subset(pses2018, LEVEL1ID %in% c("26","0") & SURVEYR == 2018,
-                select=c(LEVEL1ID,SURVEYR,BYCOND,DESCRIP_E,DESCRIP_F, SUBINDICATORENG, SUBINDICATORFRA,
-                         QUESTION,TITLE_E,TITLE_F,POSITIVE,NEUTRAL,NEGATIVE,SCORE100,ANSCOUNT))
-```
+                 select=c(LEVEL1ID,SURVEYR,BYCOND,DESCRIP_E,DESCRIP_F, SUBINDICATORENG, SUBINDICATORFRA,
+                          QUESTION,TITLE_E,TITLE_F,POSITIVE,NEUTRAL,NEGATIVE,SCORE100,ANSCOUNT))
 
-### Merge Data from Other Sources
-
-Create question subsections, themes and demographic categories using mappping tables I have created. Note that they only contain TBS-relevant mapping data. Addtional work would need to be done to generalize them form use by other departments.
-
-```{r}
-# Create question subsections by extracting the leading character from QUESTION, e.g., "A" from "A_Q01"
 TBS.df$QSection <- substr(TBS.df$QUESTION,0,1)
 TBS.df$QSection <- factor(TBS.df$QSection)
 
@@ -71,20 +55,6 @@ TBS.df$BYCOND[TBS.df$DESCRIP_E == "Treasury Board of Canada Secretariat"] <- "TB
 TBS.df$BYCOND[TBS.df$DESCRIP_E == "Public Service"] <- "PS" 
 TBS.df$DemoQ <- word(TBS.df$BYCOND, 1, sep = " =")
 
-# Add question and demographic sections from mapping tables
-#TBS.df <- merge(TBS.df, mapQ, by = "QUESTION")
-#TBS.df <- merge(TBS.df, mapDemQ, by = "BYCOND")
-
-```
-
-### Aggregate Data
-
-Since there are over a hundred questions in the survey, they can't all be be displayed on a single page (or even 2!). Consequently, we need a way to summarize them into fewer categories. We have the option of sections or themes, which we derived earlier.
-
-Here, I've gone with themes, as they were used as the basis for Statistics Canada's suplied analysis. (Makes you wonder why the theme data isn't provided in the dataset or the documentation.)
-
-These will be plotted on the vertical axis.
-```{r}
 # Aggregate by demographic and question theme
 TBSagg.df <- aggregate(data = TBS.df, cbind(ANSCOUNT,SCORE100,NEGATIVE,NEUTRAL,POSITIVE) ~ 
                          LEVEL1ID + SUBINDICATORENG + SUBINDICATORFRA + DemoQ + 
@@ -118,14 +88,7 @@ TBSagg.df <- merge(TBSagg.df, TBSprops.df, by = "DESCRIP_E")
 
 # Transform the positive-neutral-negative crosstab into a list 
 TBSagg.df <- gather(TBSagg.df, key = "sentiment", value = "prop", NEGATIVE,NEUTRAL,POSITIVE)
-```
 
-## Select Demographic Categories
-
-We have now processed the totality of TBS data. Wenow need to slect what demograhpic categories to display. Again, space is a consideration. 
-
-These will be plotted on the horizontal axis.
-```{r}
 # Order SubThemes by least to most negative  
 subIndicatorOrder <- TBSagg.df %>%
   filter(BYCOND == "TBS" & sentiment == "NEGATIVE") %>%
@@ -136,7 +99,7 @@ TBSagg.df <- TBSagg.df %>%
 
 # Select demographic groups to plot: AS & CR groups, plus PS and TBS summary columns for comparison
 TBSagg.df <- subset(TBSagg.df, DemoQ %in% c("Q27","Q78A","Q87","Q88","Q89") | 
-                         BYCOND %in% c("TBS","PS")) 
+                      BYCOND %in% c("TBS","PS")) 
 
 # Order occupational levels by overall group and then ascending level using the existing "OrderKey" column
 # from the mapDemQ lookup table.
@@ -150,12 +113,10 @@ TBSagg.df$DesProp_E <- fct_relevel(TBSagg.df$DesProp_E,
                                    c("Public Service","Treasury Board of Canada Secretariat (100%)"))
 TBSagg.df$DesProp_F <- fct_relevel(TBSagg.df$DesProp_F, 
                                    c("Fonction publique","Secrétariat du Conseil du Trésor du Canada (100%)"))
-```
+#------------
 
-## Create Bilingual Labels
-
-These will be used to build the bilingual plots further down.
-```{r}
+# CREATE BILINGUAL LABELS
+#------------
 # English captions and labels
 expl_E <- "Each cell of this chart displays the proportion of responses for a particular question theme and demographic category. The bars over each column represent the average value for this question theme for TBS. Question themes are sorted from least negative to most negative (the red column) for the AS group at TBS."
 #expl_E <- paste0(strwrap(expl_E, 100), sep="", collapse="\n")
@@ -164,8 +125,8 @@ ttl_E <- "PSES@TBS 2018 - Occupational and Employment Equity Groups"
 cap_E <- "2018 Public Service Employee Survey Open Datasets"
 file_E <- paste0(ttl_E,".pdf")
 TBSagg.df$sentiment_E <- mapvalues(TBSagg.df$sentiment, 
-                                     c("NEGATIVE","NEUTRAL","POSITIVE"),
-                                     c("Negative","Neutral","Positive"))
+                                   c("NEGATIVE","NEUTRAL","POSITIVE"),
+                                   c("Negative","Neutral","Positive"))
 PNN_E.lbls <- c("Negative" = "Negative", 
                 "Neutral" = "Neutral", 
                 "Positive" = "Positive", 
@@ -185,8 +146,8 @@ ttl_F <- "SAFF@SCT 2018 - Groupes professionnels et d'équité en emploi"
 cap_F <- "Ensemble de données ouvertes du Sondage auprès des fonctionnaires fédéraux de 2018"
 file_F <- paste0(ttl_F,".pdf")
 TBSagg.df$sentiment_F <- mapvalues(TBSagg.df$sentiment, 
-                                     c("NEGATIVE","NEUTRAL","POSITIVE"),
-                                     c("Négatif","Neutre","Positif"))
+                                   c("NEGATIVE","NEUTRAL","POSITIVE"),
+                                   c("Négatif","Neutre","Positif"))
 PNN_F.lbls <- c("Négatif" = "Négatif", 
                 "Neutre" = "Neutre", 
                 "Positif" = "Positif",
@@ -197,12 +158,11 @@ PNN_F.clrs <- c("Négatif" = "#CD202C",
                 "Positif" = "#CCDC00",
                 "Secrétariat du Conseil du Trésor du Canada (100%)" = "#d1e7ee", 
                 "Fonction publique" = "#fabcb3")
-```
 
-## Create Comparison Means
+#------------
 
-This chunk creates a dataframe of TBS means and a dataframe of Public Service means to be used as an overlay on each small multiple graph in the plot function further below.
-```{r}
+# CREATE DATAFRAMES FOR PLOT
+#------------
 # Create separate TBS and PS dataframes
 TBSagg_noPS.df <- filter(TBSagg.df, LEVEL1ID == "26" | BYCOND == "PS")
 TBSagg_PS.df <- filter(TBSagg.df, LEVEL1ID == "0" | BYCOND == "TBS")
@@ -220,7 +180,7 @@ TBSagg_noPS.df <- TBSagg_noPS.df %>%
 
 # Compute PS overall means to compare to the PS, TBS and Sector data
 PSoverall <- filter(TBSagg_PS.df, BYCOND %in% c("PS","TBS"))
-   
+
 PSoverall <- PSoverall %>%
   group_by(SUBINDICATORENG, sentiment) %>%
   filter(BYCOND =="PS") %>%
@@ -236,17 +196,10 @@ PSdetail <- filter(TBSagg_PS.df, !(BYCOND %in% c("PS","TBS")))
 PSdetail <- mutate(PSdetail, PSmean = prop)
 
 TBSagg_PS.df <- bind_rows(PSoverall, PSdetail)
-```
+#------------
 
-## Produce Bilingual Plots
-
-### Create Plot Function
-
-The function below creates our small multiple grid, with question themes forming the vertical (y) axis and demographic categories forming the horizontal (x) axis. Each of the small multiple graphs contains the postive, neutral and negative proportion of responses for a given intersection of question theme and demographic using a bar chart.
-
-The function can be called in French or English, leveragining the labels we created earlier.
-```{r}
-# Define a plotting function for all subthemes. Inputs are language (E or F) and graph dimensions in inches.
+# DEFINE PLOT FUNCTION
+#------------
 plotPSES <- function(language, wdth = 10, hght = 8, textSize = 9) {
   
   if (language == "E") {
@@ -337,19 +290,11 @@ plotPSES <- function(language, wdth = 10, hght = 8, textSize = 9) {
   ggsave(file_lang, height = hght, width = wdth)
   
   return()
-  
 }
-```
-
-### Create Binligual Plots
-
-This chunk simply calls the above function to create two plots, one in French and one in English.
-```{r}
+#------------
+ 
+# CREATE BILINGUAL PLOTS
+#------------
+# This chunk simply calls the above function to create two plots, one in French and one in English.
 plotPSES("E", 8, 13.5, 8)
 plotPSES("F", 8, 13.5, 8)
-
-```
-
-
-```{r}
-```

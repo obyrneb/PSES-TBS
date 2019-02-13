@@ -29,7 +29,7 @@ PSESdata <- read.csv("datasets_t//tutorialData.csv", na.strings=9999)
 # Make a list of LEVEL1ID identifiers and department names and print it to the console. 
 # You can find your department on the generated list. Note its LEVEL1ID for use in the next step.
 idList <- distinct(PSESdata, LEVEL1ID, Dept_E)
-idList
+idList # Simply stating the variable name makes R print it out on the console - in this case, all LEVEL1IDs
 
 # Filter for TBS data (LEVEL1ID == 26) and survey year 2017 (SURVEYR == 2017). You can also your own department ID.
 # Select only 5 columns: Question number, sector description and the 3 sentiment categories.
@@ -38,9 +38,9 @@ myData <- PSESdata %>%
   select(QUESTION,DESCRIP_E,POSITIVE,NEUTRAL,NEGATIVE)
 
 # Gather the 3 sentiment categories into a single field, named "sentiment" and the value field named "prop".
-# Create a variabel for question section (QSECTION) by using the first character of the question (e.g. A_Q001).
+# Create a variable for question section (QSECTION) by using the first character of the question (e.g. A_Q001).
 # Group by sector name, question section and sentiment.
-# summarise a sentiment mean for each sentiment by questions section, by sector name.
+# summarise a sentiment mean for each sentiment by question section, by sector name.
 mySummary <- myData %>%
   gather(key="sentiment",value="prop",-DESCRIP_E,-QUESTION) %>%
   mutate(QSECTION = substr(QUESTION,1,1)) %>%
@@ -57,3 +57,8 @@ myPlot <- ggplot(data=mySummary, aes(x=sentiment, y=prop)) +
 
 # Save the plot as a PDF file the "plots" folder, 8 inches wide by 10 inches tall.
 ggsave(plot=myPlot, file="plots_t/tutorialPlot.pdf", width = 8, height = 10)
+
+# There you have it, a simple small mutliples chart - data downloaded, processed and graphed - 
+# with about 20 lines of code. I think that's pretty neat.
+
+# Good luck!

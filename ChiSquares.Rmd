@@ -8,38 +8,34 @@ library(tidyverse)
 
 TBSdata <- pses2018 %>%
   filter(LEVEL1ID == "26" & SURVEYR == 2018) %>%
-  mutate(DemQ = ifelse(is.na(BYCOND),"TBS",word(BYCOND, 1, sep = " ="))) %>%
+  mutate(DemoQ = ifelse(is.na(BYCOND),"TBS",word(BYCOND, 1, sep = " ="))) %>%
   mutate(notDKNA_n = (100-ANSWER6-ANSWER7)/100*ANSCOUNT) %>%
   mutate(positive_n = round(POSITIVE/100*notDKNA_n),0) %>%
   mutate(neutral_n = round(NEUTRAL/100*notDKNA_n),0) %>%
   mutate(negative_n = round(NEGATIVE/100*notDKNA_n),0) %>%
-  select(QUESTION,DemQ,DEMCODE,DESCRIP_E,DESCRIP_F,
+  drop_na(positive_n,negative_n) %>%
+  filter((positive_n + neutral_n + negative_n)>0) %>%
+  select(QUESTION,DemoQ,DEMCODE,DESCRIP_E,DESCRIP_F,
          positive_n,neutral_n,negative_n)
 
-#ChiSquares <- TBSdata %>%
-  #group_by(QUESTION,DemQ) %>%
-  #table() %>%
-  #summary()
+ChiSquares <- TBSdata %>%
+  group_by(QUESTION,DemoQ) %>%
+  do(p.value = (function(x) chisq.test(x[,6:8]))(.)) %>%
+  ungroup() %>%
+  mutate(p.value = as.double(sapply(p.value,"[", "p.value")))
 
+TBS_Xsq <- left_join(TBS.df, ChiSquares, by=c("QUESTION","DemoQ"))
 
-  
-lst <- with(TBSdata, split(TBSdata, list(QUESTION,DemQ)))
-res <- lapply(lst, function(x) chisq.test(x[,6:8]))
-sapply(res, "[", "p.value")
+significant <- TBS_Xsq %>%
+  filter(p.value <= 0.01 & DemoQ != "OCCLEVEL") %>%
+  select(TITLE_E,DemoQ,DESCRIP_E,POSITIVE,NEGATIVE,NEUTRAL,p.value) %>%
+  arrange(p.value)
 
-lst[1]
+DemQpairs <- distinct(significant,TITLE_E,DemoQ)
 ```
 
 ```{r}
-set.seed(1)
-df <- data.frame(
-  group = rep(c("Case", "Control"), each=16),
-  timing = rep(c("T0", "T1", "T2", "T3"), each=4, times=2),
-  food.type = rep (c("Very healthy", "Healthy", "Unhealthy", "Very bad"), times = 8),
-  intake.percentage = runif(32, min=1, max=25))
-
-lst2 <- with(df, split(transform(df, intake.percentage2=100-intake.percentage), list(timing, food.type)))
-res <- lapply(lst2, function(x) chisq.test(x[, -(1:3)]))
-sapply(res, "[", "p.value")
+ggplot(significant, aes(p.value)) +
+  geom_histogram(binwidth=30)
 ```
 

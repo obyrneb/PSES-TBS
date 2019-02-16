@@ -9,17 +9,20 @@ library(tidyverse)
 TBSdata <- pses2018 %>%
   filter(LEVEL1ID == "26" & SURVEYR == 2018) %>%
   mutate(DemoQ = ifelse(is.na(BYCOND),"TBS",word(BYCOND, 1, sep = " ="))) %>%
-  mutate(notDKNA_n = (100-ANSWER6-ANSWER7)/100*ANSCOUNT) %>%
+  mutate(DKNA = (ifelse(is.na(ANSWER6),0,ANSWER6)+ifelse(is.na(ANSWER7),0,ANSWER7))) %>%
+  mutate(notDKNA_n = (100-DKNA)/100*ANSCOUNT) %>%
   mutate(positive_n = round(POSITIVE/100*notDKNA_n),0) %>%
   mutate(neutral_n = round(NEUTRAL/100*notDKNA_n),0) %>%
   mutate(negative_n = round(NEGATIVE/100*notDKNA_n),0) %>%
   drop_na(positive_n,negative_n) %>%
-  filter((positive_n + neutral_n + negative_n)>0) %>%
+  mutate(neutralNA = ifelse(is.na(neutral_n),1,0)) %>%
+  #filter((positive_n + negative_n)>0) %>%
   select(QUESTION,DemoQ,DEMCODE,DESCRIP_E,DESCRIP_F,
          positive_n,neutral_n,negative_n)
 
 ChiSquares <- TBSdata %>%
   group_by(QUESTION,DemoQ) %>%
+  # if neutralNA =1 , rum only 6 and 8, if not, run 6:8
   do(p.value = (function(x) chisq.test(x[,6:8]))(.)) %>%
   ungroup() %>%
   mutate(p.value = as.double(sapply(p.value,"[", "p.value")))
@@ -27,7 +30,7 @@ ChiSquares <- TBSdata %>%
 TBS_Xsq <- left_join(TBS.df, ChiSquares, by=c("QUESTION","DemoQ"))
 
 significant <- TBS_Xsq %>%
-  filter(p.value <= 0.01 & DemoQ != "OCCLEVEL") %>%
+  filter(p.value <= 0.05 & DemoQ != "OCCLEVEL") %>%
   select(TITLE_E,DemoQ,DESCRIP_E,POSITIVE,NEGATIVE,NEUTRAL,p.value) %>%
   arrange(p.value)
 
@@ -36,6 +39,6 @@ DemQpairs <- distinct(significant,TITLE_E,DemoQ)
 
 ```{r}
 ggplot(significant, aes(p.value)) +
-  geom_histogram(binwidth=30)
+  geom_freqpoly(binwidth=0.005)
 ```
 

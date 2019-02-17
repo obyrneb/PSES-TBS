@@ -15,17 +15,27 @@ TBSdata <- pses2018 %>%
   mutate(neutral_n = round(NEUTRAL/100*notDKNA_n),0) %>%
   mutate(negative_n = round(NEGATIVE/100*notDKNA_n),0) %>%
   drop_na(positive_n,negative_n) %>%
-  mutate(neutralNA = ifelse(is.na(neutral_n),1,0)) %>%
+  mutate(neutralNA = ifelse(is.na(neutral_n),TRUE,FALSE)) %>%
   #filter((positive_n + negative_n)>0) %>%
+  #filter(neutralNA == FALSE) %>%
   select(QUESTION,DemoQ,DEMCODE,DESCRIP_E,DESCRIP_F,
-         positive_n,neutral_n,negative_n)
+         positive_n,negative_n,neutral_n,neutralNA)
 
-ChiSquares <- TBSdata %>%
+TBS_Binary <- TBSdata %>%
+  filter(neutralNA == TRUE) %>%
   group_by(QUESTION,DemoQ) %>%
-  # if neutralNA =1 , rum only 6 and 8, if not, run 6:8
+  do(p.value = (function(x) chisq.test(x[,6:7]))(.)) %>%
+  ungroup() %>%
+  mutate(p.value = as.double(sapply(p.value,"[", "p.value")))
+
+TBS_PNN <- TBSdata %>%
+  filter(neutralNA == FALSE) %>%
+  group_by(QUESTION,DemoQ) %>%
   do(p.value = (function(x) chisq.test(x[,6:8]))(.)) %>%
   ungroup() %>%
   mutate(p.value = as.double(sapply(p.value,"[", "p.value")))
+
+ChiSquares <- bind_rows(TBS_Binary,TBS_PNN)
 
 TBS_Xsq <- left_join(TBS.df, ChiSquares, by=c("QUESTION","DemoQ"))
 

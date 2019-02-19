@@ -5,6 +5,7 @@ output: html_notebook
 
 ```{r}
 library(tidyverse)
+library(broom)
 
 TBSdata <- pses2018 %>%
   filter(LEVEL1ID == "26" & SURVEYR == 2018) %>%
@@ -24,16 +25,17 @@ TBSdata <- pses2018 %>%
 TBS_Binary <- TBSdata %>%
   filter(neutralNA == TRUE) %>%
   group_by(QUESTION,DemoQ) %>%
-  do(p.value = (function(x) chisq.test(x[,6:7]))(.)) %>%
+  do(Xsq = (function(x) chisq.test(x[,6:7]))(.)) %>%
   ungroup() %>%
-  mutate(p.value = as.double(sapply(p.value,"[", "p.value")))
+  mutate(p.value = as.double(sapply(Xsq,"[", "p.value")))
 
 TBS_PNN <- TBSdata %>%
   filter(neutralNA == FALSE) %>%
   group_by(QUESTION,DemoQ) %>%
-  do(p.value = (function(x) chisq.test(x[,6:8]))(.)) %>%
+  do(Xsq = (function(x) chisq.test(x[,6:8]))(.)) %>%
+  # augment(Xsq)
   ungroup() %>%
-  mutate(p.value = as.double(sapply(p.value,"[", "p.value")))
+  mutate(p.value = as.double(sapply(Xsq,"[", "p.value")))
 
 ChiSquares <- bind_rows(TBS_Binary,TBS_PNN)
 

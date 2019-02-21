@@ -7,6 +7,11 @@ output: html_notebook
 library(tidyverse)
 library(broom)
 
+mainDir <- getwd()
+dataDir <- "datasets"
+
+demoMap <- read.csv(file.path(mainDir,dataDir,"PSES2018_Demographic_Mapping.csv"))
+
 TBSdata <- pses2018 %>%
   filter(LEVEL1ID == "26" & SURVEYR == 2018) %>%
   mutate(DemoQ = ifelse(is.na(BYCOND),"TBS",word(BYCOND, 1, sep = " ="))) %>%
@@ -19,9 +24,50 @@ TBSdata <- pses2018 %>%
   mutate(neutralNA = ifelse(is.na(neutral_n),TRUE,FALSE)) %>%
   #filter((positive_n + negative_n)>0) %>%
   #filter(neutralNA == FALSE) %>%
-  select(QUESTION,DemoQ,DEMCODE,DESCRIP_E,DESCRIP_F,
-         positive_n,negative_n,neutral_n,neutralNA)
+  select(QUESTION,DemoQ,BYCOND,#DESCRIP_E,DESCRIP_F,neutralNA
+         positive_n,negative_n,neutral_n)
 
+TBSdata$BYCOND[TBSdata$DemoQ == "TBS"] <- "TBS" 
+
+TBSresiduals <- TBSdata %>%
+  group_by(QUESTION,DemoQ) %>%
+  gather("Sentiment","Freq",positive_n,negative_n,neutral_n) %>%
+  do((function(x) augment(chisq.test(xtabs(Freq ~ Sentiment + BYCOND, data=.))))(.)) %>%
+  ungroup()
+
+TBSpvalues <- TBSdata %>%
+  group_by(QUESTION,DemoQ) %>%
+  gather("Sentiment","Freq",positive_n,negative_n,neutral_n) %>%
+  do((function(x) tidy(chisq.test(xtabs(Freq ~ Sentiment + BYCOND, data=.))))(.)) %>%
+  ungroup()
+
+ChiSquares <- left_join(TBSresiduals,TBSpvalues, by=c("QUESTION","DemoQ")) %>%
+  left_join(demoMap, by = "DemoQ") %>% 
+  mutate(sentiment = recode(Sentiment, negative_n = "NEGATIVE", neutral_n = "NEUTRAL", positive_n = "POSITIVE"))
+
+TBS_Xsq <- TBS.df %>%
+  filter(LEVEL1ID == 26) %>%
+  gather("sentiment","prop",POSITIVE,NEUTRAL,NEGATIVE) %>%
+  select(QUESTION,TITLE_E,DemoQ,BYCOND,DESCRIP_E,sentiment,prop) %>%
+  left_join(select(ChiSquares,QUESTION,DemoQ,DemoQ_E,BYCOND,p.value,sentiment,.stdres,.observed),
+            by=c("QUESTION","DemoQ","BYCOND","sentiment")) 
+  
+significant <- TBS_Xsq %>%
+  filter(p.value <= 0.05 & 
+           #.stdres >= 2 & 
+           sentiment == "NEGATIVE") %>%
+  select(TITLE_E,DemoQ_E,BYCOND,DESCRIP_E,p.value,sentiment,.stdres,.observed) %>%
+  arrange(TITLE_E,BYCOND,p.value)
+
+DemQpairs <- distinct(significant,QUESTION,DemoQ_E)
+```
+
+```{r}
+ggplot(significant, aes(p.value)) +
+  geom_freqpoly(binwidth=0.005)
+```
+
+```{r}
 TBS_Binary <- TBSdata %>%
   filter(neutralNA == TRUE) %>%
   group_by(QUESTION,DemoQ) %>%
@@ -38,19 +84,4 @@ TBS_PNN <- TBSdata %>%
   mutate(p.value = as.double(sapply(Xsq,"[", "p.value")))
 
 ChiSquares <- bind_rows(TBS_Binary,TBS_PNN)
-
-TBS_Xsq <- left_join(TBS.df, ChiSquares, by=c("QUESTION","DemoQ"))
-
-significant <- TBS_Xsq %>%
-  filter(p.value <= 0.05 & DemoQ != "OCCLEVEL") %>%
-  select(TITLE_E,DemoQ,DESCRIP_E,POSITIVE,NEGATIVE,NEUTRAL,p.value) %>%
-  arrange(p.value)
-
-DemQpairs <- distinct(significant,TITLE_E,DemoQ)
 ```
-
-```{r}
-ggplot(significant, aes(p.value)) +
-  geom_freqpoly(binwidth=0.005)
-```
-

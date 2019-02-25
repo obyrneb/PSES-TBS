@@ -6,6 +6,7 @@ output: html_notebook
 ```{r}
 library(tidyverse)
 library(broom)
+library(networkD3)
 
 mainDir <- getwd()
 dataDir <- "datasets"
@@ -54,12 +55,62 @@ TBS_Xsq <- TBS.df %>%
   
 significant <- TBS_Xsq %>%
   filter(p.value <= 0.05 & 
-           #.stdres >= 2 & 
+           .stdres >= 2 & 
            sentiment == "NEGATIVE") %>%
   select(TITLE_E,DemoQ_E,BYCOND,DESCRIP_E,p.value,sentiment,.stdres,.observed) %>%
   arrange(TITLE_E,BYCOND,p.value)
 
-DemQpairs <- distinct(significant,QUESTION,DemoQ_E)
+DemQpairs <- distinct(significant,TITLE_E,DESCRIP_E)
+```
+
+```{r}
+pairs <- distinct(significant,TITLE_E,DESCRIP_E,.stdres, p.value) 
+
+nodes <- pairs %>%
+  gather("group","node") %>%
+  distinct() %>%
+  mutate(nodeID = row_number()-1)
+
+links_quest <- pairs %>%
+  select(node = TITLE_E) %>%
+  left_join(nodes, by = "node") %>%
+  select(question = nodeID)
+
+links_demo <- pairs %>%
+  select(node = DESCRIP_E) %>%
+  left_join(nodes, by = "node") %>%
+  select(demographic = nodeID)
+
+links_value <- select(pairs, residuals = .stdres, p.value)
+
+links <- bind_cols(links_quest,links_demo,links_value)
+
+forceNetwork(Links = links,
+             Nodes = nodes,
+             Source = "demographic",
+             Target = "question",
+             Value = "residuals",
+             NodeID = "node",
+             Group =  "group",
+             colourScale = JS("d3.scaleOrdinal(d3.schemeCategory10);"),
+             height = 600,
+             width = 800,
+             opacity = 0.9,
+             opacityNoHover = 0.3,
+             legend = TRUE)
+
+#simpleNetwork(DemQpairs)
+```
+```{r}
+# Load data
+data(MisLinks)
+data(MisNodes)
+
+# Plot
+forceNetwork(Links = MisLinks, Nodes = MisNodes,
+            Source = "source", Target = "target",
+            Value = "value", NodeID = "name",
+            Group = "group", opacity = 0.8)
 ```
 
 ```{r}

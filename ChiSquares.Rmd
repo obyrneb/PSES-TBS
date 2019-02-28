@@ -99,8 +99,18 @@ forceNetwork(Links = links,
              opacityNoHover = 0.3,
              legend = TRUE)
 
-#simpleNetwork(DemQpairs)
+simpleNetwork(DemQpairs)
 ```
+
+```{r, fig.width = 8, fig.height = 12}
+balloon <- distinct(significant,TITLE_E,DESCRIP_E,.stdres, p.value)
+
+ggplot(balloon, aes(x = DESCRIP_E, y = substr(TITLE_E, start=1, stop=15))) +
+  geom_point(aes(size=.stdres,colour=p.value)) +
+  scale_colour_distiller(type = "seq", palette = "YlOrRd") +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
 ```{r}
 # Load data
 data(MisLinks)

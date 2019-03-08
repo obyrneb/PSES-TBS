@@ -129,4 +129,3 @@ corMat <- cor_auto(data.mx)
 
 Graph_pcor <- qgraph(corMat, graph = "pcor", layout = "spring")
 ```
-

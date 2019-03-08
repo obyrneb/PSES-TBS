@@ -7,9 +7,11 @@ output: html_notebook
 library(tidyverse)
 library(broom)
 library(networkD3)
+library(plotly)
 
 mainDir <- getwd()
 dataDir <- "datasets"
+plotDir <- "plots"
 
 demoMap <- read.csv(file.path(mainDir,dataDir,"PSES2018_Demographic_Mapping.csv"))
 
@@ -56,8 +58,8 @@ TBS_Xsq <- TBS.df %>%
 significant <- TBS_Xsq %>%
   filter(p.value <= 0.05 & 
            .stdres >= 2 & 
-           sentiment == "NEGATIVE") %>%
-  select(TITLE_E,DemoQ_E,BYCOND,DESCRIP_E,p.value,sentiment,.stdres,.observed) %>%
+           sentiment %in% c("NEGATIVE","POSITIVE")) %>%
+  select(QUESTION,TITLE_E,DemoQ_E,BYCOND,DESCRIP_E,p.value,sentiment,.stdres,.observed) %>%
   arrange(TITLE_E,BYCOND,p.value)
 
 DemQpairs <- distinct(significant,TITLE_E,DESCRIP_E)
@@ -102,13 +104,100 @@ forceNetwork(Links = links,
 simpleNetwork(DemQpairs)
 ```
 
-```{r, fig.width = 8, fig.height = 12}
-balloon <- distinct(significant,TITLE_E,DESCRIP_E,.stdres, p.value)
+```{r, fig.width = 12, fig.height = 12}
+balloon_neg <- filter(significant, sentiment == "NEGATIVE")
 
-ggplot(balloon, aes(x = DESCRIP_E, y = substr(TITLE_E, start=1, stop=15))) +
+ggplot(balloon_neg, aes(x = DESCRIP_E, y = QUESTION)) +
   geom_point(aes(size=.stdres,colour=p.value)) +
   scale_colour_distiller(type = "seq", palette = "YlOrRd") +
-  theme(axis.text.x = element_text(angle = 90))
+  theme_bw() +
+  theme(panel.border     = element_blank()) +
+  # Remove just about everything from the y axis
+  theme(axis.title.y     = element_blank()) +
+  #theme(panel.grid.major.y = element_blank()) +
+  theme(panel.grid.minor.y = element_blank()) +
+  # Remove a few things from the x axis and increase font size
+  theme(axis.title.x     = element_blank()) +
+  theme(panel.grid.major = element_line(colour = "grey80")) +
+  theme(axis.text.x  = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  # Remove x & y tick marks
+  theme(axis.ticks       = element_blank()) +
+  # Format title & subtitle
+  theme(plot.title       = element_text(size=14, face = "bold", hjust = 0.5, vjust = 0)) +
+  theme(plot.subtitle    = element_text(hjust = 0.5))
+
+ggsave("PSES2018@TBS - ChiSquare Analysis.pdf", height = 15, width = 12, useDingbats=FALSE)
+```
+
+```{r, fig.width = 12, fig.height = 15}
+balloon_pos <- filter(significant, sentiment == "POSITIVE")
+
+ggplot(balloon_pos, aes(x = DESCRIP_E, y = QUESTION)) +
+  geom_point(aes(size=.stdres,colour=p.value)) +
+  scale_colour_distiller(type = "seq", palette = "BuGn") +
+  theme_bw() +
+  theme(panel.border     = element_blank()) +
+  # Remove just about everything from the y axis
+  theme(axis.title.y     = element_blank()) +
+  #theme(panel.grid.major.y = element_blank()) +
+  theme(panel.grid.minor.y = element_blank()) +
+  # Remove a few things from the x axis and increase font size
+  theme(axis.title.x     = element_blank()) +
+  theme(panel.grid.major = element_line(colour = "grey80")) +
+  theme(axis.text.x  = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  # Remove x & y tick marks
+  theme(axis.ticks       = element_blank()) +
+  # Format title & subtitle
+  theme(plot.title       = element_text(size=14, face = "bold", hjust = 0.5, vjust = 0)) +
+  theme(plot.subtitle    = element_text(hjust = 0.5))
+
+ggsave("PSES2018@TBS - ChiSquare Analysis.pdf", height = 15, width = 12, useDingbats=FALSE)
+```
+
+```{r, fig.width = 12, fig.height = 15}
+balloon <- TBS_Xsq %>%
+  filter(p.value <= 0.05 & 
+           .stdres >= 2) %>%
+  mutate(DESCRIP_E = replace(DESCRIP_E, DESCRIP_E == "First official language - French", "First OL: French")) %>%
+  mutate(DESCRIP_E = replace(DESCRIP_E, DESCRIP_E == "First official language - English", "First OL: English")) %>%
+  mutate(descrip_e_cut = paste0(substr(DESCRIP_E,1,15),"...")) %>%
+  arrange(BYCOND) %>%
+  mutate(descrip_e_cut = factor(descrip_e_cut, levels = unique(descrip_e_cut))) %>%
+  select(QUESTION,TITLE_E,DemoQ_E,BYCOND,DESCRIP_E,descrip_e_cut,p.value,sentiment,.stdres,.observed)
+  
+#balloon[balloon == "First official language - French"] <- "First OL: French"
+#balloon[balloon == "First official language - English"] <- "First OL: English"
+
+bp <- ggplot(balloon,aes(x = descrip_e_cut, y = reorder(QUESTION,desc(QUESTION)), 
+                         text = paste0(sentiment,"<br>",
+                                      TITLE_E,"<br>",
+                                      "Demographic: ", DemoQ_E, " - ", DESCRIP_E, " (n=",.observed,")","<br>",
+                                      " (standardized residual = ",round(.stdres,2),", p-value = ", round(p.value,5),")"
+                                      ))) +
+  geom_point(aes(size=.stdres, colour=sentiment,alpha=(0.05-p.value))) +
+  scale_colour_brewer(palette = "Set1") +
+  labs(title = "PSES@TBS 2018 - Sentiment by Question and Demographic",
+       subtitle = "Results of chi-square tests on sentiment responses by demogrphic for every PSES question at TBS.\nEach dot represents a significant finding (p < 0.05, standardized residual > 2).\nColours denote sentiment, size correspond to standardized residuals, opaqueness relfects the p-value.",
+       caption = "Data from the 2018 Public Service Employee Survey") + 
+  theme_bw() +
+  theme(panel.border     = element_blank()) +
+  # Remove just about everything from the y axis
+  theme(axis.title.y     = element_blank()) +
+  #theme(panel.grid.major.y = element_blank()) +
+  theme(panel.grid.minor.y = element_blank()) +
+  # Remove a few things from the x axis and increase font size
+  theme(axis.title.x     = element_blank()) +
+  theme(panel.grid.major = element_line(colour = "grey90")) +
+  theme(axis.text.x  = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  # Remove x & y tick marks
+  theme(axis.ticks       = element_blank()) +
+  # Format title & subtitle
+  theme(plot.title       = element_text(size=14, face = "bold", hjust = 0.5, vjust = 0)) +
+  theme(plot.subtitle    = element_text(hjust = 0.5))
+
+bp <- ggplotly(bp, tooltip = c("text"))
+
+htmlwidgets::saveWidget(as.widget(bp), file.path(mainDir,plotDir,"ChiSquare_BalloonChart.html"))
 ```
 
 ```{r}

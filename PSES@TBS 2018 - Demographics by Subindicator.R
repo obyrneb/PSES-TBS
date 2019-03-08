@@ -1,7 +1,6 @@
-library(plyr)
-library(tidyverse)
-library(readxl)
 library(scales)
+library(readxl)
+library(tidyverse)
 
 # LOAD DATA
 #------------
@@ -17,17 +16,17 @@ ss1URL <- "https://www.canada.ca/content/dam/tbs-sct/documents/datasets/pses-saf
 ss2URL <- "https://www.canada.ca/content/dam/tbs-sct/documents/datasets/pses-saff/2018/2018_PSES_SAFF_Subset-2_Sous-ensemble-2.csv"
 ss3URL <- "https://www.canada.ca/content/dam/tbs-sct/documents/datasets/pses-saff/2018/2018_PSES_SAFF_Subset-3_Sous-ensemble-3.csv"
 ss4URL <- "https://www.canada.ca/content/dam/tbs-sct/documents/datasets/pses-saff/2018/2018_PSES_SAFF_Subset-4_Sous-ensemble-4.csv"
-ss5URL <- "" # Due for release in March 2018
+ss5URL <- "https://www.canada.ca/content/dam/tbs-sct/documents/datasets/pses-saff/2018/2018_PSES_SAFF_Subset-5_Sous-ensemble-5.csv" # Due for release in March 2018
 
 ifelse(!dir.exists(file.path(mainDir, dataDir)), dir.create(file.path(mainDir, dataDir)), FALSE)
 ifelse(!dir.exists(file.path(mainDir, plotDir)), dir.create(file.path(mainDir, plotDir)), FALSE)
 
-if(!file.exists(c(ss1File,ss2File,ss3File,ss4File))) { # Add ss5File here once released
+if(!file.exists(c(ss1File,ss2File,ss3File,ss4File,ss5File))) { # Add ss5File here once released
   download.file(ss1URL,ss1File)
   download.file(ss2URL,ss2File)
   download.file(ss3URL,ss3File)
   download.file(ss4URL,ss4File)
-  #download.file(ss5URL,file.path(mainDIr, dataDir, ss5File))
+  download.file(ss5URL,ss5File)
 }
 
 if(!exists("pses2018")) {
@@ -35,12 +34,11 @@ if(!exists("pses2018")) {
   ss2 <- read.csv(ss2File, na.strings = "9999")
   ss3 <- read.csv(ss3File, na.strings = "9999")
   ss4 <- read.csv(ss4File, na.strings = "9999")
-  #ss5 <- read.csv(ss5File, na.strings = "9999")
+  ss5 <- read.csv(ss5File, na.strings = "9999")
   indicatorMap <- read.csv(file.path(mainDir,dataDir,"PSES2018_Indicator_Mapping.csv")) %>%
     select(-TITLE_E,-TITLE_F)
-  pses2018 <- bind_rows(ss1,ss2,ss3,ss4) %>% # Add ss5 here once released
+  pses2018 <- bind_rows(ss1,ss2,ss3,ss4,ss5) %>%
     left_join(indicatorMap, by = "QUESTION")
-  
 }
 #------------
 
@@ -56,10 +54,13 @@ TBS.df$QSection <- substr(TBS.df$QUESTION,0,1)
 TBS.df$QSection <- factor(TBS.df$QSection)
 
 # Create demographic question subsections by extracting the leading code from BYCOND preceding "=" 
-# Also replace NA with "TBS"
+# Also replace NAs with "TBS" or "PS" depending on DESCRIP_E
 TBS.df$BYCOND[TBS.df$DESCRIP_E == "Treasury Board of Canada Secretariat"] <- "TBS"
 TBS.df$BYCOND[TBS.df$DESCRIP_E == "Public Service"] <- "PS" 
 TBS.df$DemoQ <- word(TBS.df$BYCOND, 1, sep = " =")
+
+# Replace all LEVELxIDs with a single DemoQ value - "org". This allows more intuitive proportion calculations.
+TBS.df$DemoQ[startsWith(TBS.df$DemoQ,"LEVEL")] <- "org"
 
 # Aggregate by demographic and question theme
 TBSagg.df <- aggregate(data = TBS.df, cbind(ANSCOUNT,SCORE100,NEGATIVE,NEUTRAL,POSITIVE) ~ 
@@ -74,6 +75,7 @@ TBSprops.df <- TBSagg.df %>%
   filter(LEVEL1ID == "26") %>%
   group_by(DemoQ, DESCRIP_E) %>%
   mutate(ngrp = sum(ANSCOUNT)) %>%
+  ungroup() %>%
   group_by(DemoQ) %>%
   mutate(npop = sum(ANSCOUNT)) %>%
   ungroup() %>%
@@ -83,10 +85,6 @@ TBSprops.df <- TBSagg.df %>%
   distinct(BYCOND, DesProp_E, DesProp_F) %>%
   # Here, we're just adding an empty line for the Public Service - percentages are only relevant for TBS.
   rbind(c("PS","Public Service","Fonction publique"))
-
-# Add demographic sections from mapping tables (the "mapDemQ" lookup table is based on TBS data
-# and will therefore filter out all PS data not shared by TBS, e.g., non-TBS occupational groups)
-#TBSagg.df <- merge(TBSagg.df, mapDemQ, by = "BYCOND")
 
 # As mentioned above, we merge  the TBSprops.df dataframe to the orginal dataframe to keep descriptors consistent
 # between PS and tBS data. The preceding merge with "mapDemQ" has already stripped away non-shared descriptions.
@@ -103,8 +101,9 @@ TBSagg.df <- TBSagg.df %>%
   mutate(SUBINDICATORENG = factor(SUBINDICATORENG, unique(subIndicatorOrder$SUBINDICATORENG))) %>%
   mutate(SUBINDICATORFRA = factor(SUBINDICATORFRA, unique(subIndicatorOrder$SUBINDICATORFRA)))
 
+# CHOOSE DEMOGRAPHIC VARIABLES HERE!
 # Select demographic groups to plot: AS & CR groups, plus PS and TBS summary columns for comparison
-TBSagg.df <- subset(TBSagg.df, DemoQ %in% c("Q27","Q78A","Q87","Q88","Q89") | 
+TBSagg.df <- subset(TBSagg.df, DemoQ == "org" |#%in% c("Q27","Q78A","Q87","Q88","Q89") | 
                       BYCOND %in% c("TBS","PS")) 
 
 # Order occupational levels by overall group and then ascending level using the existing "OrderKey" column
@@ -124,44 +123,42 @@ TBSagg.df$DesProp_F <- fct_relevel(TBSagg.df$DesProp_F,
 # CREATE BILINGUAL LABELS
 #------------
 # English captions and labels
-expl_E <- "Each cell of this chart displays the proportion of responses for a particular question theme and demographic category. The bars over each column represent the average value for this question theme for TBS. Question themes are sorted from least negative to most negative (the red column) for the AS group at TBS."
-#expl_E <- paste0(strwrap(expl_E, 100), sep="", collapse="\n")
+expl_E <- "Each cell of this chart displays the proportion of responses for a particular subindicator and demographic category. The bars over each column represent the average value for this subindicator for TBS. Subindicators are sorted from least negative to most negative at TBS."
 expl_E <- str_wrap(expl_E, 100)
-ttl_E <- "PSES@TBS 2018 - Occupational and Employment Equity Groups"
+ttl_E <- "PSES@TBS 2018 - Sectors" #"PSES@TBS 2018 - Occupational and Employment Equity Groups"
 cap_E <- "2018 Public Service Employee Survey Open Datasets"
 file_E <- paste0(ttl_E,".pdf")
-TBSagg.df$sentiment_E <- mapvalues(TBSagg.df$sentiment, 
-                                   c("NEGATIVE","NEUTRAL","POSITIVE"),
-                                   c("Negative","Neutral","Positive"))
-PNN_E.lbls <- c("Negative" = "Negative", 
-                "Neutral" = "Neutral", 
-                "Positive" = "Positive", 
+#TBSagg.df$sentiment_E <- mapvalues(TBSagg.df$sentiment, 
+#                                   c("NEGATIVE","NEUTRAL","POSITIVE"),
+#                                   c("Negative","Neutral","Positive"))
+PNN_E.lbls <- c("NEGATIVE" = "Negative", 
+                "NEUTRAL" = "Neutral", 
+                "POSITIVE" = "Positive", 
                 "Public Service" ="PS", 
                 "Treasury Board of Canada Secretariat (100%)" ="TBS")
-PNN_E.clrs <- c("Negative" = "#CD202C", 
-                "Neutral" = "#63CECA", 
-                "Positive" = "#CCDC00", 
+PNN_E.clrs <- c("NEGATIVE" = "#CD202C", 
+                "NEUTRAL" = "#63CECA", 
+                "POSITIVE" = "#CCDC00", 
                 "Treasury Board of Canada Secretariat (100%)" = "#d1e7ee", 
                 "Public Service" = "#fabcb3")
 
 # French captions and labels
-expl_F <- "Chaque cellule de ce graphique affiche la proportion de réponses pour un thème de question et une catégorie démographique particuliers. Les barres sur chaque colonne représentent la valeur moyenne pour ce thème de question pour le SCT. Les thèmes de la question sont triés du moins négatif au plus négatif (la colonne rouge) pour le groupe AS du SCT."
-#expl_F <- paste0(strwrap(expl_F, 100), sep="", collapse="\n")
+expl_F <- "Chaque cellule de ce graphique affiche la proportion de réponses pour sous-indicateur et une catégorie démographique particuliers. Les barres sur chaque colonne représentent la valeur moyenne poure sous-indicateur pour le SCT. Les sous-indicateurs sont triés du moins négatif au plus négatif pour le SCT."
 expl_F <- str_wrap(expl_F, 100)
-ttl_F <- "SAFF@SCT 2018 - Groupes professionnels et d'équité en emploi" 
+ttl_F <- "SAFF@SCT 2018 - Secteurs" #"SAFF@SCT 2018 - Groupes professionnels et d'équité en emploi" 
 cap_F <- "Ensemble de données ouvertes du Sondage auprès des fonctionnaires fédéraux de 2018"
 file_F <- paste0(ttl_F,".pdf")
-TBSagg.df$sentiment_F <- mapvalues(TBSagg.df$sentiment, 
-                                   c("NEGATIVE","NEUTRAL","POSITIVE"),
-                                   c("Négatif","Neutre","Positif"))
-PNN_F.lbls <- c("Négatif" = "Négatif", 
-                "Neutre" = "Neutre", 
-                "Positif" = "Positif",
+#TBSagg.df$sentiment_F <- mapvalues(TBSagg.df$sentiment, 
+#                                   c("NEGATIVE","NEUTRAL","POSITIVE"),
+#                                   c("Négatif","Neutre","Positif"))
+PNN_F.lbls <- c("NEGATIVE" = "Négatif", 
+                "NEUTRAL" = "Neutre", 
+                "POSITIVE" = "Positif",
                 "Fonction publique" = "FP",
                 "Secrétariat du Conseil du Trésor du Canada (100%)" = "SCT")
-PNN_F.clrs <- c("Négatif" = "#CD202C", 
-                "Neutre" = "#63CECA", 
-                "Positif" = "#CCDC00",
+PNN_F.clrs <- c("NEGATIVE" = "#CD202C", 
+                "NEUTRAL" = "#63CECA", 
+                "POSITIVE" = "#CCDC00",
                 "Secrétariat du Conseil du Trésor du Canada (100%)" = "#d1e7ee", 
                 "Fonction publique" = "#fabcb3")
 
@@ -169,9 +166,8 @@ PNN_F.clrs <- c("Négatif" = "#CD202C",
 
 # CREATE DATAFRAMES FOR PLOT
 #------------
-# Create separate TBS and PS dataframes
+# Create separate TBS dataframe
 TBSagg_noPS.df <- filter(TBSagg.df, LEVEL1ID == "26" | BYCOND == "PS")
-TBSagg_PS.df <- filter(TBSagg.df, LEVEL1ID == "0" | BYCOND == "TBS")
 
 # Create TBS mean column to allow each small multiple to be compared to the TBS mean via geom_errorbar
 TBSagg_noPS.df <- TBSagg_noPS.df %>%
@@ -184,6 +180,10 @@ TBSagg_noPS.df <- TBSagg_noPS.df %>%
   #mutate(TBSmean = prop[which(BYCOND == "TBS")])%>%
   ungroup() %>%
   arrange(SUBINDICATORENG, sentiment, DESCRIP_E)
+
+
+# Create separate PS dataframe
+TBSagg_PS.df <- filter(TBSagg.df, LEVEL1ID == "0" | BYCOND == "TBS")
 
 # Compute PS overall means to compare to the PS, TBS and Sector data
 PSoverall <- filter(TBSagg_PS.df, BYCOND %in% c("PS","TBS"))
@@ -210,11 +210,11 @@ TBSagg_PS.df <- bind_rows(PSoverall, PSdetail)
 plotPSES <- function(language, wdth = 10, hght = 8, textSize = 9) {
   
   if (language == "E") {
-    TBSagg_noPS.df$sentiment_lang <- TBSagg_noPS.df$sentiment_E
+    #TBSagg_noPS.df$sentiment_lang <- TBSagg_noPS.df$sentiment_E
     TBSagg_noPS.df$DESCRIP_lang <- TBSagg_noPS.df$DesProp_E
     TBSagg_noPS.df$SUBINDICATOR_lang <- TBSagg_noPS.df$SUBINDICATORENG
     #TBSagg_noPS.df$DemQ_lang <- TBSagg_noPS.df$DemQ_E
-    TBSagg_PS.df$sentiment_lang <- TBSagg_PS.df$sentiment_E
+    #TBSagg_PS.df$sentiment_lang <- TBSagg_PS.df$sentiment_E
     TBSagg_PS.df$DESCRIP_lang <- TBSagg_PS.df$DesProp_E
     TBSagg_PS.df$SUBINDICATOR_lang <- TBSagg_PS.df$SUBINDICATORENG
     #TBSagg_PS.df$DemQ_lang <- TBSagg_PS.df$DemQ_E
@@ -229,11 +229,11 @@ plotPSES <- function(language, wdth = 10, hght = 8, textSize = 9) {
     TBS_lang <- "Treasury Board of Canada Secretariat (100%)"
     PS_lang <- "Public Service"
   } else if (language == "F") {
-    TBSagg_noPS.df$sentiment_lang <- TBSagg_noPS.df$sentiment_F
+    #TBSagg_noPS.df$sentiment_lang <- TBSagg_noPS.df$sentiment_F
     TBSagg_noPS.df$DESCRIP_lang <- TBSagg_noPS.df$DesProp_F
     TBSagg_noPS.df$SUBINDICATOR_lang <- TBSagg_noPS.df$SUBINDICATORFRA
     #TBSagg_noPS.df$DemQ_lang <- TBSagg_noPS.df$DemQ_F
-    TBSagg_PS.df$sentiment_lang <- TBSagg_PS.df$sentiment_F
+    #TBSagg_PS.df$sentiment_lang <- TBSagg_PS.df$sentiment_F
     TBSagg_PS.df$DESCRIP_lang <- TBSagg_PS.df$DesProp_F
     TBSagg_PS.df$SUBINDICATOR_lang <- TBSagg_PS.df$SUBINDICATORFRA
     #TBSagg_PS.df$DemQ_lang <- TBSagg_PS.df$DemQ_F
@@ -251,7 +251,7 @@ plotPSES <- function(language, wdth = 10, hght = 8, textSize = 9) {
     return("Invalid language selection. Choose E (English) or F (French).")
   }
   
-  ggplot(data=TBSagg_noPS.df, aes(x=sentiment_lang, y=prop, fill = sentiment_lang)) +
+  ggplot(data=TBSagg_noPS.df, aes(x=sentiment, y=prop, fill=sentiment)) +
     #geom_rect(data = subset(TBSagg_noPS.df,DESCRIP_lang == TBS_lang),
     #          fill = "grey80",xmin = -Inf,xmax = Inf,
     #          ymin = -Inf,ymax = Inf) +
@@ -262,7 +262,7 @@ plotPSES <- function(language, wdth = 10, hght = 8, textSize = 9) {
     #          fill = "grey80",xmin = -Inf,xmax = Inf,
     #          ymin = -Inf,ymax = Inf) +
     geom_rect(data = subset(TBSagg_noPS.df,TBSmeanDiff >= 8),
-              aes(fill = sentiment_lang),xmin = -Inf,xmax = Inf,
+              aes(fill = sentiment),xmin = -Inf,xmax = Inf,
               ymin = -Inf,ymax = Inf,alpha = 0.5) +
     geom_bar(stat = "identity") +
     scale_fill_manual(values = PNN_lang.clrs, labels = PNN_lang.lbls) +
@@ -276,7 +276,7 @@ plotPSES <- function(language, wdth = 10, hght = 8, textSize = 9) {
          caption = cap_lang) +
     facet_grid(SUBINDICATOR_lang ~ DESCRIP_lang, switch = "y", #scales = "free_y",
                labeller = labeller(DESCRIP_lang = label_wrap_gen(20), SUBINDICATOR_lang = label_wrap_gen(15)))  +
-    theme(plot.title = element_text(size = 20, hjust = 0, colour = "grey40"),
+    theme(plot.title = element_text(size = 16, hjust = 0, colour = "grey40"),
           plot.subtitle = element_text(face = "bold", size = textSize, colour = "grey40"),
           plot.caption = element_text(face = "italic", size = textSize, colour = "grey45"),
           axis.title = element_blank(),

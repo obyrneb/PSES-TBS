@@ -1,8 +1,10 @@
 DemoQ,DemoQ_E,DemoQ_F
+Q27,Supervision,Supervision
 Q76,Shift worker,Travailleur par postes
-Q75,Employee status,Situation professionnelle
-Q78a,Occupational group,Groupe professionnel
-Q78b,Level,Niveau
+Q77,Employee status,Situation professionnelle
+D78,Occupational category,Catégorie professionnelle
+Q78A,Occupational group,Groupe professionnel
+Q78B,Level,Niveau
 Q79,Community,Collectivité
 Q80,Years in public service,Années à la fonction pulique
 Q81,Years in department,Années au ministère
@@ -16,3 +18,4 @@ Q88,Disability status,Status handicapé
 Q89,Visible minority status,Status minorité visible
 Q90,Sexual orientation,Orientation sexuelle
 Q91,Served in military,Servi dans les forces
+OCCLEVEL,Level,Niveau

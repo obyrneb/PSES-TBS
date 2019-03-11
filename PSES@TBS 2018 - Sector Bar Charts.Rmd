@@ -13,35 +13,54 @@ library(grid)
 mainDir <- getwd()
 dataDir <- "datasets"
 plotDir <- "plots"
+ss5File_2018 <- file.path(mainDir,dataDir,"pses2018_ss5.csv")
+ss5File_2017 <- file.path(mainDir,dataDir,"pses2017_ss5.csv")
+ss5URL_2018 <- "https://www.canada.ca/content/dam/tbs-sct/documents/datasets/pses-saff/2018/2018_PSES_SAFF_Subset-5_Sous-ensemble-5.csv" # Due for release in March 2018
+ss5URL_2017 <- "https://www.canada.ca/content/dam/tbs-sct/documents/datasets/pses-saff/2017/2017_PSES_SAFF_Subset-5_Sous-ensemble-5.csv" # Due for release in March 2018
 
 ifelse(!dir.exists(file.path(mainDir, dataDir)), dir.create(file.path(mainDir, dataDir)), FALSE)
 ifelse(!dir.exists(file.path(mainDir, plotDir)), dir.create(file.path(mainDir, plotDir)), FALSE)
 
-pses2018_units <- read_excel(file.path(mainDir,dataDir,"2018_PSES_SAFF_26_TBS_SCT_Units_Unites.xlsx"), na = "9999")
+if(!file.exists(ss5File_2018)) {download.file(ss5URL_2018,ss5File_2018)}
+if(!file.exists(ss5File_2017)) {download.file(ss5URL_2017,ss5File_2017)}
 
-score100s_TBS <- pses2018_units %>%
-  mutate(unitcode = ifelse(is.na(BYCOND),"TBS",word(BYCOND, 2, sep = " = "))) %>%
-  filter(!(unitcode %in% c("200","303","304","201","202","999")) & !(is.na(SCORE100))) %>%
-  group_by(unitcode) %>%
-  mutate(overall100 = mean(SCORE100)) %>%
-  ungroup() %>%
-  group_by(unitcode,DESCRIP_E,DESCRIP_F,INDICATORID,INDICATORENG,INDICATORFRA,overall100) %>%
-  summarise(indicator100 = mean(SCORE100)) %>%
-    ungroup()
-    
-score100s_PS <- ss1 %>%
+if(!exists("ss5_2018")) {ss5_2018 <- read.csv(ss5File_2018, na.strings = "9999")}
+if(!exists("ss5_2017")) {ss5_2017 <- read.csv(ss5File_2017, na.strings = "9999")}
+
+Qcorr <- read.csv(file.path(mainDir,dataDir,"PSES2018_Question_Corr.csv"), na.strings = "N/A") %>%
+  gather("PSES_year","QUESTION",-QUESTION_E) %>%
+  mutate(QUESTION = ifelse(is.na(QUESTION),NA,
+                           paste0("Q",
+                           ifelse(QUESTION %in% c("1","2","3","4","5","6","7","8","9"),"0",""),
+                           QUESTION))) %>%
+  spread(PSES_year,QUESTION) %>%
+  arrange(PSES_2018)
+
+sectors_2017 <- ss5_2017 %>%
+  filter(LEVEL1ID %in% c(0,26)) %>%
+  mutate(QUESTION = substring(QUESTION,3)) %>%
+  left_join(select(Qcorr,QUESTION="PSES_2017",Q2018="PSES_2018"), by = "QUESTION") %>%
+  filter(!is.na(Q2018)) %>%
+  select(DESCRIP_E,QUESTION="Q2018",s100_2017="SCORE100")
+
+score100s <- ss5_2018 %>%
+  filter(LEVEL1ID %in% c(0,26)) %>%
   left_join(indicatorMap, by = "QUESTION") %>%
-  filter(LEVEL1ID == "0" & SURVEYR == 2018 & !(is.na(SCORE100))) %>%
-  mutate(unitcode = "PS") %>%
+  mutate(unitcode = ifelse(is.na(BYCOND),
+                           ifelse(LEVEL1ID == 26, "TBS","PS"),
+                           word(BYCOND, 2, sep = " = "))) %>%
+  filter(!(unitcode %in% c("200","303","304","201","202","999")) & !(is.na(SCORE100))) %>%
+  left_join(sectors_2017, by = c("QUESTION","DESCRIP_E")) %>%
+  rename(s100_2018 = "SCORE100") %>%
+  gather("SURVEYR","SCORE100",s100_2018,s100_2017) %>%
+  mutate(SURVEYR = substring(SURVEYR,6)) %>%
+  filter(!(is.na(SCORE100))) %>%
+  group_by(SURVEYR,unitcode) %>%
   mutate(overall100 = mean(SCORE100)) %>%
   ungroup() %>%
-  group_by(unitcode,DESCRIP_E,DESCRIP_F,INDICATORID,INDICATORENG,INDICATORFRA,overall100) %>%
+  group_by(SURVEYR,unitcode,DESCRIP_E,DESCRIP_F,INDICATORID,INDICATORENG,INDICATORFRA,overall100) %>%
   summarise(indicator100 = mean(SCORE100)) %>%
   ungroup()
-
-score100s <- bind_rows(score100s_TBS,score100s_PS) %>%
-  filter()
-
 
 ```
 
@@ -97,13 +116,44 @@ ggsave("TBS Sectors by Indicator - lines.png", height = 8, width = 10)
 
 ```{r, fig.height = 8, fig.width = 12}
 score100s_overall <- score100s %>%
+  filter(SURVEYR == 2018) %>%
   select(DESCRIP_E,INDICATORENG,indicator100,overall100) %>%
   mutate(OVERALL = overall100) %>%
   spread(INDICATORENG,indicator100) %>%
   gather(INDICATORENG,indicator100,-DESCRIP_E,-overall100) %>%
-  mutate(INDICATORENG = fct_relevel(INDICATORENG, "OVERALL"))
+  mutate(INDICATORENG = fct_relevel(INDICATORENG, "OVERALL")) %>%
+  mutate(DESCRIP_E = fct_reorder(DESCRIP_E,overall100))
 
-ggplot(score100s_overall, aes(x = fct_reorder(DESCRIP_E,overall100), y = indicator100,fill = INDICATORENG)) +
+ggplot(score100s_overall, aes(x = DESCRIP_E, y = indicator100, fill = INDICATORENG)) +
+  geom_bar(position="dodge", stat="identity") +
+  scale_x_discrete(labels=c("Public Service"=expression(bold("Public Service")),
+                            "Treasury Board of Canada Secretariat"=expression(bold("Treasury Board of Canada Secretariat")),
+                            parse=TRUE)) +
+  scale_fill_brewer(palette = "Set2") +
+  geom_text(aes(y=indicator100,label=round(indicator100,0)), hjust = 1.1, fontface = "bold", colour = "white") +
+  coord_flip() +
+  labs(caption = "2018 Public Service Employee Survey") +
+  facet_grid(~INDICATORENG, labeller = labeller(INDICATORENG = label_wrap_gen(15))) +
+  theme_minimal() +
+  theme(axis.title = element_blank(),
+        legend.title = element_blank(),
+        legend.position = "none",
+        axis.text.x = element_blank(),
+        panel.grid = element_blank())
+
+ggsave("TBS Sectors by Indicator 2018 - facets.png", height = 8, width = 12)
+```
+
+```{r, fig.height = 8, fig.width = 12}
+score100s_overall <- score100s %>%
+  select(SURVEYR,DESCRIP_E,INDICATORENG,indicator100,overall100) %>%
+  mutate(OVERALL = overall100) %>%
+  spread(INDICATORENG,indicator100) %>%
+  gather(INDICATORENG,indicator100,-DESCRIP_E,-overall100,-SURVEYR) %>%
+  mutate(INDICATORENG = fct_relevel(INDICATORENG, "OVERALL")) %>%
+  mutate(DESCRIP_E = fct_reorder(DESCRIP_E,overall100))
+
+ggplot(score100s_overall, aes(x = DESCRIP_E, y = indicator100, fill = INDICATORENG, group = SURVEYR)) +
   geom_bar(position="dodge", stat="identity") +
   scale_x_discrete(labels=c("Public Service"=expression(bold("Public Service")),
                             "Treasury Board of Canada Secretariat"=expression(bold("Treasury Board of Canada Secretariat")),

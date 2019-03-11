@@ -151,26 +151,48 @@ score100s_overall <- score100s %>%
   spread(INDICATORENG,indicator100) %>%
   gather(INDICATORENG,indicator100,-DESCRIP_E,-overall100,-SURVEYR) %>%
   mutate(INDICATORENG = fct_relevel(INDICATORENG, "OVERALL")) %>%
-  mutate(DESCRIP_E = fct_reorder(DESCRIP_E,overall100))
+  mutate(DESCRIP_E = ifelse(DESCRIP_E == "Public Service",
+                            "bold(Public Service)",
+                            ifelse(DESCRIP_E == "Treasury Board of Canada Secretariat",
+                                   "bold(Treasury Board of Canada Secretariat)",
+                                   DESCRIP_E))) %>%
+  mutate(DESCRIP_E = gsub(" ","~",DESCRIP_E)) %>%
+  mutate(DESCRIP_E = gsub(",","",DESCRIP_E)) %>%
+  mutate(DESCRIP_E = gsub("'","",DESCRIP_E)) %>%
+  arrange(desc(SURVEYR),desc(overall100)) %>% 
+  mutate(DESCRIP_E = factor(DESCRIP_E,unique(DESCRIP_E)))
 
-ggplot(score100s_overall, aes(x = DESCRIP_E, y = indicator100, fill = INDICATORENG, group = SURVEYR)) +
-  geom_bar(position="dodge", stat="identity") +
-  scale_x_discrete(labels=c("Public Service"=expression(bold("Public Service")),
-                            "Treasury Board of Canada Secretariat"=expression(bold("Treasury Board of Canada Secretariat")),
-                            parse=TRUE)) +
+
+ggplot(score100s_overall, aes(x = SURVEYR, y = indicator100, fill = INDICATORENG)) +
+  geom_bar(position="dodge", stat="identity", width = 1, aes(alpha = SURVEYR)) +
+  scale_y_continuous(limits = c(0,100)) +
   scale_fill_brewer(palette = "Set2") +
-  geom_text(aes(y=indicator100,label=round(indicator100,0)), hjust = 1.1, fontface = "bold", colour = "white") +
+  scale_colour_brewer(palette = "Set2") +
+  scale_alpha_manual(values = c(.67,1)) +
+  geom_text(aes(y=indicator100, label=round(indicator100,0), colour = INDICATORENG),
+            size = 3, hjust = -0.3, vjust = 0.5, fontface = "bold") +
+  geom_text(aes(label=SURVEYR),
+            y = 0, size = 3, hjust = -0.1, vjust = 0.5, colour = "white") +
   coord_flip() +
   labs(caption = "2018 Public Service Employee Survey") +
-  facet_grid(~INDICATORENG, labeller = labeller(INDICATORENG = label_wrap_gen(15))) +
+  facet_grid(DESCRIP_E~INDICATORENG, 
+             switch = "y", 
+             labeller = labeller(
+               INDICATORENG = label_wrap_gen(15), 
+               DESCRIP_E = label_parsed)) +
   theme_minimal() +
   theme(axis.title = element_blank(),
         legend.title = element_blank(),
         legend.position = "none",
-        axis.text.x = element_blank(),
-        panel.grid = element_blank())
+        axis.text = element_blank(),
+        axis.ticks.y.right = element_blank(),
+        panel.grid = element_blank(),
+        strip.text.y = element_text(angle = 180, hjust = 1),
+        panel.spacing.y = unit(0.5,"mm"))
 
-ggsave("TBS Sectors by Indicator - facets.png", height = 8, width = 12)
+
+
+ggsave("TBS Sectors by Indicator - facets.pdf", height = 8, width = 12)
 ```
 
 ```{r pressure, echo=FALSE}

@@ -9,6 +9,7 @@ library(readxl)
 library(tidyverse)
 library(ggrepel)
 library(grid)
+library(cowplot)
 
 mainDir <- getwd()
 dataDir <- "datasets"
@@ -164,7 +165,7 @@ score100s_overall <- score100s %>%
   mutate(DESCRIP_E = factor(DESCRIP_E,unique(DESCRIP_E)))
 
 
-ggplot(score100s_overall, aes(x = SURVEYR, y = indicator100, fill = INDICATORENG)) +
+TBSfacets <- ggplot(score100s_overall, aes(x = SURVEYR, y = indicator100, fill = INDICATORENG)) +
   geom_bar(position="dodge", stat="identity", width = 1, aes(alpha = SURVEYR)) +
   scale_y_continuous(limits = c(0,100)) +
   scale_fill_brewer(palette = "Set2") +
@@ -191,9 +192,80 @@ ggplot(score100s_overall, aes(x = SURVEYR, y = indicator100, fill = INDICATORENG
         strip.text.y = element_text(angle = 180, hjust = 1),
         panel.spacing.y = unit(0.5,"mm"))
 
+TBSfacets
 
+ggsave(plot = TBSfacets, "TBS Sectors by Indicator - facets.pdf", height = 8, width = 12)
+```
 
-ggsave("TBS Sectors by Indicator - facets.pdf", height = 8, width = 12)
+```{r TBS Sectors - Facets & Descriptions, fig.height = 8, fig.width = 13.5}
+title.grb <- textGrob("TBS Sectors by PSES Indicator (2017-2018)", hjust = 0.5, gp=gpar(fontsize=16, col ="black",
+                                                                                        fontface = "bold"))
+
+graph.grb <- plot_grid(title.grb,TBSfacets, ncol = 1, align = "v", rel_heights = c(1,19))
+
+howto_ttl.grb <- textGrob("\nHow to read \nthis graph", hjust = 0.5, gp=gpar(fontsize=12, col ="black", fontface = "bold"))
+
+howto_txt.grb <- textGrob("
+Each row represents a TBS sector.
+Overall TBS and Public Service rows 
+are also provided for comparison.\n 
+Each column represents a grouping of
+PSES questions by theme - an \"indicator\".
+The OVERALL column is the grouping of 
+all PSES questions.\n
+Sector rows are ordered using the 2018
+OVERALL column from highest to lowest
+score. The number and length of each bar
+represents the average score of the
+questions in that grouping, in that sector.\n
+The score is based on the \"Score 100\"
+measure for each question. It is the
+average of question responses using
+these weights: 
+Very Positive = 100,
+Positive = 75,
+Neutral = 50,
+Negative = 25,
+Very Negative = 0.\n
+Example:
+A score of 52 for \"Employee Engagement\"
+means that the average \"Score 100\"
+of the questions under that theme
+(5, 9, 10, 14, 43, 44 and 45)
+for that sector was 52 out of 100 -
+closest to \"Neutral\".",
+                          hjust = 0.5, gp=gpar(fontsize=6, col ="black"))
+
+limits_ttl.grb <- textGrob("\nLimitations", hjust = 0.5, gp=gpar(fontsize=12, col ="black", fontface = "bold"))
+
+limits_txt.grb <- textGrob("
+Not all responses rates were the same
+for all sectors (HRD has this available).\n
+The \"Score 100\" measure does not reflect
+the distribution of responses. Example:
+50 people scoring very positive and
+50 people scoring very negative
+(50%*100 + 50%*0 = 50)
+is identical to 100 people
+scoring neutral
+(100%*50 = 50).\n
+The \"Score 100\" measure makes
+assumptions based on its weighting
+(described above).\n
+The \"indicators\" are not stable - 
+PSES questions change from year to year.\n
+\"Indicator\" questions are weighted equally.
+",
+                          hjust = 0.5, gp=gpar(fontsize=6, col ="black"))
+
+descrip.grb <- plot_grid(howto_ttl.grb,howto_txt.grb,limits_ttl.grb,limits_txt.grb, ncol = 1, align = "v", rel_heights = c(1,10,1,6))
+
+facets.grb <- plot_grid(graph.grb,descrip.grb, rel_widths = c(7,1))
+
+facets.grb
+
+ggsave(plot = facets.grb, "TBS Sectors by Indicator - facets.pdf", height = 8, width = 13.5)
+
 ```
 
 ```{r OCG Sectors - Facets, fig.height = 4, fig.width = 12}

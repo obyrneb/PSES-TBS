@@ -103,7 +103,7 @@ TBSagg.df <- TBSagg.df %>%
 
 # CHOOSE DEMOGRAPHIC VARIABLES HERE!
 # Select demographic groups to plot: AS & CR groups, plus PS and TBS summary columns for comparison
-TBSagg.df <- subset(TBSagg.df, DemoQ == "org" |#%in% c("Q27","Q78A","Q87","Q88","Q89") | 
+TBSagg.df <- subset(TBSagg.df, DemoQ %in% c("Q27","Q78A","Q87","Q88","Q89") | 
                       BYCOND %in% c("TBS","PS")) 
 
 # Order occupational levels by overall group and then ascending level using the existing "OrderKey" column
@@ -125,7 +125,7 @@ TBSagg.df$DesProp_F <- fct_relevel(TBSagg.df$DesProp_F,
 # English captions and labels
 expl_E <- "Each cell of this chart displays the proportion of responses for a particular subindicator and demographic category. The bars over each column represent the average value for this subindicator for TBS. Subindicators are sorted from least negative to most negative at TBS."
 expl_E <- str_wrap(expl_E, 100)
-ttl_E <- "PSES@TBS 2018 - Sectors" #"PSES@TBS 2018 - Occupational and Employment Equity Groups"
+ttl_E <- "PSES@TBS 2018 - Occupational and Employment Equity Groups"
 cap_E <- "2018 Public Service Employee Survey Open Datasets"
 file_E <- paste0(ttl_E,".pdf")
 #TBSagg.df$sentiment_E <- mapvalues(TBSagg.df$sentiment, 
@@ -145,7 +145,7 @@ PNN_E.clrs <- c("NEGATIVE" = "#CD202C",
 # French captions and labels
 expl_F <- "Chaque cellule de ce graphique affiche la proportion de réponses pour sous-indicateur et une catégorie démographique particuliers. Les barres sur chaque colonne représentent la valeur moyenne poure sous-indicateur pour le SCT. Les sous-indicateurs sont triés du moins négatif au plus négatif pour le SCT."
 expl_F <- str_wrap(expl_F, 100)
-ttl_F <- "SAFF@SCT 2018 - Secteurs" #"SAFF@SCT 2018 - Groupes professionnels et d'équité en emploi" 
+ttl_F <- "SAFF@SCT 2018 - Groupes professionnels et d'équité en emploi" 
 cap_F <- "Ensemble de données ouvertes du Sondage auprès des fonctionnaires fédéraux de 2018"
 file_F <- paste0(ttl_F,".pdf")
 #TBSagg.df$sentiment_F <- mapvalues(TBSagg.df$sentiment, 

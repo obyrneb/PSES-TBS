@@ -272,6 +272,128 @@ ggsave(plot = facets.grb, "TBS Sectors by Indicator - facets.pdf", height = 8, w
 
 ```
 
+```{r TBS Sectors - Facets FR, fig.height = 8, fig.width = 13.5}
+score100s_overall_FR <- score100s %>%
+  filter(!(unitcode %in% c("200","303","304","201","202","999"))) %>%
+  select(SURVEYR,DESCRIP_F,INDICATORFRA,indicator100,overall100) %>%
+  mutate(SOMMAIRE = overall100) %>%
+  spread(INDICATORFRA,indicator100) %>%
+  gather(INDICATORFRA,indicator100,-DESCRIP_F,-overall100,-SURVEYR) %>%
+  mutate(INDICATORFRA = fct_relevel(INDICATORFRA, "SOMMAIRE")) %>%
+  mutate(DESCRIP_F = ifelse(DESCRIP_F == "Fonction publique",
+                            "bold(Fonction publique)",
+                            ifelse(DESCRIP_F == "Secrétariat du Conseil du Trésor du Canada",
+                                   "bold(Secrétariat du Conseil du Trésor du Canada)",
+                                   as.character(DESCRIP_F)))) %>%
+  mutate(DESCRIP_F = gsub(" ","~",DESCRIP_F)) %>%
+  mutate(DESCRIP_F = gsub(",","",DESCRIP_F)) %>%
+  mutate(DESCRIP_F = gsub("'","",DESCRIP_F)) %>%
+  arrange(desc(SURVEYR),desc(overall100)) %>% 
+  mutate(DESCRIP_F = factor(DESCRIP_F,unique(DESCRIP_F)))
+
+
+TBSfacets_FR <- ggplot(score100s_overall_FR, aes(x = SURVEYR, y = indicator100, fill = INDICATORFRA)) +
+  geom_bar(position="dodge", stat="identity", width = 1, aes(alpha = SURVEYR)) +
+  scale_y_continuous(limits = c(0,100)) +
+  scale_fill_brewer(palette = "Set2") +
+  scale_colour_brewer(palette = "Set2") +
+  scale_alpha_manual(values = c(.67,1)) +
+  geom_text(aes(y=indicator100, label=round(indicator100,0), colour = INDICATORFRA),
+            size = 3, hjust = -0.3, vjust = 0.5, fontface = "bold") +
+  geom_text(aes(label=SURVEYR),
+            y = 0, size = 3, hjust = -0.1, vjust = 0.5, colour = "white") +
+  coord_flip() +
+  labs(caption = "Sondage auprès des fonctionnaires fédéraux 2018") +
+  facet_grid(DESCRIP_F~INDICATORFRA, 
+             switch = "y", 
+             labeller = labeller(
+               INDICATORFRA = label_wrap_gen(15), 
+               DESCRIP_F = label_parsed)) +
+  theme_minimal() +
+  theme(axis.title = element_blank(),
+        legend.title = element_blank(),
+        legend.position = "none",
+        axis.text = element_blank(),
+        axis.ticks.y.right = element_blank(),
+        panel.grid = element_blank(),
+        strip.text.y = element_text(angle = 180, hjust = 1),
+        panel.spacing.y = unit(0.5,"mm"))
+
+titleFR.grb <- textGrob("Secteurs du SCT par indicateur SAFF (2017-2018)", hjust = 0.5, gp=gpar(fontsize=16, col ="black",
+                                                                                        fontface = "bold"))
+graphFR.grb <- plot_grid(titleFR.grb,TBSfacets_FR, ncol = 1, align = "v", rel_heights = c(1,19))
+
+howto_ttlFR.grb <- textGrob("\nComment lire \nce graphique", hjust = 0.5, gp=gpar(fontsize=12, col ="black", fontface = "bold"))
+
+howto_txtFR.grb <- textGrob("
+Chaque ligne représente un secteur du 
+SCT. Des rangées globales pour le SCT 
+et la fonction publique sont également 
+fournies à titre de comparaison. \n
+Chaque colonne représente un groupe de
+questions sur le SAFF par thème, dit un
+un « indicateur ». La colonne SOMMAIRE
+est le regroupement de toutes les 
+questions sur le SAFF. \n
+Les rangées de secteurs sont classées
+à l'aide de la colonne SOMMAIRE 2018
+en ordre décroissant. Le chiffre et la
+longueur de chaque barre représente
+le score moyen des questions dans ce 
+groupe, dans ce secteur. \n
+Le score est basé sur le « Score 100 »
+mesuré pour chaque question. C'est la
+moyenne des réponses aux questions en
+utilisant ces poids:
+Très positif = 100,
+Positif = 75,
+Neutre = 50,
+Négatif = 25,
+Très négatif = 0. \n
+Exemple:
+Un score de 52 pour « Engagement des
+employés » signifie que la moyenne
+du « Score 100 » des questions sous 
+ce thème (5, 9, 10, 14, 43, 44 et 45)
+pour ce secteur était de 52 sur 100,
+soit plus proche de « Neutre ».",
+                          hjust = 0.5, gp=gpar(fontsize=6, col ="black"))
+
+limits_ttlFR.grb <- textGrob("\nLimitations", hjust = 0.5, gp=gpar(fontsize=12, col ="black", fontface = "bold"))
+
+limits_txtFR.grb <- textGrob("
+Tous les taux de réponse n'étaient pas
+les mêmes pour tous les secteurs
+(la DRH les a de disponible). \ n
+La mesure « Score 100 » ne reflète pas
+la distribution des réponses. Exemple:
+50 personnes très positives et
+50 personnes très négatives
+(50% * 100 + 50% * 0 = 50)
+est identique à 100 personnes
+marquant neutre
+(100% * 50 = 50). \ N
+La mesure « Score 100 » fait des
+hypothèses basées sur la pondération
+(décrit ci-dessus). \ n
+Les « indicateurs » ne sont pas stables;
+les questions du SAFF changent d'année 
+en année. \ N
+Les questions qui contituent les 
+« indicateurs » ne sont pas pondérées.
+",
+                          hjust = 0.5, gp=gpar(fontsize=6, col ="black"))
+
+descripFR.grb <- plot_grid(howto_ttlFR.grb,howto_txtFR.grb,limits_ttlFR.grb,limits_txtFR.grb, ncol = 1, align = "v", rel_heights = c(1,10,1,6))
+
+facetsFR.grb <- plot_grid(graphFR.grb,descripFR.grb, rel_widths = c(7,1))
+
+facetsFR.grb
+
+ggsave(plot = facetsFR.grb, "Secteurs du SCT par indicateur - facettes FR.pdf", height = 8, width = 13.5)
+```
+
+
 ```{r OCG Sectors - Facets, fig.height = 4, fig.width = 12}
 score100s_overall <- score100s %>%
   filter(unitcode %in% c(NA,"304","405","406","407","408")) %>%
@@ -324,6 +446,8 @@ ggplot(score100s_overall, aes(x = SURVEYR, y = indicator100, fill = INDICATORENG
 
 ggsave("OCG Sectors by Indicator - facets.pdf", height = 4, width = 12)
 ```
+
+
 
 ```{r pressure, echo=FALSE}
 slp <- ggplot(score100s, aes(x = str_wrap(INDICATORENG,15), y = indicator100, group = DESCRIP_E)) +

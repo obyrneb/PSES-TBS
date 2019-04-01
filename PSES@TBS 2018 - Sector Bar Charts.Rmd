@@ -542,27 +542,31 @@ ggsave(paste0(ttl_E,".pdf"), height = 8, width = 10)
 sectorDeltas <- question100s %>%
   filter(unitcode %in% c(thisSector,"TBS")) %>%
   mutate(abbr_E = ifelse(unitcode == thisSector, thisAbbr_E, unitcode)) %>%
-  select(QUESTION,TITLE_E,TITLE_F,unitcode,abbr_E,DESCRIP_E,DESCRIP_F,SURVEYR,SCORE100) %>%
+  select(INDICATORENG,INDICATORFRA,QUESTION,TITLE_E,TITLE_F,unitcode,abbr_E,DESCRIP_E,DESCRIP_F,SURVEYR,SCORE100) %>%
   spread(SURVEYR,SCORE100) %>%
   mutate(delta = `2018`-`2017`)
 
-best10deltas <- filter(sectorDeltas, unitcode == thisSector) %>% top_n(10,delta) %>% select(QUESTION)
-worst10deltas <- filter(sectorDeltas, unitcode == thisSector) %>% top_n(-10,delta) %>% select(QUESTION)
+best10deltas <- filter(sectorDeltas, unitcode == thisSector & delta > 0) %>% top_n(10,delta) %>% select(QUESTION)
+worst10deltas <- filter(sectorDeltas, unitcode == thisSector & delta < 0) %>% top_n(-10,delta) %>% select(QUESTION)
 
 best <- ggplot(data = inner_join(sectorDeltas, best10deltas, by = "QUESTION"),
                              x = abbr_E, group = abbr_E) +
-  geom_segment(aes(x = abbr_E, xend = abbr_E, y = `2017`, yend = `2018`), arrow = arrow(length = unit(0.2, "cm"))) +
-  geom_point(aes(x = abbr_E, y = `2017`, alpha = abbr_E), size = 8, shape = 16, colour = "blue") +
-  geom_point(aes(x = abbr_E, y = `2018`, alpha = abbr_E), size = 8, shape = 16, colour = "red") +
+  geom_segment(aes(x = abbr_E, xend = abbr_E, y = `2017`, yend = `2018`, colour = INDICATORENG, alpha = abbr_E), 
+               size = 1.5, lineend = "round", arrow = arrow(length = unit(0.2, "cm"))) +
+  #geom_point(aes(x = abbr_E, y = `2017`, alpha = abbr_E), size = 8, shape = 16, colour = "blue") +
+  #geom_point(aes(x = abbr_E, y = `2018`, alpha = abbr_E), size = 8, shape = 16, colour = "red") +
   geom_text(aes(label = `2017`, x = abbr_E, y = `2017`),
-            size = 4, colour = "grey30", fontface = "bold") +
+            size = 4, colour = "grey30", fontface = "bold", hjust = 1.2) +
   geom_text(aes(label = `2018`, x = abbr_E, y = `2018`),
-            size = 4, colour = "grey30", fontface = "bold") +
-  geom_text(aes(label = delta, x = abbr_E, y = (`2017` + delta/2)),
+            size = 4, colour = "grey30", fontface = "bold", hjust = -0.2) +
+  geom_text(aes(label = paste0("+",delta), x = abbr_E, y = (`2017` + delta/2)),
             size = 4, colour = "grey30", fontface = "bold", vjust = 1.1) +
   coord_flip() +
   facet_grid(TITLE_E~.,switch = "y", labeller = label_wrap_gen(45)) +
   scale_alpha_manual(values = c(1,.5)) +
+  scale_colour_brewer(palette = "Set2") +
+  scale_y_continuous(limits = c(25,100), breaks = c(25,50,75,100)) +
+  scale_x_discrete() +
   theme_bw() +
   # Format tweaks
   # Remove the legend
@@ -599,18 +603,20 @@ best
 
 worst <- ggplot(data = inner_join(sectorDeltas, worst10deltas, by = "QUESTION"),
                              x = abbr_E, group = abbr_E) +
-  geom_segment(aes(x = abbr_E, xend = abbr_E, y = `2017`, yend = `2018`), arrow = arrow(length = unit(0.2, "cm"))) +
-  geom_point(aes(x = abbr_E, y = `2017`, alpha = abbr_E), size = 8, shape = 16, colour = "blue") +
-  geom_point(aes(x = abbr_E, y = `2018`, alpha = abbr_E), size = 8, shape = 16, colour = "red") +
+  geom_segment(aes(x = abbr_E, xend = abbr_E, y = `2017`, yend = `2018`, colour = INDICATORENG, alpha = abbr_E), 
+               size = 1.5, lineend = "round", arrow = arrow(length = unit(0.2, "cm"))) +
+  #geom_point(aes(x = abbr_E, y = `2017`, alpha = abbr_E), size = 8, shape = 16, colour = "blue") +
+  #geom_point(aes(x = abbr_E, y = `2018`, alpha = abbr_E), size = 8, shape = 16, colour = "red") +
   geom_text(aes(label = `2017`, x = abbr_E, y = `2017`),
-            size = 4, colour = "grey30", fontface = "bold") +
+            size = 4, colour = "grey30", fontface = "bold", hjust = -0.2) +
   geom_text(aes(label = `2018`, x = abbr_E, y = `2018`),
-            size = 4, colour = "grey30", fontface = "bold") +
+            size = 4, colour = "grey30", fontface = "bold", hjust = 1.2) +
   geom_text(aes(label = delta, x = abbr_E, y = (`2017` + delta/2)),
             size = 4, colour = "grey30", fontface = "bold", vjust = 1.1) +
   coord_flip() +
   facet_grid(TITLE_E~.,switch = "y", labeller = label_wrap_gen(45)) +
   scale_alpha_manual(values = c(1,.5)) +
+  scale_colour_brewer(palette = "Set2") +
   theme_bw() +
   # Format tweaks
   # Remove the legend

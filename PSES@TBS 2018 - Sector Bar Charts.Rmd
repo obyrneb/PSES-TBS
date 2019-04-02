@@ -457,15 +457,15 @@ ggsave("OCG Sectors by Indicator - facets.pdf", height = 4, width = 12)
 
 ```{r Sector Card - slope, echo=FALSE, fig.height=4, fig.width=5}
 
-thisSector <- 301
-thisAbbr_E <- "OCIO"
+thisSector <- 408
+thisAbbr_E <- "IAS"
 
 sectorData <- score100s %>%
   filter(unitcode %in% c(thisSector,"TBS")) %>%
   mutate(abbr_E = ifelse(unitcode == thisSector, thisAbbr_E, unitcode))
 
-#sectorName_E <- sectorData$DESCRIP_E[[1]]
-sectorName_E <- "Office of the Chief Information Officer"
+sectorName_E <- sectorData$DESCRIP_E[[1]]
+#sectorName_E <- "Office of the Chief Information Officer"
 
 ttl_E <- paste0("PSES@TBS 2018 - ",sectorName_E)
 
@@ -566,8 +566,9 @@ slp2 <- ggplot(sectorData, aes(x = SURVEYR, y = round(indicator100,0), group = I
 #grid.draw(gt)
 
 slp_ttl <- textGrob("Year-to-Year Score 100 Comparsion", gp=gpar(fontsize = 10, fontface = "bold", col = "grey30"))
+space <- textGrob("")
 
-slp.grb <- plot_grid(slp_ttl,slp2,nrow=2,rel_heights = c(1,12))
+slp.grb <- plot_grid(slp_ttl,slp2,space,nrow=3,rel_heights = c(1,11.5,0.5))
 slp.grb
 ```
 
@@ -632,15 +633,15 @@ best <- ggplot(data = bestData, x = abbr_E, group = abbr_E) +
             size = 3, colour = "grey30", fontface = "plain", hjust = 1.3, vjust = 0.5) +
   geom_text(aes(label = `2018`, x = abbr_E, y = `2018`),
             size = 3, colour = "grey30", fontface = "bold", hjust = -0.3, vjust = 0.5) +
-  geom_text(aes(label = paste0("(+",delta,")"), x = abbr_E, y = `2018`, colour = delta),
-            size = 3, fontface = "bold", hjust = -1, vjust = 0.5) +
+  geom_text(aes(label = paste0("(+",delta,")"), x = abbr_E, y = `2017`, colour = delta),
+            size = 3, fontface = "bold", hjust = 2, vjust = 0.5) +
   geom_text(aes(label = paste0("ind",INDICATORID), x = abbr_E, y = 0),
             size = 3, colour = "grey50", fontface = "plain", hjust = -0.1, vjust = 0.5) +
   coord_flip() +
-  facet_grid(fct_reorder(substr(TITLE_E,10,200),delta,.desc=TRUE)~.,switch = "y", labeller = label_wrap_gen(50)) +
+  facet_grid(fct_reorder(substr(TITLE_E,10,140),delta,.desc=TRUE)~.,switch = "y", labeller = label_wrap_gen(60)) +
   #scale_alpha_manual(values = c(1,.5)) +
-  scale_colour_gradient2(high = "#0571b0", mid = "#f7f7f7", low = "#ca0020") +
-  scale_y_continuous(limits = c(0,100), breaks = c(0,25,50,75,100)) +
+  scale_colour_gradient2(high = "#0571b0", mid = "#bcbcbc", low = "#ca0020") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,25,50,75,100), expand = expand_scale(add = c(0,5))) +
   deltaTheme
 
 worstData <- sectorDeltas %>%
@@ -660,14 +661,14 @@ worst <- ggplot(data = worstData, x = abbr_E, group = abbr_E) +
   geom_text(aes(label = `2018`, x = abbr_E, y = `2018`),
             size = 3, colour = "grey30", fontface = "bold", hjust = 1.3, vjust = 0.5) +
   geom_text(aes(label = paste0("(",delta,")"), x = abbr_E, y = `2018`, colour = delta),
-            size = 3, fontface = "bold", hjust = 2.2, vjust = 0.5) +
+            size = 3, fontface = "bold", hjust = 2, vjust = 0.5) +
   geom_text(aes(label = paste0("ind",INDICATORID), x = abbr_E, y = 0),
             size = 3, colour = "grey50", fontface = "plain", hjust = -0.1, vjust = 0.5) +
   coord_flip() +
-  facet_grid(fct_reorder(substr(TITLE_E,10,200),delta)~.,switch = "y", labeller = label_wrap_gen(50)) +
+  facet_grid(fct_reorder(substr(TITLE_E,10,140),delta)~.,switch = "y", labeller = label_wrap_gen(60)) +
   #scale_alpha_manual(values = c(1,.5)) +
-  scale_colour_gradient2(high = "#0571b0", mid = "#f7f7f7", low = "#ca0020") +
-  scale_y_continuous(limits = c(0,100), breaks = c(0,25,50,75,100)) +
+  scale_colour_gradient2(high = "#0571b0", mid = "#bcbcbc", low = "#ca0020") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,25,50,75,100), expand = expand_scale(add = c(0,5))) +
   deltaTheme
 
 best_ttl <- textGrob("Top Positive Shifts", gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
@@ -718,12 +719,12 @@ hd_ttl.grb <- plot_grid(har_ttl,dis_ttl)
 
 hdpc.grb <- ggplot(data = filter(sectorHarDis, QUESTION %in% c("Q48","Q55")), aes(x = abbr_E)) +
   geom_text(aes(label = paste0(abbr_E,": ",`2018`,"%"),y=1, colour = QUESTION), fontface = "bold.italic", size = 4) +
-  facet_grid(.~str_wrap(substr(TITLE_E,10,200),45)) +
+  facet_grid(.~str_wrap(substr(TITLE_E,10,200),50)) +
   scale_x_discrete(position = "bottom") +
   scale_colour_manual(values = c("#7fc97f","#beaed4")) +
   deltaTheme +
   theme(axis.text = element_blank()) +
-  theme(strip.text = element_text(size = 8))
+  theme(strip.text = element_text(size = 7))
 
 #hd.grb <- plot_grid(hd_ttl,hd,nrow=2, rel_heights = c(1,8))
 
@@ -778,7 +779,7 @@ nt_ttl.grb <- plot_grid(hr_ttl,dt_ttl)
 
 nt.grb <- plot_grid(harNature,disType)
 
-hd.grb <- plot_grid(hd_ttl.grb,hdpc.grb,nt_ttl.grb,nt.grb,nrow=4, rel_heights = c(1,5,1,14))  
+hd.grb <- plot_grid(hd_ttl.grb,hdpc.grb,nt_ttl.grb,nt.grb,nrow=4, rel_heights = c(1,3.3,0.7,8))  
 
 left.grb <- plot_grid(slp.grb,hd.grb, nrow = 2)
 
@@ -791,5 +792,5 @@ plot.grb <- plot_grid(left.grb,right.grb)
 plot.grb <- plot_grid(plot_ttl.grb,plot.grb,nrow=2,rel_heights = c(1,20))
 plot.grb
 
-ggsave(file.path(mainDir,plotDir,paste0(plot_ttl,".pdf")), plot = plot.grb, height = 8, width = 10.5)
+ggsave(file.path(mainDir,plotDir,paste0(plot_ttl,".pdf")), plot = plot.grb, height = 8, width = 11)
 ```

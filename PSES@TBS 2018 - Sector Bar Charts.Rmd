@@ -464,7 +464,8 @@ sectorData <- score100s %>%
   filter(unitcode %in% c(thisSector,"TBS")) %>%
   mutate(abbr_E = ifelse(unitcode == thisSector, thisAbbr_E, unitcode))
 
-sectorName_E <- sectorData$DESCRIP_E[[1]]
+#sectorName_E <- sectorData$DESCRIP_E[[1]]
+sectorName_E <- "Office of the Chief Information Officer"
 
 ttl_E <- paste0("PSES@TBS 2018 - ",sectorName_E)
 
@@ -504,7 +505,7 @@ slp <- ggplot(sectorData, aes(x = SURVEYR, y = round(indicator100,0), group = IN
   geom_line(data = sectorData %>% filter(unitcode == thisSector),
             aes(color = INDICATORENG), alpha = 1,linetype = 1, size = 1) +
   geom_line(data = sectorData %>% filter(unitcode == "TBS"),
-            aes(color = INDICATORENG), alpha = 0.67,linetype = 2, size = 1) +
+            aes(color = INDICATORENG), alpha = 0.67,linetype = 1, size = 1) +
   scale_colour_brewer(palette = "Set2") +
   geom_text_repel(data = sectorData %>% filter(SURVEYR == 2017), 
                   aes(label = abbr_E, colour = INDICATORENG), 
@@ -532,19 +533,19 @@ slp <- ggplot(sectorData, aes(x = SURVEYR, y = round(indicator100,0), group = IN
 slp2 <- ggplot(sectorData, aes(x = SURVEYR, y = round(indicator100,0), group = INDICATORENG)) +
   facet_grid(.~abbr_E) + 
   geom_line(data = sectorData %>% filter(unitcode == thisSector),
-            aes(color = INDICATORENG), alpha = 0.7,linetype = 1, size = 1) +
+            aes(color = INDICATORENG), alpha = 0.6,linetype = 1, size = 1) +
   geom_line(data = sectorData %>% filter(unitcode == "TBS"),
-            aes(color = INDICATORENG), alpha = 0.7,linetype = 2, size = 1) +
+            aes(color = INDICATORENG), alpha = 0.6,linetype = 2, size = 1) +
   scale_colour_brewer(palette = "Set2") +
   geom_text_repel(data = sectorData %>% filter(SURVEYR == 2017), 
-                  aes(label = str_wrap(INDICATORENG,10), colour = INDICATORENG), 
+                  aes(label = str_wrap(paste0(INDICATORENG," (ind",INDICATORID,")"),10), colour = INDICATORENG), 
                   hjust = 2, 
                   fontface = "bold", 
                   size = 2,
                   nudge_x = -1, 
                   direction = "y") +
   geom_text_repel(data = sectorData %>% filter(SURVEYR == 2018), 
-                  aes(label = str_wrap(INDICATORENG,10), colour = INDICATORENG), 
+                  aes(label = str_wrap(paste0(INDICATORENG," (ind",INDICATORID,")"),10), colour = INDICATORENG), 
                   hjust = -1, 
                   fontface = "bold", 
                   size = 2,
@@ -575,7 +576,8 @@ slp.grb
 sectorDeltas <- question100s %>%
   filter(unitcode %in% c(thisSector, "TBS")) %>%
   mutate(abbr_E = ifelse(unitcode == thisSector, thisAbbr_E, unitcode)) %>%
-  select(INDICATORENG,INDICATORFRA,QUESTION,TITLE_E,TITLE_F,unitcode,abbr_E,DESCRIP_E,DESCRIP_F,SURVEYR,SCORE100,AGREE) %>%
+  select(INDICATORID,INDICATORENG,INDICATORFRA,QUESTION,TITLE_E,TITLE_F,
+         unitcode,abbr_E,DESCRIP_E,DESCRIP_F,SURVEYR,SCORE100,AGREE) %>%
   spread(SURVEYR,SCORE100) %>%
   mutate(delta = `2018`-`2017`)
 
@@ -627,11 +629,13 @@ best <- ggplot(data = bestData, x = abbr_E, group = abbr_E) +
   #geom_point(aes(x = abbr_E, y = `2017`, alpha = abbr_E), size = 8, shape = 16, colour = "blue") +
   #geom_point(aes(x = abbr_E, y = `2018`, alpha = abbr_E), size = 8, shape = 16, colour = "red") +
   geom_text(aes(label = `2017`, x = abbr_E, y = `2017`),
-            size = 3, colour = "grey30", fontface = "plain", hjust = 1.3) +
+            size = 3, colour = "grey30", fontface = "plain", hjust = 1.3, vjust = 0.5) +
   geom_text(aes(label = `2018`, x = abbr_E, y = `2018`),
-            size = 3, colour = "grey30", fontface = "bold", hjust = -0.3)+
+            size = 3, colour = "grey30", fontface = "bold", hjust = -0.3, vjust = 0.5) +
   geom_text(aes(label = paste0("(+",delta,")"), x = abbr_E, y = `2018`, colour = delta),
-            size = 3, fontface = "bold", hjust = -1)+
+            size = 3, fontface = "bold", hjust = -1, vjust = 0.5) +
+  geom_text(aes(label = paste0("ind",INDICATORID), x = abbr_E, y = 0),
+            size = 3, colour = "grey50", fontface = "plain", hjust = -0.1, vjust = 0.5) +
   coord_flip() +
   facet_grid(fct_reorder(substr(TITLE_E,10,200),delta,.desc=TRUE)~.,switch = "y", labeller = label_wrap_gen(50)) +
   #scale_alpha_manual(values = c(1,.5)) +
@@ -652,11 +656,13 @@ worst <- ggplot(data = worstData, x = abbr_E, group = abbr_E) +
   #geom_point(aes(x = abbr_E, y = `2017`, alpha = abbr_E), size = 8, shape = 16, colour = "blue") +
   #geom_point(aes(x = abbr_E, y = `2018`, alpha = abbr_E), size = 8, shape = 16, colour = "red") +
   geom_text(aes(label = `2017`, x = abbr_E, y = `2017`),
-            size = 3, colour = "grey30", fontface = "plain", hjust = -0.3) +
+            size = 3, colour = "grey30", fontface = "plain", hjust = -0.3, vjust = 0.5) +
   geom_text(aes(label = `2018`, x = abbr_E, y = `2018`),
-            size = 3, colour = "grey30", fontface = "bold", hjust = 1.3)+
+            size = 3, colour = "grey30", fontface = "bold", hjust = 1.3, vjust = 0.5) +
   geom_text(aes(label = paste0("(",delta,")"), x = abbr_E, y = `2018`, colour = delta),
-            size = 3, fontface = "bold", hjust = 2.2)+
+            size = 3, fontface = "bold", hjust = 2.2, vjust = 0.5) +
+  geom_text(aes(label = paste0("ind",INDICATORID), x = abbr_E, y = 0),
+            size = 3, colour = "grey50", fontface = "plain", hjust = -0.1, vjust = 0.5) +
   coord_flip() +
   facet_grid(fct_reorder(substr(TITLE_E,10,200),delta)~.,switch = "y", labeller = label_wrap_gen(50)) +
   #scale_alpha_manual(values = c(1,.5)) +
@@ -672,7 +678,7 @@ right.grb
 
 ```
 
-```{r Sector Card - Har & Dis, echo=FALSE, fig.height=8, fig.width=10}
+```{r Sector Card - Har & Dis, echo=FALSE, fig.height=8, fig.width=10.5}
 
 sectorHarDis <- question100s %>%
   filter(unitcode %in% c(thisSector, "TBS") & SURVEYR == 2018 & SUBINDICATORID %in% c(12,13)) %>%
@@ -706,14 +712,15 @@ har <- ggplot(data = filter(sectorHarDis, QUESTION %in% c("Q48","Q55")), x = abb
     #axis.text.y = element_text(size = 8),
     strip.text.x = element_text(size = 6))
 
-har_ttl <- textGrob("Harassment", gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
-dis_ttl <- textGrob("Discrimination", gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
+har_ttl <- textGrob("Victims of Harassment", gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
+dis_ttl <- textGrob("Victims of Discrimination", gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
 hd_ttl.grb <- plot_grid(har_ttl,dis_ttl)
 
 hdpc.grb <- ggplot(data = filter(sectorHarDis, QUESTION %in% c("Q48","Q55")), aes(x = abbr_E)) +
-  geom_text(aes(label = paste0(abbr_E,": ",`2018`,"%"),y=1), colour = "grey30", fontface = "italic", size = 4) +
-  facet_grid(.~str_wrap(substr(TITLE_E,10,200),50)) +
+  geom_text(aes(label = paste0(abbr_E,": ",`2018`,"%"),y=1, colour = QUESTION), fontface = "bold.italic", size = 4) +
+  facet_grid(.~str_wrap(substr(TITLE_E,10,200),45)) +
   scale_x_discrete(position = "bottom") +
+  scale_colour_manual(values = c("#7fc97f","#beaed4")) +
   deltaTheme +
   theme(axis.text = element_blank()) +
   theme(strip.text = element_text(size = 8))
@@ -721,39 +728,51 @@ hdpc.grb <- ggplot(data = filter(sectorHarDis, QUESTION %in% c("Q48","Q55")), ae
 #hd.grb <- plot_grid(hd_ttl,hd,nrow=2, rel_heights = c(1,8))
 
 harNatureData <- sectorHarDis %>%
-  filter(startsWith(QUESTION,"Q50") & unitcode != "TBS") %>%
-  mutate(Qshort_E = word(TITLE_E,3, sep = fixed('.')))
-harNature <- ggplot(harNatureData, aes(x=fct_reorder(str_wrap(Qshort_E,30),`2018`), y=`2018`)) +
+  filter(startsWith(QUESTION,"Q50")) %>%
+  mutate(Qshort_E = word(TITLE_E,3, sep = fixed('.'))) %>%
+  arrange(desc(unitcode),`2018`) %>%
+  mutate(order = row_number())
+harNature <- ggplot(harNatureData, aes(x=fct_reorder(str_wrap(substr(Qshort_E,1,50),30), order), y=`2018`)) +
   labs(
     x="Sectors", 
     y="% answering yes in 2018") +
-  geom_col(fill = "#7fc97f") +
-  geom_text(nudge_y=3, size=3, colour="grey30", fontface = "bold", aes(label=`2018`)) +
+  geom_col(aes(alpha = abbr_E), fill = "#7fc97f") +
+  geom_text(hjust=-0.1, vjust=0.5, size=3, colour="grey30", fontface = "bold", 
+            aes(label=ifelse(`2018`==0,"-",`2018`), y=0)) +
   coord_flip() +
+  facet_grid(.~abbr_E) +
+  scale_alpha_manual(values = c(1,.5)) +
   deltaTheme +
   theme(axis.text.y = element_text(size = 6)) +
   theme(axis.title.x = element_text(size = 8)) +
-  theme(axis.text.x = element_blank())
+  theme(axis.text.x = element_blank()) +
+  theme(strip.text = element_text(colour = "grey30", face = "italic", size = 8))
 
 disTypeData <- sectorHarDis %>%
-  filter(startsWith(QUESTION,"Q57") & unitcode != "TBS") %>%
-  mutate(Qshort_E = word(TITLE_E,3, sep = fixed('.')))
-disType <- ggplot(disTypeData, aes(x=fct_reorder(str_wrap(Qshort_E,30),`2018`), y=`2018`)) +
+  filter(startsWith(QUESTION,"Q57")) %>%
+  mutate(Qshort_E = word(TITLE_E,3, sep = fixed('.'))) %>%
+  arrange(desc(unitcode),`2018`) %>%
+  mutate(order = row_number())
+disType <- ggplot(disTypeData, aes(x=fct_reorder(str_wrap(substr(Qshort_E,1,50),30), order), y=`2018`)) +
   labs(
     x="Sectors", 
     y="% answering yes in 2018") +
-  geom_col(fill = "#beaed4") +
-  geom_text(nudge_y=3, size=3, colour="grey30", fontface = "bold", aes(label=`2018`)) +
+  geom_col(aes(alpha = abbr_E), fill = "#beaed4") +
+  geom_text(hjust=-0.1, vjust=0.5, size=3, colour="grey30", fontface = "bold", 
+            aes(label=ifelse(`2018`==0,"-",`2018`), y=0)) +
   coord_flip() +
+  facet_grid(.~abbr_E) +
+  scale_alpha_manual(values = c(1,.5)) +
   deltaTheme +
   theme(axis.text.y = element_text(size = 6)) +
   theme(axis.title.x = element_text(size = 8)) +
-  theme(axis.text.x = element_blank())
+  theme(axis.text.x = element_blank()) +
+  theme(strip.text = element_text(colour = "grey30", face = "italic", size = 8))
 
-hr_ttl <- textGrob(paste0("Nature of Harassment at ",thisAbbr_E),
-                   gp = gpar(fontsize = 8, col = "grey30"))
-dt_ttl <- textGrob(paste0("Type of Discrimination at ",thisAbbr_E),
-                   gp = gpar(fontsize = 8, col = "grey30"))
+hr_ttl <- textGrob("Nature of Harassment",
+                   gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
+dt_ttl <- textGrob("Type of Discrimination",
+                   gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
 
 nt_ttl.grb <- plot_grid(hr_ttl,dt_ttl)
 
@@ -763,10 +782,14 @@ hd.grb <- plot_grid(hd_ttl.grb,hdpc.grb,nt_ttl.grb,nt.grb,nrow=4, rel_heights = 
 
 left.grb <- plot_grid(slp.grb,hd.grb, nrow = 2)
 
-plot_ttl <- textGrob(paste0("PSES 2018 Report Card - ",sectorName_E),
+plot_ttl <- paste0("PSES 2018 Report Card - ",sectorName_E) 
+
+plot_ttl.grb <- textGrob(plot_ttl, hjust=0.85,
                      gp = gpar(fontsize = 14, fontface = "bold", col = "grey30"))
 
 plot.grb <- plot_grid(left.grb,right.grb)
-plot.grb <- plot_grid(plot_ttl,plot.grb,nrow=2,rel_heights = c(1,20))
+plot.grb <- plot_grid(plot_ttl.grb,plot.grb,nrow=2,rel_heights = c(1,20))
 plot.grb
+
+ggsave(file.path(mainDir,plotDir,paste0(plot_ttl,".pdf")), plot = plot.grb, height = 8, width = 10.5)
 ```

@@ -59,26 +59,36 @@ TBS.df$BYCOND[TBS.df$DESCRIP_E == "Treasury Board of Canada Secretariat"] <- "TB
 TBS.df$BYCOND[TBS.df$DESCRIP_E == "Public Service"] <- "PS" 
 TBS.df$DemoQ <- word(TBS.df$BYCOND, 1, sep = " =")
 
+# Create a unit code field - this makes it easy to remove or add sectors by LEVEL code
+TBS.df$unitcode <- ifelse(startsWith(TBS.df$BYCOND,"LEVEL"), 
+                          word(TBS.df$BYCOND, 2, sep = " = "), 
+                          ifelse(TBS.df$BYCOND %in% c("TBS","PS"), TBS.df$BYCOND, NA))
+
 # Replace all LEVELxIDs with a single DemoQ value - "org". This allows more intuitive proportion calculations.
 TBS.df$DemoQ[startsWith(TBS.df$DemoQ,"LEVEL")] <- "org"
 
-# Aggregate by demographic and question theme
+# Create a summary of the % of total negative responses by BYCOND - this helps us sort on negative repsonses later
+TBS.df <- TBS.df %>%
+  filter(!is.na(NEGATIVE)) %>%
+  group_by(BYCOND) %>%
+  mutate(neg_overall = sum(ANSCOUNT*NEGATIVE)/sum(ANSCOUNT)) %>%
+  ungroup()
+
+# Aggregate by demographic and question theme - note that the inclusion of "unitcode" excludes all non-sector data
 TBSagg.df <- aggregate(data = TBS.df, cbind(ANSCOUNT,SCORE100,NEGATIVE,NEUTRAL,POSITIVE) ~ 
-                         LEVEL1ID + SUBINDICATORID + SUBINDICATORENG + SUBINDICATORFRA + DemoQ + 
+                         LEVEL1ID + unitcode + SUBINDICATORID + SUBINDICATORENG + SUBINDICATORFRA + DemoQ + 
                          #DemQ_E + DemQ_F + 
-                         BYCOND + DESCRIP_E + DESCRIP_F + SURVEYR, mean)
+                         BYCOND + DESCRIP_E + DESCRIP_F + SURVEYR + neg_overall, mean)
 
 # Calculate proportions for each TBS demographic group and append to the descriptors (DesProp_E and DesProp_F).
 # We will want the description fields with TBS-only proportions to be common to both PS and TBS data
 # so we can graph them together. This is why we output to another dataframe (TBSprops.df), which we merge below.
 TBSprops.df <- TBSagg.df %>%
   filter(LEVEL1ID == "26") %>%
-  group_by(DemoQ, DESCRIP_E) %>%
+  group_by(BYCOND) %>%
   mutate(ngrp = sum(ANSCOUNT)) %>%
   ungroup() %>%
-  group_by(DemoQ) %>%
-  mutate(npop = sum(ANSCOUNT)) %>%
-  ungroup() %>%
+  mutate(npop = sum(ANSCOUNT[which(BYCOND == "TBS")])) %>%
   mutate(prop = ngrp/npop) %>%
   mutate(DesProp_E = paste0(DESCRIP_E, " (", round((prop*100),0),"%)")) %>%
   mutate(DesProp_F = paste0(DESCRIP_F, " (", round((prop*100),0),"%)")) %>%
@@ -103,13 +113,12 @@ TBSagg.df <- TBSagg.df %>%
 
 # CHOOSE DEMOGRAPHIC VARIABLES HERE!
 # Select demographic groups to plot: AS & CR groups, plus PS and TBS summary columns for comparison
-TBSagg.df <- subset(TBSagg.df, DemoQ %in% c("Q27","Q78A","Q87","Q88","Q89") | 
-                      BYCOND %in% c("TBS","PS")) 
+TBSagg.df <- subset(TBSagg.df, !(unitcode %in% c("200","303","304","201","202","999",NA))) 
 
 # Order occupational levels by overall group and then ascending level using the existing "OrderKey" column
 # from the mapDemQ lookup table.
 TBSagg.df <- TBSagg.df %>% 
-  arrange(BYCOND) %>%
+  arrange(neg_overall) %>%
   mutate(DesProp_E = factor(DesProp_E, unique(DesProp_E))) %>%
   mutate(DesProp_F = factor(DesProp_F, unique(DesProp_F)))
 
@@ -123,9 +132,9 @@ TBSagg.df$DesProp_F <- fct_relevel(TBSagg.df$DesProp_F,
 # CREATE BILINGUAL LABELS
 #------------
 # English captions and labels
-expl_E <- "Each cell of this chart displays the proportion of responses for a particular subindicator and sector - negative (red), neutral (blue) and postive (green). The bars over each column represent the average value for this subindicator for TBS (solid line) and the Public Service (dotted line). Subindicators are sorted from least negative to most negative at TBS."
+expl_E <- "Each cell of this chart displays the proportion of responses for a particular subindicator and sector - negative (red), neutral (blue) and postive (green). The bars over each column represent the average value for this subindicator for TBS (solid line) and the Public Service (dotted line). Sectors and subindicators are sorted from least negative to most negative at TBS."
 expl_E <- str_wrap(expl_E, 130)
-ttl_E <- "PSES@TBS 2018 - Occupational and Employment Equity Groups"
+ttl_E <- "PSES@TBS 2018 - Sectors" #"PSES@T.BS 2018 - Occupational and Employment Equity Groups"
 cap_E <- "2018 Public Service Employee Survey Open Datasets"
 file_E <- paste0(ttl_E,".pdf")
 #TBSagg.df$sentiment_E <- mapvalues(TBSagg.df$sentiment, 
@@ -143,9 +152,9 @@ PNN_E.clrs <- c("NEGATIVE" = "#CD202C",
                 "Public Service" = "#fabcb3")
 
 # French captions and labels
-expl_F <- "Chaque cellule de ce graphique affiche la proportion de réponses pour sous-indicateur et un secteur en particulier, soir négatif (rouge), neutre (bleu) et positif (vert). Les barres sur chaque colonne représentent la valeur moyenne poure sous-indicateur pour le SCT (ligne solide) et la fonction publique (ligne pointillée). Les sous-indicateurs sont triés du moins négatif au plus négatif pour le SCT."
+expl_F <- "Chaque cellule de ce graphique affiche la proportion de réponses pour un sous-indicateur et un secteur en particulier, soir négatif (rouge), neutre (bleu) et positif (vert). Les barres sur chaque colonne représentent la valeur moyenne poure sous-indicateur pour le SCT (ligne solide) et la fonction publique (ligne pointillée). Les secteurs et les sous-indicateurs sont triés du moins négatif au plus négatif pour le SCT."
 expl_F <- str_wrap(expl_F, 130)
-ttl_F <- "SAFF@SCT 2018 - Groupes professionnels et d'équité en emploi" 
+ttl_F <- "SAFF@SCT 2018 - Secteurs" #"SAFF@SCT 2018 - Groupes professionnels et d'équité en emploi" 
 cap_F <- "Ensemble de données ouvertes du Sondage auprès des fonctionnaires fédéraux de 2018"
 file_F <- paste0(ttl_F,".pdf")
 #TBSagg.df$sentiment_F <- mapvalues(TBSagg.df$sentiment, 
@@ -183,26 +192,16 @@ TBSagg_noPS.df <- TBSagg_noPS.df %>%
 
 
 # Create separate PS dataframe
-TBSagg_PS.df <- filter(TBSagg.df, LEVEL1ID == "0" | BYCOND == "TBS")
-
-# Compute PS overall means to compare to the PS, TBS and Sector data
-PSoverall <- filter(TBSagg_PS.df, BYCOND %in% c("PS","TBS"))
-
-PSoverall <- PSoverall %>%
+TBSagg_PS.df <- TBSagg.df %>%
   group_by(SUBINDICATORENG, sentiment) %>%
-  filter(BYCOND =="PS") %>%
-  select(SUBINDICATORENG, sentiment, PSmean = prop) %>%
-  right_join(PSoverall, by = c("SUBINDICATORENG", "sentiment")) %>%
-  select(names(PSoverall), PSmean) %>%
-  #mutate(PSmean = prop[which(BYCOND == "PS")])%>%
+  #filter(BYCOND =="PS") %>%
+  #select(SUBINDICATORENG, sentiment, PSmean = prop) %>%
+  #right_join(PSoverall, by = c("SUBINDICATORENG", "sentiment")) %>%
+  #select(names(PSoverall), PSmean) %>%
+  mutate(PSmean = prop[which(BYCOND == "PS")])%>%
   ungroup() %>%
   arrange(SUBINDICATORENG, sentiment)
 
-PSdetail <- filter(TBSagg_PS.df, !(BYCOND %in% c("PS","TBS")))
-
-PSdetail <- mutate(PSdetail, PSmean = prop)
-
-TBSagg_PS.df <- bind_rows(PSoverall, PSdetail)
 #------------
 
 # DEFINE PLOT FUNCTION
@@ -263,7 +262,7 @@ plotPSES <- function(language, wdth = 10, hght = 8, textSize = 9) {
     #          ymin = -Inf,ymax = Inf) +
     geom_rect(data = subset(TBSagg_noPS.df,TBSmeanDiff >= 8),
               aes(fill = sentiment),xmin = -Inf,xmax = Inf,
-              ymin = -Inf,ymax = Inf,alpha = 0.5) +
+              ymin = -Inf,ymax = Inf,alpha = 0.3) +
     geom_bar(stat = "identity") +
     scale_fill_manual(values = PNN_lang.clrs, labels = PNN_lang.lbls) +
     geom_errorbar(aes(ymax=TBSmean, ymin=TBSmean, linetype = TBSmean_lang), colour = "grey20") +
@@ -275,7 +274,7 @@ plotPSES <- function(language, wdth = 10, hght = 8, textSize = 9) {
          subtitle = expl_lang,
          caption = cap_lang) +
     facet_grid(SUBINDICATOR_lang ~ DESCRIP_lang, switch = "y", #scales = "free_y",
-               labeller = labeller(DESCRIP_lang = label_wrap_gen(20), SUBINDICATOR_lang = label_wrap_gen(15)))  +
+               labeller = labeller(DESCRIP_lang = label_wrap_gen(32), SUBINDICATOR_lang = label_wrap_gen(15)))  +
     theme(plot.title = element_text(size = 16, hjust = 0, colour = "grey40"),
           plot.subtitle = element_text(face = "bold", size = textSize, colour = "grey40"),
           plot.caption = element_text(face = "italic", size = textSize, colour = "grey45"),
@@ -299,9 +298,9 @@ plotPSES <- function(language, wdth = 10, hght = 8, textSize = 9) {
   return()
 }
 #------------
- 
+
 # CREATE BILINGUAL PLOTS
 #------------
 # This chunk simply calls the above function to create two plots, one in French and one in English.
 plotPSES("E", 8, 13.5, 8)
-plotPSES("F", 8, 13.5, 8)
+plotPSES("F", 8, 13.5, 6)

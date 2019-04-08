@@ -622,7 +622,7 @@ bestData <- sectorDeltas %>%
   filter(unitcode != "TBS")
 
 best <- ggplot(data = bestData, x = abbr_E, group = abbr_E) +
-  geom_col(aes(x = abbr_E, y = `2018`), colour = "grey80", fill = "#f7f7f7", width = 0.8) +
+  geom_col(aes(x = abbr_E, y = `2018`), fill = "#f7f7f7", width = 0.8) +
   geom_hline(aes(yintercept = `2017`), colour = "grey60") +
   geom_hline(aes(yintercept = `2018`), colour = "grey60") +
   geom_segment(aes(x = abbr_E, xend = abbr_E, y = `2017`, yend = `2018`, colour = delta),
@@ -649,7 +649,7 @@ worstData <- sectorDeltas %>%
   filter(unitcode != "TBS")
 
 worst <- ggplot(data = worstData, x = abbr_E, group = abbr_E) +
-  geom_col(aes(x = abbr_E, y = `2018`), colour = "grey80", fill = "#f7f7f7", width = 0.8) +
+  geom_col(aes(x = abbr_E, y = `2018`), fill = "#f7f7f7", width = 0.8) +
   geom_hline(aes(yintercept = `2017`), colour = "grey60") +
   geom_hline(aes(yintercept = `2018`), colour = "grey60") +
   geom_segment(aes(x = abbr_E, xend = abbr_E, y = `2017`, yend = `2018`, colour = delta),
@@ -732,7 +732,7 @@ harNatureData <- sectorHarDis %>%
   filter(startsWith(QUESTION,"Q50")) %>%
   mutate(Qshort_E = word(TITLE_E,3, sep = fixed('.'))) %>%
   arrange(desc(unitcode),`2018`) %>%
-  mutate(order = row_number())
+  mutate(order = ifelse(unitcode == "TBS", (row_number()+999), row_number()))
 harNature <- ggplot(harNatureData, aes(x=fct_reorder(str_wrap(substr(Qshort_E,1,50),30), order), y=`2018`)) +
   labs(
     x="Sectors", 

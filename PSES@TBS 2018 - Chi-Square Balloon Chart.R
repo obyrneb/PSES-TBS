@@ -49,10 +49,10 @@ demoMap <- read.csv(file.path(mainDir,dataDir,"PSES2018_Demographic_Mapping.csv"
 #------------
 
 TBSdata <- pses2018 %>%
-  filter(LEVEL1ID == "26" & SURVEYR == 2018 & !endsWith(BYCOND, c("200","303","304","201","202","999"))) %>%
-  mutate(unitcode = ifelse(startsWith(TBS.df$BYCOND,"LEVEL"), 
-                                        word(TBS.df$BYCOND, 2, sep = " = "), 
-                                        ifelse(TBS.df$BYCOND %in% c("TBS","PS"), TBS.df$BYCOND, NA))) %>%
+  filter(LEVEL1ID == "26" & SURVEYR == 2018) %>%
+  mutate(unitcode = ifelse(startsWith(BYCOND,"LEVEL"), 
+                                        word(BYCOND, 2, sep = " = "), 
+                                        ifelse(BYCOND %in% c("TBS","PS"), TBS.df$BYCOND, NA))) %>%
   filter(!(unitcode %in% c("200","303","304","201","202","999"))) %>%
   mutate(DemoQ = ifelse(is.na(BYCOND),"TBS",
                         ifelse(startsWith(BYCOND, "LEVEL"),"org",
@@ -104,15 +104,15 @@ balloon <- TBS_Xsq %>%
   mutate(descrip_e_cut = paste0(substr(DESCRIP_E,1,15),"...")) %>%
   arrange(BYCOND) %>%
   mutate(descrip_e_cut = factor(descrip_e_cut, levels = unique(descrip_e_cut))) %>%
-  select(QUESTION,TITLE_E,DemoQ_E,BYCOND,DESCRIP_E,descrip_e_cut,p.value,sentiment,.stdres,.observed,ANSCOUNT)
+  select(QUESTION,TITLE_E,DemoQ_E,BYCOND,DESCRIP_E,descrip_e_cut,p.value,sentiment,.stdres,.observed,ANSCOUNT,prop)
 
 #balloon[balloon == "First official language - French"] <- "First OL: French"
 #balloon[balloon == "First official language - English"] <- "First OL: English"
 
 bp <- ggplot(balloon,aes(x = descrip_e_cut, y = reorder(QUESTION,desc(QUESTION)), 
-                         text = paste0(sentiment,"<br>",
+                         text = paste0(sentiment," (n=",.observed,", %=",prop,")","<br>",
                                        TITLE_E,"<br>",
-                                       "Demographic: ", DemoQ_E, " - ", DESCRIP_E, " (n=",.observed,")","<br>",
+                                       "Demographic: ", DemoQ_E, " - ", DESCRIP_E, "<br>",
                                        " (standardized residual = ",round(.stdres,2),", p-value = ", round(p.value,5),")"
                          ))) +
   geom_point(aes(size=.observed, colour=sentiment,alpha=(.observed/ANSCOUNT))) +
@@ -138,4 +138,4 @@ bp <- ggplot(balloon,aes(x = descrip_e_cut, y = reorder(QUESTION,desc(QUESTION))
 
 bp <- ggplotly(bp, tooltip = c("text"))
 
-htmlwidgets::saveWidget(as.widget(bp), file.path(mainDir,plotDir,"ChiSquare_BalloonChart.html"))
+htmlwidgets::saveWidget(as_widget(bp), file.path(mainDir,plotDir,"ChiSquare_BalloonChart.html"))

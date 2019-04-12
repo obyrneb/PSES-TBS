@@ -73,12 +73,12 @@ score100s <- question100s %>%
 
 #----
 # SET SECTOR
-apply(sectorAbbr,1,) 
+#apply(sectorAbbr,1,) 
 
 
 
-thisSector <- 408
-thisAbbr_E <- "IAS"
+thisSector <- 301
+thisAbbr_E <- "OCIO"
 
 sectorData <- score100s %>%
   filter(unitcode %in% c(thisSector,"TBS")) %>%
@@ -194,8 +194,12 @@ sectorDeltas <- question100s %>%
   mutate(delta = `2018`-`2017`)
 
 # Get the the 10 best and the 10 worst deltas
-best10deltas <- filter(sectorDeltas, unitcode == thisSector & delta > 0) %>% top_n(10,delta) %>% select(QUESTION)
-worst10deltas <- filter(sectorDeltas, unitcode == thisSector & delta < 0) %>% top_n(-10,delta) %>% select(QUESTION)
+#best10deltas <- filter(sectorDeltas, unitcode == thisSector & delta > 0) %>% top_n(10,delta) %>% select(QUESTION)
+#worst10deltas <- filter(sectorDeltas, unitcode == thisSector & delta < 0) %>% top_n(-10,delta) %>% select(QUESTION)
+best10deltas <- filter(sectorDeltas, unitcode == thisSector & delta > 0) %>%
+  arrange(desc(delta),`2018`) %>% slice(1:10) %>% select(QUESTION,delta,`2018`)
+worst10deltas <- filter(sectorDeltas, unitcode == thisSector & delta < 0) %>%
+  arrange(delta,`2018`) %>% slice(1:10) %>% select(QUESTION,delta,`2018`)
 
 # Set the delta theme, which we will reuse for both charts
 deltaTheme <- list( 
@@ -231,7 +235,7 @@ deltaTheme <- list(
 
 # Use the 10 best deltas to build the data for the "Most postive shifts"
 bestData <- sectorDeltas %>%
-  inner_join(best10deltas, by = "QUESTION") %>%
+  inner_join(select(best10deltas,QUESTION), by = "QUESTION") %>%
   filter(unitcode != "TBS")
 
 # Build the "Most postive shifts" chart
@@ -249,10 +253,11 @@ best.plt <- ggplot(data = bestData, x = abbr_E, group = abbr_E) +
             size = 3, colour = "grey30", fontface = "bold", hjust = -0.3, vjust = 0.5) +
   geom_text(aes(label = paste0("(+",delta,")"), x = abbr_E, y = `2017`, colour = delta),
             size = 3, fontface = "bold", hjust = 2, vjust = 0.5) +
-  geom_text(aes(label = paste0("ind",INDICATORID), x = abbr_E, y = 0),
-            size = 3, colour = "grey50", fontface = "plain", hjust = -0.1, vjust = 0.5) +
+  #geom_text(aes(label = paste0("ind",INDICATORID), x = abbr_E, y = 0),
+  #          size = 3, colour = "grey50", fontface = "plain", hjust = -0.1, vjust = 0.5) +
   coord_flip() +
-  facet_grid(fct_reorder(substr(TITLE_E,10,140),delta,.desc=TRUE)~.,switch = "y", labeller = label_wrap_gen(60)) +
+  facet_grid(fct_reorder(paste0(INDICATORID,"-",INDICATORENG,": ",substr(TITLE_E,10,140)),
+                         delta,.desc=TRUE)~.,switch = "y", labeller = label_wrap_gen(60)) +
   #scale_alpha_manual(values = c(1,.5)) +
   scale_colour_gradient2(high = "#0571b0", mid = "#bcbcbc", low = "#ca0020") +
   scale_y_continuous(limits = c(0,100), breaks = c(0,25,50,75,100), expand = expand_scale(add = c(0,5))) +
@@ -260,7 +265,7 @@ best.plt <- ggplot(data = bestData, x = abbr_E, group = abbr_E) +
 
 # Use the 10 worst deltas to build the data for the "Most negative shifts"
 worstData <- sectorDeltas %>%
-  inner_join(worst10deltas, by = "QUESTION") %>%
+  inner_join(select(worst10deltas,QUESTION), by = "QUESTION") %>%
   filter(unitcode != "TBS")
 
 # Build the "Most negative shifts" chart
@@ -278,10 +283,11 @@ worst.plt <- ggplot(data = worstData, x = abbr_E, group = abbr_E) +
             size = 3, colour = "grey30", fontface = "bold", hjust = 1.3, vjust = 0.5) +
   geom_text(aes(label = paste0("(",delta,")"), x = abbr_E, y = `2018`, colour = delta),
             size = 3, fontface = "bold", hjust = 2, vjust = 0.5) +
-  geom_text(aes(label = paste0("ind",INDICATORID), x = abbr_E, y = 0),
-            size = 3, colour = "grey50", fontface = "plain", hjust = -0.1, vjust = 0.5) +
+  #geom_text(aes(label = paste0("ind",INDICATORID), x = abbr_E, y = 0),
+  #          size = 3, colour = "grey50", fontface = "plain", hjust = -0.1, vjust = 0.5) +
   coord_flip() +
-  facet_grid(fct_reorder(substr(TITLE_E,10,140),delta)~.,switch = "y", labeller = label_wrap_gen(60)) +
+  facet_grid(fct_reorder(paste0(INDICATORID,"-",INDICATORENG,": ",substr(TITLE_E,10,140)),
+                         delta)~.,switch = "y", labeller = label_wrap_gen(60)) +
   #scale_alpha_manual(values = c(1,.5)) +
   scale_colour_gradient2(high = "#0571b0", mid = "#bcbcbc", low = "#ca0020") +
   scale_y_continuous(limits = c(0,100), breaks = c(0,25,50,75,100), expand = expand_scale(add = c(0,5))) +
@@ -358,7 +364,7 @@ harNatureData <- sectorHarDis %>%
   filter(startsWith(QUESTION,"Q50")) %>%
   mutate(Qshort_E = word(TITLE_E,3, sep = fixed('.'))) %>%
   arrange(desc(unitcode),`2018`) %>%
-  mutate(order = ifelse(unitcode == "TBS", (row_number()+999), row_number()))
+  mutate(order = ifelse(unitcode == "TBS", row_number(), NA))
 # Create the the nature of harassment chart
 harNature.plt <- ggplot(harNatureData, aes(x=fct_reorder(str_wrap(substr(Qshort_E,1,50),30), order), y=`2018`)) +
   labs(
@@ -381,7 +387,7 @@ disTypeData <- sectorHarDis %>%
   filter(startsWith(QUESTION,"Q57")) %>%
   mutate(Qshort_E = word(TITLE_E,3, sep = fixed('.'))) %>%
   arrange(desc(unitcode),`2018`) %>%
-  mutate(order = row_number())
+  mutate(order = ifelse(unitcode == "TBS", row_number(), NA))
 # Create the type of discrimination chart
 disType.plt <- ggplot(disTypeData, aes(x=fct_reorder(str_wrap(substr(Qshort_E,1,50),30), order), y=`2018`)) +
   labs(
@@ -438,15 +444,16 @@ report_card.plt
 ggsave(file.path(mainDir,plotDir,paste0(ttl_E,".pdf")), plot = report_card.plt, height = 8, width = 11)
 }
 
-sectorList <- distinct(question100s, unitcode) %>% filter(!unitcode %in% c("TBS","PS")) %>% as.vector(mode = "numeric")
+#c(200,201,202,301,302,303,400,401,402,403,404,304,405,406,407,408,305,306,307,308,309,310,311,312,313,314,315,203)
 
-sectorVector <- sectorList$unitcode
+sectorList <- distinct(score100s, unitcode, DESCRIP_E) %>% filter(!unitcode %in% c("TBS","PS","300","999"))
 
-tv <- c(200,300)
+#sectorVector <- sectorList$unitcode
 
-lapply(sectorList,report_card, question100s, score100s)
+#tv <- c(200,300)
 
-for (i in c(200,300,301,302,303,400,401,402,403,404,304,405,406,407,408,
-            305,201,306,307,308,309,202,310,311,312,313,314,315,203,999)) {
+#lapply(sectorList,report_card, question100s, score100s)
+
+for (i in sectorList$unitcode) {
   report_card(i, question100s, score100s)
   }

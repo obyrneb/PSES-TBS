@@ -243,8 +243,9 @@ best.plt <- ggplot(data = bestData, x = abbr_E, group = abbr_E) +
   geom_col(aes(x = abbr_E, y = `2018`), fill = "#f7f7f7", width = 0.8) +
   geom_hline(aes(yintercept = `2017`), colour = "grey60") +
   geom_hline(aes(yintercept = `2018`), colour = "grey60") +
-  geom_segment(aes(x = abbr_E, xend = abbr_E, y = `2017`, yend = `2018`, colour = delta),
-               size = 1, linejoin = "mitre", arrow = arrow(length = unit(0.2, "cm"))) +
+  geom_point(aes(x = abbr_E, y = (`2017`+delta/2), colour = delta), shape = 62) +
+  #geom_segment(aes(x = abbr_E, xend = abbr_E, y = `2017`, yend = `2018`, colour = delta),
+  #             size = 1, linejoin = "mitre", arrow = arrow(length = unit(0.2, "cm"))) +
   #geom_point(aes(x = abbr_E, y = `2017`, alpha = abbr_E), size = 8, shape = 16, colour = "blue") +
   #geom_point(aes(x = abbr_E, y = `2018`, alpha = abbr_E), size = 8, shape = 16, colour = "red") +
   geom_text(aes(label = `2017`, x = abbr_E, y = `2017`),
@@ -273,8 +274,9 @@ worst.plt <- ggplot(data = worstData, x = abbr_E, group = abbr_E) +
   geom_col(aes(x = abbr_E, y = `2018`), fill = "#f7f7f7", width = 0.8) +
   geom_hline(aes(yintercept = `2017`), colour = "grey60") +
   geom_hline(aes(yintercept = `2018`), colour = "grey60") +
-  geom_segment(aes(x = abbr_E, xend = abbr_E, y = `2017`, yend = `2018`, colour = delta),
-               size = 1, linejoin = "mitre", arrow = arrow(length = unit(0.2, "cm"))) +
+  geom_point(aes(x = abbr_E, y = (`2017`+delta/2), colour = delta), shape = 60) +
+  #geom_segment(aes(x = abbr_E, xend = abbr_E, y = `2017`, yend = `2018`, colour = delta),
+  #             size = 1, linejoin = "mitre", arrow = arrow(length = unit(0.2, "cm"))) +
   #geom_point(aes(x = abbr_E, y = `2017`, alpha = abbr_E), size = 8, shape = 16, colour = "blue") +
   #geom_point(aes(x = abbr_E, y = `2018`, alpha = abbr_E), size = 8, shape = 16, colour = "red") +
   geom_text(aes(label = `2017`, x = abbr_E, y = `2017`),

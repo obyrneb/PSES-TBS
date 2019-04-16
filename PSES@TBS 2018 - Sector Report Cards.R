@@ -84,8 +84,11 @@ score100s <- question100s %>%
 # SET SECTOR - for testing purposes only
 
 
-thisSector <- 200
-thisAbbr_E <- "Programs"
+thisSector <- 301
+thisAbbr_E <- "OCIO"
+
+customName <- "Office of the Chief Information Officer"
+customAbbr <- "OCIO"
 
 sectorData <- score100s %>%
   filter(unitcode %in% c(thisSector,"TBS")) %>%
@@ -106,6 +109,8 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
   
   sectorName_E <- ifelse(is.null(customName), sectorData$DESCRIP_E[[1]], customName)
   thisAbbr_E <- ifelse(is.null(customAbbr), sectorData$abbr_E[[1]], customAbbr)
+  
+  sectorData <- mutate(sectorData, abbr_E = ifelse(unitcode == thisSector, thisAbbr_E, unitcode))
   
   anscount <- question100s %>% 
     filter(unitcode == thisSector & SURVEYR == 2018) %>% 
@@ -298,7 +303,7 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
   
   # Extract the harassment and discrimination questions using the appropriate subindicators (12 and 13)
   sectorHarDis <- question100s %>%
-    filter(unitcode %in% c(thisSector, "TBS") & UBINDICATORID %in% c(12,13)) %>%
+    filter(unitcode %in% c(thisSector, "TBS") & SUBINDICATORID %in% c(12,13) & SURVEYR == 2018) %>%
     mutate(abbr_E = ifelse(unitcode == thisSector, thisAbbr_E, unitcode)) %>%
     select(QUESTION,TITLE_E,TITLE_F,unitcode,abbr_E,SURVEYR,AGREE,agree_2017) %>%
     mutate(delta = AGREE - agree_2017) %>%
@@ -310,20 +315,53 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
   har_dis.ttl <- plot_grid(har.ttl,dis.ttl)
   
   # Create a single harassment and discrimination plot showing the rates of each (Q48 and Q55)
-  har_dis.plt <- ggplot(data = filter(sectorHarDis, QUESTION %in% c("Q48","Q55")), aes(x = abbr_E)) +
-    geom_text(aes(label = paste0(abbr_E,": ",`2018`,"%"),y=1, colour = QUESTION), fontface = "bold.italic", size = 4) +
-    facet_grid(.~str_wrap(substr(TITLE_E,10,200),50)) +
-    scale_x_discrete(position = "bottom") +
-    scale_colour_manual(values = c("#7fc97f","#beaed4")) +
-    deltaTheme +
-    theme(axis.text = element_blank()) +
-    theme(strip.text = element_text(size = 7))
+  #har_dis.plt <- ggplot(data = filter(sectorHarDis, QUESTION %in% c("Q48","Q55")), aes(x = abbr_E)) +
+  #  geom_text(aes(label = paste0(abbr_E,": ",`2018`,"%"),y=1, colour = QUESTION), fontface = "bold.italic", size = 4) +
+  #  facet_grid(.~str_wrap(substr(TITLE_E,10,200),50)) +
+  #  scale_x_discrete(position = "bottom") +
+  #  scale_colour_manual(values = c("#7fc97f","#beaed4")) +
+  #  deltaTheme +
+  #  theme(axis.text = element_blank()) +
+  #  theme(strip.text = element_text(size = 7))
   
-  har.plt <- 
+
+  har_dis <- sectorHarDis %>%
+    filter(QUESTION %in% c("Q48","Q55")) %>%
+    select(QUESTION,abbr_E,`2017`,`2018`) %>%
+    gather("SURVEYR","AGREE",-QUESTION,-abbr_E)
+  
+  har_dis.plt <- ggplot(har_dis, aes(x = SURVEYR, y = AGREE, group = abbr_E)) +
+    facet_wrap(~QUESTION, scales = "free_y") + 
+    geom_line(data = har_dis,
+              aes(linetype = abbr_E, colour = QUESTION, alpha = abbr_E), size = 1) +
+    scale_colour_manual(values = c("#7fc97f","#beaed4")) +
+    scale_alpha_manual(values = c(1,0.5)) +
+    geom_text_repel(data = har_dis %>% filter(SURVEYR == 2017), 
+                    aes(label = abbr_E, colour = QUESTION, alpha = abbr_E), 
+                    hjust = 2, 
+                    fontface = "bold", 
+                    size = 3,
+                    nudge_x = -1, 
+                    direction = "y") +
+    geom_text_repel(data = har_dis %>% filter(SURVEYR == 2018), 
+                    aes(label = abbr_E, colour = QUESTION, alpha = abbr_E), 
+                    hjust = -1, 
+                    fontface = "bold", 
+                    size = 3,
+                    nudge_x = 1, 
+                    direction = "y") +
+    geom_point(colour = "white", size = 8, shape = 16) +
+    geom_text(aes(label = AGREE, y = AGREE),
+              size = 3, colour = "grey30", fontface = "bold") +
+    scale_x_discrete(position = "top", expand = expand_scale(add = 1)) +
+    scale_y_continuous(expand = expand_scale(add = 1)) +
+    # Reuse theme
+    slopeTheme +
+    theme(strip.text = element_blank())
   
   # Extract the data on the nature of harassment
   harNatureData <- sectorHarDis %>%
-    filter(startsWith(QUESTION,"Q50" & SURVEYR == 2018)) %>%
+    filter(startsWith(QUESTION,"Q50") & SURVEYR == 2018) %>%
     mutate(Qshort_E = word(TITLE_E,3, sep = fixed('.'))) %>%
     arrange(`2018`) %>%
     mutate(order = ifelse(unitcode == "TBS", row_number(), NA))
@@ -336,7 +374,7 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
       y="% answering yes") +
     geom_col(aes(alpha = abbr_E), fill = "#7fc97f") +
     geom_text(hjust=-0.1, vjust=0.5, size=3, colour="grey30", fontface = "bold", 
-              aes(label=ifelse(`2018`==0,"-",`2018`), y=0)) +
+              aes(label=ifelse(is.na(`2018`),"n<=5",`2018`), y=0)) +
     coord_flip() +
     facet_grid(.~abbr_E) +
     scale_alpha_manual(values = c(1,.5)) +
@@ -348,7 +386,7 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
   
   # Extract the data on the type of discrimination
   disTypeData <- sectorHarDis %>%
-    filter(startsWith(QUESTION,"Q57" & SURVEYR == 2018)) %>%
+    filter(startsWith(QUESTION,"Q57") & SURVEYR == 2018) %>%
     mutate(Qshort_E = word(TITLE_E,3, sep = fixed('.'))) %>%
     arrange(`2018`) %>%
     mutate(order = ifelse(unitcode == "TBS", row_number(), NA))
@@ -361,7 +399,7 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
       y="% answering yes") +
     geom_col(aes(alpha = abbr_E), fill = "#beaed4") +
     geom_text(hjust=-0.1, vjust=0.5, size=3, colour="grey30", fontface = "bold", 
-              aes(label=ifelse(`2018`==0,"-",`2018`), y=0)) +
+              aes(label=ifelse(is.na(`2018`),"n<=5",`2018`), y=0)) +
     coord_flip() +
     facet_grid(.~abbr_E) +
     scale_alpha_manual(values = c(1,.5)) +

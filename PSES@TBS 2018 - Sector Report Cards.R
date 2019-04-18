@@ -112,12 +112,12 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
   
   sectorData <- mutate(sectorData, abbr_E = ifelse(unitcode == thisSector, thisAbbr_E, unitcode))
   
-  anscount <- question100s %>% 
+  thisAnscount <- question100s %>% 
     filter(unitcode == thisSector & SURVEYR == 2018) %>% 
     summarise(ANSCOUNT = max(ANSCOUNT)) %>% 
     pull(ANSCOUNT)
   
-  ttl_E <- paste0("PSES 2018 Report Card - ",sectorName_E," (responses = ",anscount,")")
+  ttl_E <- paste0("PSES 2018 Report Card - ",sectorName_E," (responses = ",thisAnscount,")")
   
   #----
   ## TOP-LEFT: Consutruct slopechart comparing sector and TBS
@@ -175,7 +175,7 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
                     direction = "y") +
     geom_point(colour = "white", size = 8, shape = 16) +
     geom_text(aes(label = round(indicator100,0), y = round(indicator100,0)),
-              size = 3, colour = "grey30", fontface = "bold", alpha = 0.6) +
+              size = 3, colour = "grey30", fontface = "bold", alpha = 0.8) +
     scale_x_discrete(position = "top", expand = expand_scale(add = 1)) +
     scale_y_continuous(expand = expand_scale(add = 1)) +
     # Reuse theme
@@ -304,14 +304,28 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
   # Extract the harassment and discrimination questions using the appropriate subindicators (12 and 13)
   sectorHarDis <- question100s %>%
     filter(unitcode %in% c(thisSector, "TBS") & SUBINDICATORID %in% c(12,13) & SURVEYR == 2018) %>%
+    expand(QUESTION,unitcode) %>%
+    left_join(distinct(select(question100s,QUESTION,TITLE_E,TITLE_F)), by = "QUESTION") %>%
+    left_join(filter(question100s, SURVEYR == 2018), by = c("QUESTION", "unitcode", "TITLE_E", "TITLE_F")) %>%
+    select(QUESTION,TITLE_E,TITLE_F,unitcode,abbr_E,AGREE,agree_2017,ANSCOUNT) %>%
     mutate(abbr_E = ifelse(unitcode == thisSector, thisAbbr_E, unitcode)) %>%
-    select(QUESTION,TITLE_E,TITLE_F,unitcode,abbr_E,SURVEYR,AGREE,agree_2017) %>%
     mutate(delta = AGREE - agree_2017) %>%
     rename(`2017` = agree_2017, `2018` = AGREE)
+    
+    #mutate(i = row_number()) %>%
+    #spread(unitcode,QUESTION) %>%
+    #gather(key = "unitcode", value = "QUESTION", -i) %>%
+    #select(-i) %>%
+    
+    
+    #mutate(abbr_E = ifelse(unitcode == thisSector, thisAbbr_E, unitcode)) %>%
+    #select(QUESTION,TITLE_E,TITLE_F,unitcode,abbr_E,SURVEYR,AGREE,agree_2017) %>%
+    #mutate(delta = AGREE - agree_2017) %>%
+    #rename(`2017` = agree_2017, `2018` = AGREE)
 
   # Create the harassment and discrimination titles
-  har.ttl <- textGrob("Victims of Harassment", gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
-  dis.ttl <- textGrob("Victims of Discrimination", gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
+  har.ttl <- textGrob("Victims of Harassment (%)", gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
+  dis.ttl <- textGrob("Victims of Discrimination (%)", gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
   har_dis.ttl <- plot_grid(har.ttl,dis.ttl)
   
   # Create a single harassment and discrimination plot showing the rates of each (Q48 and Q55)
@@ -324,11 +338,13 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
   #  theme(axis.text = element_blank()) +
   #  theme(strip.text = element_text(size = 7))
   
-
+  suppressed <- 5/thisAnscount
+  
   har_dis <- sectorHarDis %>%
     filter(QUESTION %in% c("Q48","Q55")) %>%
     select(QUESTION,abbr_E,`2017`,`2018`) %>%
-    gather("SURVEYR","AGREE",-QUESTION,-abbr_E)
+    gather("SURVEYR","AGREE",-QUESTION,-abbr_E) %>%
+    mutate(AGREE = ifelse(is.na(AGREE),suppressed,AGREE))
   
   har_dis.plt <- ggplot(har_dis, aes(x = SURVEYR, y = AGREE, group = abbr_E)) +
     facet_wrap(~QUESTION, scales = "free_y") + 
@@ -351,8 +367,8 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
                     nudge_x = 1, 
                     direction = "y") +
     geom_point(colour = "white", size = 8, shape = 16) +
-    geom_text(aes(label = AGREE, y = AGREE),
-              size = 3, colour = "grey30", fontface = "bold") +
+    geom_text(aes(label = ifelse(AGREE == suppressed,"n<6",AGREE), y = AGREE),
+              size = 3, colour = "grey30", fontface = "bold", alpha = 0.8) +
     scale_x_discrete(position = "top", expand = expand_scale(add = 1)) +
     scale_y_continuous(expand = expand_scale(add = 1)) +
     # Reuse theme
@@ -361,20 +377,21 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
   
   # Extract the data on the nature of harassment
   harNatureData <- sectorHarDis %>%
-    filter(startsWith(QUESTION,"Q50") & SURVEYR == 2018) %>%
+    filter(startsWith(QUESTION,"Q50")) %>%
     mutate(Qshort_E = word(TITLE_E,3, sep = fixed('.'))) %>%
+    mutate(`2018` = ifelse(is.na(`2018`),0.5,`2018`)) %>%
     arrange(`2018`) %>%
     mutate(order = ifelse(unitcode == "TBS", row_number(), NA))
   
   # Create the the nature of harassment chart
   harNature.plt <- ggplot(harNatureData, 
-                          aes(x=fct_reorder(str_wrap(substr(Qshort_E,1,50),30), order, fun = max, na.rm = TRUE), y=`2018`)) +
+                          aes(x=fct_reorder(str_wrap(substr(Qshort_E,1,30),30), order, fun = max, na.rm = TRUE), y=`2018`)) +
     labs(
       x="Sectors", 
       y="% answering yes") +
     geom_col(aes(alpha = abbr_E), fill = "#7fc97f") +
     geom_text(hjust=-0.1, vjust=0.5, size=3, colour="grey30", fontface = "bold", 
-              aes(label=ifelse(is.na(`2018`),"n<=5",`2018`), y=0)) +
+              aes(label=ifelse(`2018` == 0.5,paste0("n<6"),`2018`), y=0)) +
     coord_flip() +
     facet_grid(.~abbr_E) +
     scale_alpha_manual(values = c(1,.5)) +
@@ -386,20 +403,21 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
   
   # Extract the data on the type of discrimination
   disTypeData <- sectorHarDis %>%
-    filter(startsWith(QUESTION,"Q57") & SURVEYR == 2018) %>%
+    filter(startsWith(QUESTION,"Q57")) %>%
     mutate(Qshort_E = word(TITLE_E,3, sep = fixed('.'))) %>%
+    mutate(`2018` = ifelse(is.na(`2018`),0.5,`2018`)) %>%
     arrange(`2018`) %>%
     mutate(order = ifelse(unitcode == "TBS", row_number(), NA))
   
   # Create the type of discrimination chart
   disType.plt <- ggplot(disTypeData,
-                        aes(x=fct_reorder(str_wrap(substr(Qshort_E,1,50),30), order, fun = max, na.rm = TRUE), y=`2018`)) +
+                        aes(x=fct_reorder(str_wrap(substr(Qshort_E,1,30),30), order, fun = max, na.rm = TRUE), y=`2018`)) +
     labs(
       x="Sectors", 
       y="% answering yes") +
     geom_col(aes(alpha = abbr_E), fill = "#beaed4") +
     geom_text(hjust=-0.1, vjust=0.5, size=3, colour="grey30", fontface = "bold", 
-              aes(label=ifelse(is.na(`2018`),"n<=5",`2018`), y=0)) +
+              aes(label=ifelse(`2018` == 0.5,paste0("n<6"),`2018`), y=0)) +
     coord_flip() +
     facet_grid(.~abbr_E) +
     scale_alpha_manual(values = c(1,.5)) +
@@ -439,12 +457,74 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
   
   # Combine the left- and right-hand panes into a single grob, then add the title on top. All done!
   bottom.grb <- plot_grid(left.grb,right.grb)
-  report_card.plt <- plot_grid(top.grb,
+  report.grb <- plot_grid(top.grb,
                            bottom.grb,
                            nrow=2,rel_heights = c(1,20))
   
+  howto.ttl <- textGrob("\nHow to read this \nreport card", hjust = 0.5, gp=gpar(fontsize=12, col ="grey30", fontface = "bold"))
+  
+  howto.txt <- textGrob(paste0("
+This PSES \"report card\" is made up of panels summarizing
+differences between the 2017 and 2018 PSES and between the 
+TBS average and the ",sectorName_E,".\n",
+"The top-left panel shows differences between groupings of
+PSES questions by theme - \"indicators\". The right panel
+shows the top 10 most positive and negative shifts in scores.\n 
+The score is based on the \"Score 100\" measure for each question.
+It is the average of question responses using these weights: 
+Very Positive = 100,
+Positive = 75,
+Neutral = 50,
+Negative = 25,
+Very Negative = 0.\n
+Example:
+A score of 52 for \"Employee Engagement\" means that the
+average \"Score 100\" of the questions under that theme
+(5, 9, 10, 14, 43, 44 and 45)
+for that sector was 52 out of 100 - closest to \"Neutral\".\n
+Note high scores are always postive and low scores, always
+negative.\n
+Example: 
+For Q16,\"I feel that the quality of my work suffers because of...\", 
+a score of 100 means that the work almost never suffers, while
+a score of 0 indicates it almost always suffers.\n
+The bottom-left panel shows a summary of discrimination and 
+harassment rates and the relevant nature and type. Note that some
+data is suppressed when respondents are 5 or less. In that case,
+they are replaced with \"n<6\".
+                            "),
+                            hjust = 0.5, gp=gpar(fontsize=6, col ="grey30"))
+  
+  limits.ttl <- textGrob("\nLimitations", hjust = 0.5, gp=gpar(fontsize=12, col ="grey30", fontface = "bold"))
+  
+  limits.txt <- textGrob("
+Not all responses rates were the same for all sectors
+(HRD has this available).\n
+The \"Score 100\" measure does not reflect the distribution of
+responses. Example:
+50 people scoring very positive and
+50 people scoring very negative
+(50%*100 + 50%*0 = 50)
+is identical to 100 people
+scoring neutral
+(100%*50 = 50).\n
+The \"Score 100\" measure makes assumptions based on its
+weighting (described above).\n
+The \"indicators\" are not stable - PSES questions change from year to year
+and \"Indicator\" questions are weighted equally.\n
+The harassment and discrimination rates were calculated on 
+\"the last 24 months\" in 2017 and on \"the last 12 months\" in 2018.
+In cases where the rate was suppressed, only TBS data is presented 
+on harassment nature and discrimination type.
+                            ",
+                            hjust = 0.5, gp=gpar(fontsize=6, col ="grey30"))
+  
+  descrip.grb <- plot_grid(howto.ttl,howto.txt,limits.ttl,limits.txt, ncol = 1, align = "v", rel_heights = c(1,10,1,6))
+  
+  report_card.plt <- plot_grid(report.grb,descrip.grb, rel_widths = c(11,3))
+  
   # Save the report card into a PDF
-  ggsave(file.path(mainDir,plotDir,paste0(ttl_E,".pdf")), plot = report_card.plt, height = 8, width = 11)
+  ggsave(file.path(mainDir,plotDir,paste0(ttl_E,".pdf")), plot = report_card.plt, height = 8.5, width = 14)
 }
 
 #----
@@ -454,6 +534,6 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
 
 sectorList <- distinct(score100s, unitcode, DESCRIP_E) %>% filter(!unitcode %in% c("TBS","PS","300","301","999"))
 
-#for (i in sectorList$unitcode) { report_card(i, question100s, score100s) }
+for (i in sectorList$unitcode) { report_card(i, question100s, score100s) }
 
 report_card(301, question100s, score100s, "Office of the Chief Information Officer", "OCIO")

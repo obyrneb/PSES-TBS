@@ -1,0 +1,94 @@
+---
+title: "PSES 2018 Questions"
+output: html_notebook
+---
+ 
+
+```{r setup}
+library(tidyverse)
+library(grid)
+library(cowplot)
+
+mainDir <- getwd()
+dataDir <- "datasets"
+plotDir <- "plots"
+ss5File_2018 <- file.path(mainDir,dataDir,"pses2018_ss5.csv")
+ss5URL_2018 <- "https://www.canada.ca/content/dam/tbs-sct/documents/datasets/pses-saff/2018/2018_PSES_SAFF_Subset-5_Sous-ensemble-5.csv" 
+
+ifelse(!dir.exists(file.path(mainDir, dataDir)), dir.create(file.path(mainDir, dataDir)), FALSE)
+ifelse(!dir.exists(file.path(mainDir, plotDir)), dir.create(file.path(mainDir, plotDir)), FALSE)
+
+if(!file.exists(ss5File_2018)) {download.file(ss5URL_2018,ss5File_2018)}
+
+if(!exists("ss5_2018")) {ss5_2018 <- read.csv(ss5File_2018, na.strings = "9999")}
+if(!exists("indicatorMap")) {
+  indicatorMap <- read.csv(file.path(mainDir,dataDir,"PSES2018_Indicator_Mapping.csv"))}
+
+
+```
+
+```{r Question Map,fig.height = 14, fig.width = 8.5, warning = FALSE}
+TBSqs.df <- ss1 %>%
+  left_join(indicatorMap, by = "QUESTION") %>%
+  filter(LEVEL1ID %in% c("26") & LEVEL2ID == "0" & !(is.na(SCORE100))) %>%
+  arrange(INDICATORID,SUBINDICATORID) %>%
+  mutate(SUBINDICATORENG = factor(SUBINDICATORENG,unique(SUBINDICATORENG))) %>%
+  mutate(INDICATORENG = factor(INDICATORENG,unique(INDICATORENG))) %>%
+  mutate(SUBINDICATORFRA = factor(SUBINDICATORFRA,unique(SUBINDICATORFRA))) %>%
+  mutate(INDICATORFRA= factor(INDICATORFRA,unique(INDICATORFRA))) %>%
+  mutate(TITLE_E = substr(TITLE_E,10,120)) %>%
+  mutate(TITLE_F = substr(TITLE_F,10,120)) %>%
+  arrange(desc(QUESTION)) %>%
+  mutate(TITLE_E = factor(TITLE_E,unique(TITLE_E))) %>% 
+  mutate(TITLE_F = factor(TITLE_F,unique(TITLE_F)))
+
+ENplot <- ggplot(TBSqs.df, aes(x = as.factor(SURVEYR), y = TITLE_E, fill = SCORE100)) +
+  labs(title = "TBS Questions by Survey Year and Theme") +
+  geom_tile() +
+  geom_text(aes(label = SCORE100), size = 3, colour = "grey30", hjust = 0.5, vjust = 0.5) +
+  scale_fill_distiller(palette = "RdYlGn", direction = 1, limits = c(0,100)) +
+  scale_x_discrete(position = "top") +
+  scale_y_discrete(position = "right") +
+  facet_grid(#cols = vars(LEVEL1ID), 
+             rows = vars(INDICATORENG,SUBINDICATORENG),
+             scales = "free", space = "free",
+             switch = "y",
+             labeller = label_wrap_gen(width = 15)) +
+  theme_minimal() +
+  theme(text = element_text(size = 8),
+        strip.text.y = element_text(angle = 180),
+        strip.text.x = element_text(angle = 90),
+        axis.title = element_blank(),
+        axis.text.x = element_text(angle = 90),
+        axis.text.y = element_text(hjust = 0),
+        legend.position = "bottom",
+        legend.title = element_text(size=10, colour ="grey30"),
+        title = element_text(size=12, colour ="grey30", face = "bold"))
+
+FRplot <- ggplot(TBSqs.df, aes(x = as.factor(SURVEYR), y = TITLE_F, fill = SCORE100)) +
+  labs(title = "Questions du SCT par année de sondage et thème") +
+  geom_tile() +
+  geom_text(aes(label = SCORE100), size = 3, colour = "grey30", hjust = 0.5, vjust = 0.5) +
+  scale_fill_distiller(palette = "RdYlGn", direction = 1, limits = c(0,100)) +
+  scale_x_discrete(position = "top") +
+  scale_y_discrete(position = "right") +
+  facet_grid(#cols = vars(LEVEL1ID), 
+             rows = vars(INDICATORFRA,SUBINDICATORFRA),
+             scales = "free", space = "free",
+             switch = "y",
+             labeller = label_wrap_gen(width = 15)) +
+  theme_minimal() +
+  theme(text = element_text(size = 8),
+        strip.text.y = element_text(angle = 180),
+        strip.text.x = element_text(angle = 90),
+        axis.title = element_blank(),
+        axis.text.x = element_text(angle = 90),
+        axis.text.y = element_text(hjust = 0),
+        legend.position = "bottom",
+        legend.title = element_text(size=10, colour ="grey30"),
+        title = element_text(size=12, colour ="grey30", face = "bold"))
+
+ggsave(file.path(mainDir,plotDir,"TBS PSES 2018 Question Heatmap.pdf"), plot = ENplot, height = 14, width = 8.5)
+ggsave(file.path(mainDir,plotDir,"Carte de chaleur SAFF 2018 du SCT.pdf"), plot = FRplot, height = 14, width = 8.5)
+
+```

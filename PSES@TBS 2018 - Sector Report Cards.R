@@ -117,7 +117,7 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
     summarise(ANSCOUNT = max(ANSCOUNT)) %>% 
     pull(ANSCOUNT)
   
-  ttl_E <- paste0("PSES 2018 Report Card - ",sectorName_E," (responses = ",thisAnscount,")")
+  ttl_E <- paste0("PSES 2018 Report Card - ",sectorName_E," (responses = ",thisAnscount,") [DRAFT]")
   
   #----
   ## TOP-LEFT: Consutruct slopechart comparing sector and TBS
@@ -154,10 +154,7 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
   # Build slopechart
   slope.plt <- ggplot(sectorData, aes(x = SURVEYR, y = round(indicator100,0), group = INDICATORENG)) +
     facet_grid(.~abbr_E) + 
-    geom_line(data = sectorData %>% filter(unitcode == thisSector),
-              aes(color = INDICATORENG), alpha = 0.6,linetype = 1, size = 1) +
-    geom_line(data = sectorData %>% filter(unitcode == "TBS"),
-              aes(color = INDICATORENG), alpha = 0.6,linetype = 2, size = 1) +
+    geom_line(aes(color = INDICATORENG, linetype = abbr_E), alpha = 0.6, size = 1) +
     scale_colour_brewer(palette = "Set2") +
     geom_text_repel(data = sectorData %>% filter(SURVEYR == 2017), 
                     aes(label = str_wrap(INDICATORENG,10), colour = INDICATORENG), 
@@ -182,7 +179,7 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
     slopeTheme
   
   # Create title grob
-  slope.ttl <- textGrob("Year-to-Year Score 100 Comparsion", gp=gpar(fontsize = 10, fontface = "bold", col = "grey30"))
+  slope.ttl <- textGrob("Year-to-Year Comparision (Score 100)", gp=gpar(fontsize = 10, fontface = "bold", col = "grey30"))
   space.grb <- textGrob("")
   
   # Add title to slopechart
@@ -242,7 +239,7 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
   # Use the 10 best deltas to build the data for the "Most postive shifts"
   bestData <- sectorDeltas %>%
     inner_join(select(best10deltas,QUESTION), by = "QUESTION") %>%
-    filter(unitcode != "TBS")
+    filter(unitcode == thisSector)
   
   # Build the "Most postive shifts" chart
   best.plt <- ggplot(data = bestData, x = abbr_E, group = abbr_E) +
@@ -266,7 +263,7 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
   # Use the 10 worst deltas to build the data for the "Most negative shifts"
   worstData <- sectorDeltas %>%
     inner_join(select(worst10deltas,QUESTION), by = "QUESTION") %>%
-    filter(unitcode != "TBS")
+    filter(unitcode == thisSector)
   
   # Build the "Most negative shifts" chart
   worst.plt <- ggplot(data = worstData, x = abbr_E, group = abbr_E) +
@@ -288,8 +285,10 @@ report_card <- function(thisSector, question100s, score100s, customName = NULL, 
     deltaTheme
   
   # Create chart titles
-  best.ttl <- textGrob("Top 10 Positive Shifts from 2017 to 2018", gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
-  worst.ttl <- textGrob("Top 10 Negative Shifts from 2017 to 2018", gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
+  best.ttl <- textGrob(paste0("Top 10 Positive Shifts for ",thisAbbr_E," from 2017 to 2018 (Score 100)"),
+                       gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
+  worst.ttl <- textGrob(paste0("Top 10 Negative Shifts for ",thisAbbr_E," from 2017 to 2018 (Score 100)"),
+                        gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
   
   # Combine the charts and title into the right-hand pane of the report card
   right.grb <- plot_grid(best.ttl,
@@ -532,7 +531,8 @@ on harassment nature and discrimination type.
 
 #c(200,201,202,301,302,303,400,401,402,403,404,304,405,406,407,408,305,306,307,308,309,310,311,312,313,314,315,203)
 
-sectorList <- distinct(score100s, unitcode, DESCRIP_E) %>% filter(!unitcode %in% c("TBS","PS","300","301","999"))
+# Select all TBS sectors, except CIOB (use OCIO below, CDS (because there is no 2017 comparator) and "I cannot fonmd my sector"
+sectorList <- distinct(score100s, unitcode, DESCRIP_E) %>% filter(!unitcode %in% c("300","301","999")) # Exclude CDS, CIOB and NA
 
 for (i in sectorList$unitcode) { report_card(i, question100s, score100s) }
 

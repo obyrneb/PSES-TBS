@@ -1,33 +1,33 @@
-DESCRIP_E,abbr_E
-Public Service,PS
-Treasury Board of Canada Secretariat,TBS
-Policy Sectors,Policy
-Canadian Digital Services,CDS
-Chief Information Officer Branch,CIOB
-Expenditure Management Sector,EMS
-Office of the Chief Human Resources Officer,OCHRO
-Compensation and Labour Relations Sector,CLR
-Executive Management and Leadership Development,EMLD
-"Governance, Planning and Policy Sector",GPP
-Human Resources Management Transformation Sector,HRMT
-Pensions and Benefits Sector,PBS
-Office of the Comptroller General,OCG
-Acquired Services and Assets Sector,ASAS
-Financial Management Sector,FMS
-Financial Management Transformation Sector,FMT
-Internal Audit Sector,IAS
-Regulatory Affairs Sector,RAS
-Program Sectors,Program
-Economic Sector,ES
-Government Operations Sector,GOS
-"International Affairs, Security and Justice Sector",IASJ
-Social and Cultural Sector,SCS
-Enabling Sectors,Enabling
-Corporate Services Sector,CSS
-Human Resources Division,HRD
-Internal Audit and Evaluation Bureau,IAEB
-Legal Services,LS
-Priorities and Planning Sector,P&P
-Strategic Communications and Ministerial Affairs Sector,SCMA
-Minister's and Deputy Ministers' Offices,MinO/DMO
-I cannot find my organizational unit,none
+DESCRIP_E,abbr_E,abbr_F
+Public Service,PS,FP
+Treasury Board of Canada Secretariat,TBS,SCT
+Policy Sectors,Policy,Politiques
+Canadian Digital Services,CDS,SNC
+Chief Information Officer Branch,CIOB,DDPI
+Expenditure Management Sector,EMS,SGD
+Office of the Chief Human Resources Officer,OCHRO,BDPRH
+Compensation and Labour Relations Sector,CLR,SRRT
+Executive Management and Leadership Development,EMLD,GCSDL
+"Governance, Planning and Policy Sector",GPP,SGPP
+Human Resources Management Transformation Sector,HRMT,SGTRH
+Pensions and Benefits Sector,PBS,SPAS
+Office of the Comptroller General,OCG,BCG
+Acquired Services and Assets Sector,ASAS,SSAA
+Financial Management Sector,FMS,SGF
+Financial Management Transformation Sector,FMT,STGF
+Internal Audit Sector,IAS,SVI
+Regulatory Affairs Sector,RAS,SAR
+Program Sectors,Program,Programmes
+Economic Sector,ES,SPE
+Government Operations Sector,GOS,SOG
+"International Affairs, Security and Justice Sector",IASJ,SAISJ
+Social and Cultural Sector,SCS,SPSC
+Enabling Sectors,Enabling,Habilitants
+Corporate Services Sector,CSS,SSM
+Human Resources Division,HRD,DRH
+Internal Audit and Evaluation Bureau,IAEB,BVIE
+Legal Services,LS,SJ
+Priorities and Planning Sector,P&P,P&P
+Strategic Communications and Ministerial Affairs Sector,SCMA,CSAM
+Minister's and Deputy Ministers' Offices,MinO/DMO,Cabinets Min/SM
+I cannot find my organizational unit,none,aucun

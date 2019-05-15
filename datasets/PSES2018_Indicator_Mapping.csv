@@ -1,4 +1,4 @@
-QUESTION,TITLE_E,TITLE_F,INDICATORID,INDICATORENG,INDICATORFRA,SUBINDICATORID,SUBINDICATORENG,SUBINDICATORFRA
+QUESTION,TITLE_E,TITLE_F,INDICATORID,INDICATOR_E,INDICATOR_F,SUBINDICATORID,SUBINDICATOR_E,SUBINDICATOR_F
 Q01,Question 1. I get the training I need to do my job.,Question 1. Je reçois la formation dont j’ai besoin pour faire mon travail.,3,WORKFORCE,EFFECTIF,4,Job fit and development,Compatibilité entre la personne et l'emploi et perfectionnement
 Q02,Question 2. My job is a good fit with my interests.,Question 2. Mon emploi correspond bien à mes intérêts.,3,WORKFORCE,EFFECTIF,4,Job fit and development,Compatibilité entre la personne et l'emploi et perfectionnement
 Q03,Question 3. My job is a good fit with my skills.,Question 3. Mon emploi correspond bien à mes compétences.,3,WORKFORCE,EFFECTIF,4,Job fit and development,Compatibilité entre la personne et l'emploi et perfectionnement

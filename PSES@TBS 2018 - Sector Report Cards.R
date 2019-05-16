@@ -99,6 +99,7 @@ thisSectorName_E <- sectorData$DESCRIP_E[[1]]
 
 ttl_E <- paste0("PSES 2018 Report Card - ",thisSectorName_E)
 
+lang = "F"
 #----
 ### CONSTRUCT REPORT CARD FUNCTION
 
@@ -109,17 +110,25 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
   thisUnitcode <- as.character(thisUnitcode)
   
   sectorData <- score100s %>%
+    as_tibble() %>% 
     filter(unitcode %in% c(thisUnitcode,"TBS")) %>%
     set_names(~sub(paste0("_",lang),"_lang",.x)) %>%
-    select(-matches("_[EF]"))
+    select(-matches("_[EF]")) %>% 
+    mutate(INDICATOR_lang = fct_reorder(INDICATOR_lang,INDICATORID))
   
   questionData <- question100s %>% 
+    as_tibble() %>% 
     filter(unitcode %in% c(thisUnitcode,"TBS")) %>%
     set_names(~sub(paste0("_",lang),"_lang",.x)) %>%
-    select(-matches("_[EF]"))
+    select(-matches("_[EF]")) %>% 
+    mutate(INDICATOR_lang = fct_reorder(INDICATOR_lang,INDICATORID))
   
-  thisSectorName <- ifelse(is.null(customName), sectorData$DESCRIP_lang[[1]], customName)
-  thisAbbr <- ifelse(is.null(customAbbr), sectorData$abbr_lang[[1]], customAbbr)
+  thisSectorName <- ifelse(is.null(customName), 
+                           as.character(sectorData$DESCRIP_lang[sectorData$unitcode==thisUnitcode]),
+                           customName)
+  thisAbbr <- ifelse(is.null(customAbbr),
+                     as.character(sectorData$abbr_lang[sectorData$unitcode==thisUnitcode]),
+                     customAbbr)
 
   sectorData <- mutate(sectorData, abbr_lang = ifelse(unitcode == thisUnitcode, thisAbbr, unitcode))
   
@@ -507,7 +516,7 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
 
   limits.ttl_lang <- case_when(
     lang == "E" ~ "\nLimitations",
-    lang == "F" ~ "\nLimitations\n"
+    lang == "F" ~ "\nLimitations"
   )
 
   howto.ttl <- textGrob(howto.ttl_lang, hjust = 0.5, gp=gpar(fontsize=12, col ="grey30", fontface = "bold"))
@@ -572,13 +581,13 @@ on harassment nature and discrimination type.
   } else if (lang == "F") {
     
     howto.txt <- textGrob(paste0("
-Ce << bulletin >> du SAFF se compose de panneaux résumant les
+Ce « bulletin » du SAFF se compose de panneaux résumant les
 différences entre le SAFF de 2017 et celui de 2018 et entre la
 moyenne du SCT et celle du ", thisSectorName,".\n ",
 "Le panneau en haut à gauche montre les différences entre les groupes de
-Questions sur le SAFF par thème, soit << indicateurs. >> Le panneau de droite
+Questions sur le SAFF par thème, soit « indicateurs. » Le panneau de droite
 affiche les 10 changements les plus positifs et les plus négatifs des scores.\n
-Le score est basé sur la mesure << Score 100 >> pour chaque question.
+Le score est basé sur la mesure « Score 100 » pour chaque question.
 C'est la moyenne des réponses aux questions utilisant ces poids:
 Très positif = 100,
 Positif = 75,
@@ -586,28 +595,28 @@ Neutre = 50,
 Négatif = 25,
 Très négatif = 0.\n
 Exemple:
-Un score de 52 pour << Engagement des employés >> signifie que la
-moyenne << Score 100 >> des questions de ce thème
+Un score de 52 pour « Engagement des employés » signifie que la
+moyenne « Score 100 » des questions de ce thème
 (5, 9, 10, 14, 43, 44 et 45)
-pour ce secteur était de 52 sur 100; plus proche de << neutre.>>\n
+pour ce secteur était de 52 sur 100; plus proche de « neutre.»\n
 Notez que les scores élevés sont toujours positifs et les scores faibles,
 toujours négatif.\n
 Exemple:
 Pour la Q16, 
-<< Je pense que la qualité de mon travail en souffre à cause de ... >>
+« Je pense que la qualité de mon travail en souffre à cause de ... »
 un score de 100 signifie que le travail ne souffre presque jamais,
 alors qu'un score de 0 indique qu'il en souffre presque toujours.\n
 Le panneau en bas à gauche montre un résumé des taux de discrimination
 et de harcèlement et la nature et le type pertinents. 
 Notez que certainesdonnées sont supprimées lorsque les répondants 
-sont 5 ou moins. Dans ce cas, ils sont remplacés par << n<6.>>
+sont 5 ou moins. Dans ce cas, ils sont remplacés par « n<6.»
                             "),
                           hjust = 0.5, gp=gpar(fontsize=6, col ="grey30"))
     
     limits.txt <- textGrob("
 Les taux de réponse n'étaient pas tous les mêmes pour tous 
 les secteurs (ils sont disponibles chez la DRH).\n
-La mesure << Score 100 >> ne reflète pas la distribution
+La mesure « Score 100 » ne reflète pas la distribution
 des réponses. Exemple:
 50 personnes marquant très positif et
 50 personnes marquant très négatif
@@ -615,14 +624,14 @@ des réponses. Exemple:
 est identique à 100 personnes
 marquant neutre
 (100% * 50 = 50).\n
-La mesure << Score 100 >> fait des hypothèses basées sur sa
+La mesure « Score 100 » fait des hypothèses basées sur sa
 pondération (décrite ci-dessus).\n
-Les << indicateurs >> ne sont pas stables, puisque les questions
+Les « indicateurs » ne sont pas stables, puisque les questions
 du SAFF changent d'année en année, et les questions qui les 
 constituent sont pondérées également.\n
 Les taux de harcèlement et de discrimination ont été calculés sur
-<< Les 24 derniers mois >> en 2017 et
-<< les 12 derniers mois >> en 2018.
+« Les 24 derniers mois » en 2017 et
+« les 12 derniers mois » en 2018.
 Dans les cas où le taux a été supprimé, seules les données du SCT
 sont présentées sur le harcèlement et le type de discrimination.
                             ",
@@ -631,7 +640,7 @@ sont présentées sur le harcèlement et le type de discrimination.
   }
   
   
-  descrip.grb <- plot_grid(howto.ttl,howto.txt,limits.ttl,limits.txt, ncol = 1, align = "v", rel_heights = c(1,10,1,6))
+  descrip.grb <- plot_grid(howto.ttl,howto.txt,limits.ttl,limits.txt, ncol = 1, align = "v", rel_heights = c(1,10,1,7))
   
   report_card.plt <- plot_grid(report.grb,descrip.grb, rel_widths = c(11,3))
   
@@ -645,9 +654,10 @@ sont présentées sur le harcèlement et le type de discrimination.
 #c(200,201,202,301,302,303,400,401,402,403,404,304,405,406,407,408,305,306,307,308,309,310,311,312,313,314,315,203)
 
 # Select all TBS sectors, except CIOB (use OCIO below, CDS (because there is no 2017 comparator) and "I cannot fonmd my sector"
-#sectorList <- distinct(score100s, unitcode, DESCRIP_E) %>% filter(!unitcode %in% c("300","301","999")) # Exclude CDS, CIOB and NA
+sectorList <- distinct(score100s, unitcode, DESCRIP_E) %>% filter(!unitcode %in% c("300","301","999")) # Exclude CDS, CIOB and NA
 
-#for (i in sectorList$unitcode) { report_card(i, question100s, score100s) }
+for (i in sectorList$unitcode) { report_card(i, "E", question100s = question100s, score100s = score100s) }
+for (i in sectorList$unitcode) { report_card(i, "F", question100s = question100s, score100s = score100s) }
 
 report_card(301, "E", "Office of the Chief Information Officer", "OCIO", question100s, score100s)
 report_card(301, "F", "Bureau du Dirigeant Principal de l'information", "BDPI", question100s, score100s)

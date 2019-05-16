@@ -130,7 +130,7 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
                      as.character(sectorData$abbr_lang[sectorData$unitcode==thisUnitcode]),
                      customAbbr)
 
-  sectorData <- mutate(sectorData, abbr_lang = ifelse(unitcode == thisUnitcode, thisAbbr, unitcode))
+  sectorData <- mutate(sectorData, abbr_lang = ifelse(unitcode == thisUnitcode, thisAbbr, abbr_lang))
   
   thisAnscount <- question100s %>% 
     filter(unitcode == thisUnitcode & SURVEYR == 2018) %>% 
@@ -138,8 +138,8 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
     pull(ANSCOUNT)
   
   ttl_lang <- case_when(
-    lang == "E" ~ paste0("PSES 2018 Report Card - ",thisSectorName," (responses = ",thisAnscount,") [DRAFT]"),
-    lang == "F" ~ paste0("Bulletin SAFF 2018 - ",thisSectorName," (résponses = ",thisAnscount,") [BROUILLON]")
+    lang == "E" ~ paste0("PSES 2018 Report Card - ",thisSectorName," (responses = ",thisAnscount,")"),
+    lang == "F" ~ paste0("Bulletin SAFF 2018 - ",thisSectorName," (résponses = ",thisAnscount,")")
     )
     
   #----
@@ -220,7 +220,7 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
   # Determine the deltas between PSES 2017 and PSES 2018 data
   sectorDeltas <- questionData %>%
     #filter(unitcode %in% c(thisUnitcode, "TBS")) %>%
-    mutate(abbr_lang = ifelse(unitcode == thisUnitcode, thisAbbr, unitcode)) %>%
+    #mutate(abbr_lang = ifelse(unitcode == thisUnitcode, thisAbbr, unitcode)) %>%
     select(INDICATORID,INDICATOR_lang,QUESTION,TITLE_lang,
            unitcode,abbr_lang,DESCRIP_lang,SURVEYR,SCORE100,AGREE) %>%
     spread(SURVEYR,SCORE100) %>%
@@ -337,10 +337,11 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
   sectorHarDis <- questionData %>%
     filter(SUBINDICATORID %in% c(12,13) & SURVEYR == 2018) %>%
     expand(QUESTION,unitcode) %>%
+    left_join(distinct(select(questionData,unitcode,abbr_lang)), by = "unitcode") %>%
     left_join(distinct(select(questionData,QUESTION,TITLE_lang)), by = "QUESTION") %>%
-    left_join(filter(questionData, SURVEYR == 2018), by = c("QUESTION", "unitcode", "TITLE_lang")) %>%
+    left_join(filter(questionData, SURVEYR == 2018), by = c("QUESTION","unitcode","abbr_lang","TITLE_lang")) %>%
     select(QUESTION,TITLE_lang,unitcode,abbr_lang,AGREE,agree_2017,ANSCOUNT) %>%
-    mutate(abbr_lang = ifelse(unitcode == thisUnitcode, thisAbbr, unitcode)) %>%
+    #mutate(abbr_lang = ifelse(unitcode == thisUnitcode, thisAbbr, unitcode)) %>%
     mutate(delta = AGREE - agree_2017) %>%
     rename(`2017` = agree_2017, `2018` = AGREE)
     

@@ -29,13 +29,13 @@ if(!exists("indicatorMap")) {
 
 ```{r Question Map,fig.height = 14, fig.width = 8.5, warning = FALSE}
 TBSqs.df <- ss1 %>%
-  left_join(indicatorMap, by = "QUESTION") %>%
+  left_join(indicatorMap, by = c("QUESTION","TITLE_E","TITLE_F")) %>%
   filter(LEVEL1ID %in% c("26") & LEVEL2ID == "0" & !(is.na(SCORE100))) %>%
   arrange(INDICATORID,SUBINDICATORID) %>%
-  mutate(SUBINDICATORENG = factor(SUBINDICATORENG,unique(SUBINDICATORENG))) %>%
-  mutate(INDICATORENG = factor(INDICATORENG,unique(INDICATORENG))) %>%
-  mutate(SUBINDICATORFRA = factor(SUBINDICATORFRA,unique(SUBINDICATORFRA))) %>%
-  mutate(INDICATORFRA= factor(INDICATORFRA,unique(INDICATORFRA))) %>%
+  mutate(SUBINDICATOR_E = factor(SUBINDICATOR_E,unique(SUBINDICATOR_E))) %>%
+  mutate(INDICATOR_E = factor(INDICATOR_E,unique(INDICATOR_E))) %>%
+  mutate(SUBINDICATOR_F = factor(SUBINDICATOR_F,unique(SUBINDICATOR_F))) %>%
+  mutate(INDICATOR_F= factor(INDICATOR_F,unique(INDICATOR_F))) %>%
   mutate(TITLE_E = substr(TITLE_E,10,120)) %>%
   mutate(TITLE_F = substr(TITLE_F,10,120)) %>%
   arrange(desc(QUESTION)) %>%
@@ -50,7 +50,7 @@ ENplot <- ggplot(TBSqs.df, aes(x = as.factor(SURVEYR), y = TITLE_E, fill = SCORE
   scale_x_discrete(position = "top") +
   scale_y_discrete(position = "right") +
   facet_grid(#cols = vars(LEVEL1ID), 
-             rows = vars(INDICATORENG,SUBINDICATORENG),
+             rows = vars(INDICATOR_E,SUBINDICATOR_E),
              scales = "free", space = "free",
              switch = "y",
              labeller = label_wrap_gen(width = 15)) +
@@ -73,7 +73,7 @@ FRplot <- ggplot(TBSqs.df, aes(x = as.factor(SURVEYR), y = TITLE_F, fill = SCORE
   scale_x_discrete(position = "top") +
   scale_y_discrete(position = "right") +
   facet_grid(#cols = vars(LEVEL1ID), 
-             rows = vars(INDICATORFRA,SUBINDICATORFRA),
+             rows = vars(INDICATOR_F,SUBINDICATOR_F),
              scales = "free", space = "free",
              switch = "y",
              labeller = label_wrap_gen(width = 15)) +
@@ -92,3 +92,17 @@ ggsave(file.path(mainDir,plotDir,"TBS PSES 2018 Question Heatmap.pdf"), plot = E
 ggsave(file.path(mainDir,plotDir,"Carte de chaleur SAFF 2018 du SCT.pdf"), plot = FRplot, height = 14, width = 8.5)
 
 ```
+
+```{r Question Map,fig.height = 14, fig.width = 8.5, warning = FALSE}
+SectorQs.df <- ss5_2018 %>%
+  left_join(indicatorMap, by = "QUESTION") %>%
+  filter(LEVEL1ID %in% c("26") & LEVEL2ID == "0" & !(is.na(SCORE100))) %>%
+  arrange(INDICATORID,SUBINDICATORID,desc(QUESTION)) %>%
+  mutate(SUBINDICATOR_E = fct_inorder(SUBINDICATOR_E),
+         INDICATOR_E = fct_inorder(INDICATOR_E),
+         SUBINDICATOR_E = fct_inorder(SUBINDICATOR_F),
+         INDICATOR_E = fct_inorder(INDICATOR_F),
+         TITLE_E = fct_inorder(substr(TITLE_E,10,120)),
+         TITLE_F = fct_inorder(substr(TITLE_F,10,120)))
+  
+  ```

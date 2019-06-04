@@ -6,6 +6,7 @@ library(grid)
 library(cowplot)
 
 
+
 #----
 # LOAD DATA
 
@@ -28,10 +29,21 @@ if(!exists("ss5_2017")) {ss5_2017 <- read.csv(ss5File_2017, na.strings = "9999")
 
 indicatorMap <- read.csv(file.path(mainDir,dataDir,"PSES2018_Indicator_Mapping.csv"))
 
+QCtable <- read.csv(file.path(mainDir,dataDir,"PSES2018_Question_Corr.csv"), na.strings = "N/A")
+
+#----
+# SELECT DEPARTMENT
+# Run this code to see a list of departments and their LEVEL1ID codes
+distinct(ss5_2018, LEVEL1ID, DEPT_E, DEPT_F)
+
+# Enter your department's LEVEL1ID code here (e.g., TBS is 26)
+this_dept <- 26
+
+# This next line reads a table where French and English abbreviations
+# have been mapped to English sector names the DESCRIP_E field.
+# You will need to construct your own, as these are not avaialable publically.
 sectorAbbr <- read.csv(file.path(mainDir,dataDir,"PSES2018_TBS_Sector_Abbreviations.csv"),
                        colClasses = c("character","character","character"))
-
-QCtable <- read.csv(file.path(mainDir,dataDir,"PSES2018_Question_Corr.csv"), na.strings = "N/A")
 
 #----
 # PRE-PROCESS DATA
@@ -51,7 +63,7 @@ QCtable_har_dis <- QCtable %>%
 
 # Get PSES 2017 sector-level results and use the lookup table to filter on 2018 questions and create needed fields to merge
 sectors_2017 <- ss5_2017 %>%
-  filter(LEVEL1ID %in% c(0,26)) %>%
+  filter(LEVEL1ID %in% c(0,this_dept)) %>%
   mutate(QUESTION = substring(QUESTION,3)) %>%
   left_join(select(QCtable_har_dis,QUESTION="PSES_2017",Q2018="PSES_2018"), by = "QUESTION") %>%
   filter(!is.na(Q2018)) %>%
@@ -60,11 +72,11 @@ sectors_2017 <- ss5_2017 %>%
 # Filter PSES 2018 sector-level questions and then merge 2017 data. 
 # Gather allows us to add rows using the exiting SURVEYR field.
 question100s <- ss5_2018 %>%
-  filter(LEVEL1ID %in% c(0,26)) %>%
+  filter(LEVEL1ID %in% c(0,this_dept)) %>%
   left_join(select(indicatorMap,-matches("TITLE_")), by = "QUESTION") %>%
   left_join(sectorAbbr, by = "DESCRIP_E") %>%
   mutate(unitcode = ifelse(BYCOND == "",
-                           ifelse(LEVEL1ID == 26, "TBS","PS"),
+                           ifelse(LEVEL1ID == this_dept, "dept","PS"),
                            word(BYCOND, 2, sep = " = "))) %>%
   left_join(sectors_2017, by = c("QUESTION","DESCRIP_E")) %>%
   rename(s100_2018 = "SCORE100") %>%
@@ -84,14 +96,14 @@ score100s <- question100s %>%
 # SET SECTOR - for testing purposes only
 
 
-thisUnitcode <- 301
-thisAbbr <- "OCIO"
+thisUnitcode <- "dept"
+thisAbbr <- "TBS"
 
 customName <- "Office of the Chief Information Officer"
 customAbbr <- "OCIO"
 
 sectorData <- score100s %>%
-  filter(unitcode %in% c(thisUnitcode,"TBS")) %>%
+  filter(unitcode %in% c(thisUnitcode,"dept")) %>%
   mutate(abbr_lang = ifelse(unitcode == thisUnitcode, thisAbbr, unitcode))
 
 thisSectorName_E <- sectorData$DESCRIP_E[[1]]
@@ -100,29 +112,34 @@ thisSectorName_E <- sectorData$DESCRIP_E[[1]]
 ttl_E <- paste0("PSES 2018 Report Card - ",thisSectorName_E)
 
 lang = "F"
-#----
-### CONSTRUCT REPORT CARD FUNCTION
+#----## CONSTRUCT REPORT CARD FUNCTION
 
 report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL, question100s = question100s, score100s = score100s) {
 
   if (!(lang %in% c("F","E"))) {print("Invalid selection. Choose E or F as a language.")}
   
+  # Ensure the unitcode is read as  character, not a numeric
   thisUnitcode <- as.character(thisUnitcode)
   
+  # Both of the next blocks select the appropriate bilingual fields and delete
+  # fields from the other language. Indicator order is also set to correspond to ID.
   sectorData <- score100s %>%
     as_tibble() %>% 
-    filter(unitcode %in% c(thisUnitcode,"TBS")) %>%
+    filter(unitcode %in% c(thisUnitcode,"dept")) %>%
     set_names(~sub(paste0("_",lang),"_lang",.x)) %>%
     select(-matches("_[EF]")) %>% 
     mutate(INDICATOR_lang = fct_reorder(INDICATOR_lang,INDICATORID))
   
   questionData <- question100s %>% 
     as_tibble() %>% 
-    filter(unitcode %in% c(thisUnitcode,"TBS")) %>%
+    filter(unitcode %in% c(thisUnitcode,"dept")) %>%
     set_names(~sub(paste0("_",lang),"_lang",.x)) %>%
     select(-matches("_[EF]")) %>% 
     mutate(INDICATOR_lang = fct_reorder(INDICATOR_lang,INDICATORID))
   
+  
+  # Set sectors name and abbreviation. Retrieve from dataframe by default,
+  # otherwise use custom parameters.
   thisSectorName <- ifelse(is.null(customName), 
                            as.character(sectorData$DESCRIP_lang[sectorData$unitcode==thisUnitcode]),
                            customName)
@@ -130,13 +147,21 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
                      as.character(sectorData$abbr_lang[sectorData$unitcode==thisUnitcode]),
                      customAbbr)
 
-  sectorData <- mutate(sectorData, abbr_lang = ifelse(unitcode == thisUnitcode, thisAbbr, abbr_lang))
+  # Replace existing abbreviation if a custom abbreviation was used
+  sectorData <- sectorData %>% mutate(abbr_lang = ifelse(unitcode == thisUnitcode, thisAbbr, abbr_lang))
+  questionData <- questionData %>% mutate(abbr_lang = ifelse(unitcode == thisUnitcode, thisAbbr, abbr_lang))
   
+  # Make sure that the sector always comes before the department whenever they are compared.
+  sectorData <- sectorData %>% mutate(abbr_lang = fct_relevel(abbr_lang,thisAbbr))
+  questionData <- questionData %>% mutate(abbr_lang = fct_relevel(abbr_lang,thisAbbr))
+  
+  # Get the number of respondents for the sector
   thisAnscount <- question100s %>% 
     filter(unitcode == thisUnitcode & SURVEYR == 2018) %>% 
     summarise(ANSCOUNT = max(ANSCOUNT)) %>% 
     pull(ANSCOUNT)
   
+  # Create the report card title - it includes the number of respondents.
   ttl_lang <- case_when(
     lang == "E" ~ paste0("PSES 2018 Report Card - ",thisSectorName," (responses = ",thisAnscount,")"),
     lang == "F" ~ paste0("Bulletin SAFF 2018 - ",thisSectorName," (résponses = ",thisAnscount,")")
@@ -219,7 +244,7 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
   
   # Determine the deltas between PSES 2017 and PSES 2018 data
   sectorDeltas <- questionData %>%
-    #filter(unitcode %in% c(thisUnitcode, "TBS")) %>%
+    #filter(unitcode %in% c(thisUnitcode, "dept")) %>%
     #mutate(abbr_lang = ifelse(unitcode == thisUnitcode, thisAbbr, unitcode)) %>%
     select(INDICATORID,INDICATOR_lang,QUESTION,TITLE_lang,
            unitcode,abbr_lang,DESCRIP_lang,SURVEYR,SCORE100,AGREE) %>%
@@ -423,7 +448,7 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
     mutate(Qshort_lang = word(TITLE_lang,3, sep = fixed('.'))) %>%
     mutate(`2018` = ifelse(is.na(`2018`),0.5,`2018`)) %>%
     arrange(`2018`) %>%
-    mutate(order = ifelse(unitcode == "TBS", row_number(), NA))
+    mutate(order = ifelse(unitcode == "dept", row_number(), NA))
   
   # Create the the nature of harassment chart
   harNature.plt <- ggplot(harNatureData, 
@@ -449,7 +474,7 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
     mutate(Qshort_lang = word(TITLE_lang,3, sep = fixed('.'))) %>%
     mutate(`2018` = ifelse(is.na(`2018`),0.5,`2018`)) %>%
     arrange(`2018`) %>%
-    mutate(order = ifelse(unitcode == "TBS", row_number(), NA))
+    mutate(order = ifelse(unitcode == "dept", row_number(), NA))
   
   # Create the type of discrimination chart
   disType.plt <- ggplot(disTypeData,
@@ -477,7 +502,7 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
                      gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
   
   distype.ttl_lang <- case_when(
-    lang == "E" ~ "Type of discrimination (2018)",
+    lang == "E" ~ "Type of Discrimination (2018)",
     lang == "F" ~ "Type de discrimination (2018)")
   disType.ttl <- textGrob(distype.ttl_lang,
                      gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
@@ -545,8 +570,8 @@ A score of 52 for \"Employee Engagement\" means that the
 average \"Score 100\" of the questions under that theme
 (5, 9, 10, 14, 43, 44 and 45)
 for that sector was 52 out of 100 - closest to \"Neutral\".\n
-Note high scores are always postive and low scores, always
-negative.\n
+Note high scores are always positive and 
+low scores are always negative.\n
 Example: 
 For Q16,\"I feel that the quality of my work suffers because of...\", 
 a score of 100 means that the work almost never suffers, while
@@ -645,20 +670,55 @@ sont présentées sur le harcèlement et le type de discrimination.
   
   report_card.plt <- plot_grid(report.grb,descrip.grb, rel_widths = c(11,3))
   
+  
+  
+  rc_filename <- file.path(mainDir,plotDir,paste0(ttl_lang,".pdf"))
+  
   # Save the report card into a PDF
-  ggsave(file.path(mainDir,plotDir,paste0(ttl_lang,".pdf")), plot = report_card.plt, height = 8.5, width = 14)
+  #ggsave(rc_filename, plot = report_card.plt, height = 8.5, width = 14)
+  
+  #return(rc_filename)
+  return(report_card.plt)
 }
+
 
 #----
 ### RUN REPORT CARDS
 
+# These are all of TBS's unit codes
 #c(200,201,202,301,302,303,400,401,402,403,404,304,405,406,407,408,305,306,307,308,309,310,311,312,313,314,315,203)
 
 # Select all TBS sectors, except CIOB (use OCIO below, CDS (because there is no 2017 comparator) and "I cannot fonmd my sector"
 sectorList <- distinct(score100s, unitcode, DESCRIP_E) %>% filter(!unitcode %in% c("300","301","999")) # Exclude CDS, CIOB and NA
 
-for (i in sectorList$unitcode) { report_card(i, "E", question100s = question100s, score100s = score100s) }
-for (i in sectorList$unitcode) { report_card(i, "F", question100s = question100s, score100s = score100s) }
+#for (i in sectorList$unitcode) { report_card(i, "E", question100s = question100s, score100s = score100s) }
+#for (i in sectorList$unitcode) { report_card(i, "F", question100s = question100s, score100s = score100s) }
 
+for (i in sectorList$unitcode) { 
+  # Get sector abbreviations and construct a filename
+  #sector_abbr_e <- as.character(score100s$abbr_E[score100s$unitcode==i])
+  #sector_abbr_f <- as.character(score100s$abbr_F[score100s$unitcode==i])
+  #rc_filename <- paste0("PSES_SAFF2018 - ",sector_abbr_e,"_",sector_abbr_f,".pdf")
+  
+  sector_name <- as.character(score100s$DESCRIP_E[score100s$unitcode==i])
+  rc_filename <- paste0("PSES2018 Report Cards (EN&FR) - ",sector_name,".pdf")
+  
+  rc_e <- report_card(i, "E", question100s = question100s, score100s = score100s) 
+  rc_f <- report_card(i, "F", question100s = question100s, score100s = score100s)
+  
+  # Make bilingual pdf two-pager
+  pdf(file.path(mainDir,plotDir,rc_filename),height = 8.5, width = 14,
+      useDingbats=FALSE)
+  #pdf(file.path(mainDir,plotDir,paste0(i," test.pdf")),height = 8.5, width = 14)
+  print(rc_e)
+  print(rc_f)
+  dev.off()
+}
+
+# CIOB has been rechristened OCIO, following elevation of the CIO to DM status.
+# These lines ensure the new OCIO descriptors are used for CIOB's unitcode (301).
+pdf(file.path(mainDir,plotDir,"PSES2018 Report Cards (EN&FR) - Office of the Chief Information Officer.pdf"),
+    height = 8.5, width = 14, useDingbats=FALSE)
 report_card(301, "E", "Office of the Chief Information Officer", "OCIO", question100s, score100s)
 report_card(301, "F", "Bureau du Dirigeant Principal de l'information", "BDPI", question100s, score100s)
+dev.off()

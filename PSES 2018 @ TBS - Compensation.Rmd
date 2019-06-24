@@ -1,0 +1,38 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r, fig.height=30,fig.width=10}
+
+library(tidyverse)
+
+source("pses2018.R") 
+
+compTBS <- filter(ss5_2018,LEVEL1ID == 26, SURVEYR == 2018, QUESTION %in% c("Q67","Q73","Q71","Q72")) %>% 
+  #gather("answer","ans_prop",matches("ANSWER[1-5]")) %>% 
+  gather("sentiment","sent_prop",NEGATIVE,NEUTRAL,POSITIVE)
+
+
+ggplot(compTBS, aes(x = sentiment, y = sent_prop, fill = sentiment)) +
+  scale_fill_manual(values = c("NEGATIVE" = "#CD202C", "NEUTRAL" = "#63CECA", "POSITIVE" = "#CCDC00"))  +
+  facet_grid(cols = vars(substr(TITLE_E,1,30)), rows = vars(DESCRIP_E)) +
+  geom_col() +
+  theme(axis.text = element_text(angle = 90),
+        strip.text.y = element_text(angle = 0),
+        strip.text.x = element_text(angle = 90),
+        legend.position = "none")
+
+```
+
+```{r, fig.height=30,fig.width=10}
+
+nb_data <- filter(ss5_2018,LEVEL1ID == 26, SURVEYR == 2018) %>% 
+  select(DESCRIP_E,QUESTION,SCORE100) %>% 
+  spread(QUESTION,SCORE100)
+
+```

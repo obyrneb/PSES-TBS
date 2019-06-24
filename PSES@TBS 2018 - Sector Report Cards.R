@@ -96,14 +96,14 @@ score100s <- question100s %>%
 # SET SECTOR - for testing purposes only
 
 
-thisUnitcode <- "dept"
-thisAbbr <- "TBS"
+thisUnitcode <- "301"
+thisAbbr <- "OCIO"
 
 customName <- "Office of the Chief Information Officer"
 customAbbr <- "OCIO"
 
 sectorData <- score100s %>%
-  filter(unitcode %in% c(thisUnitcode,"dept")) %>%
+  filter(unitcode %in% c(thisUnitcode,"301")) %>%
   mutate(abbr_lang = ifelse(unitcode == thisUnitcode, thisAbbr, unitcode))
 
 thisSectorName_E <- sectorData$DESCRIP_E[[1]]
@@ -118,11 +118,12 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
 
   if (!(lang %in% c("F","E"))) {print("Invalid selection. Choose E or F as a language.")}
   
-  # Ensure the unitcode is read as  character, not a numeric
+  # Ensure the unitcode is read as a character, not a numeric
   thisUnitcode <- as.character(thisUnitcode)
   
   # Both of the next blocks select the appropriate bilingual fields and delete
-  # fields from the other language. Indicator order is also set to correspond to ID.
+  # fields from the other language. Indicator order is also set to correspond to
+  # the numeric indicator ID.
   sectorData <- score100s %>%
     as_tibble() %>% 
     filter(unitcode %in% c(thisUnitcode,"dept")) %>%
@@ -141,10 +142,10 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
   # Set sectors name and abbreviation. Retrieve from dataframe by default,
   # otherwise use custom parameters.
   thisSectorName <- ifelse(is.null(customName), 
-                           as.character(sectorData$DESCRIP_lang[sectorData$unitcode==thisUnitcode]),
+                           as.character(sectorData$DESCRIP_lang[sectorData$unitcode == thisUnitcode]),
                            customName)
   thisAbbr <- ifelse(is.null(customAbbr),
-                     as.character(sectorData$abbr_lang[sectorData$unitcode==thisUnitcode]),
+                     as.character(sectorData$abbr_lang[sectorData$unitcode == thisUnitcode]),
                      customAbbr)
 
   # Replace existing abbreviation if a custom abbreviation was used
@@ -186,16 +187,16 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
     # Remove a few things from the x axis and increase font size
     theme(axis.title.x     = element_blank()),
     theme(panel.grid.major.x = element_blank()),
-    theme(axis.text.x.top      = element_text(size=10, face="bold")),
+    theme(axis.text.x.top      = element_text(size = 10, face = "bold")),
     # Remove x & y tick marks
     theme(axis.ticks       = element_blank()),
     # Format title & subtitle
-    theme(text = element_text(colour="grey30")),
-    theme(plot.title       = element_text(size=10, hjust = 0.5)),
+    theme(text = element_text(colour = "grey30")),
+    theme(plot.title       = element_text(size = 10, hjust = 0.5)),
     theme(plot.subtitle    = element_text(hjust = 0.5)),
     # Put facet labels on the left and horizontal
     theme(strip.text.y = element_text(angle = 180, size = 8)),
-    theme(strip.text.x = element_text(size = 10, colour = "grey30", face="italic")),
+    theme(strip.text.x = element_text(size = 10, colour = "grey30", face = "italic")),
     theme(strip.background = element_blank())
   )
   
@@ -230,14 +231,15 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
   slope.ttl_lang <- case_when(
     lang == "E" ~ "Year-to-Year Comparision (Score 100)",
     lang == "F" ~ "Comparaison annuelle (Score 100)")
-  slope.ttl <- textGrob(slope.ttl_lang, gp=gpar(fontsize = 10, fontface = "bold", col = "grey30"))
+  slope.ttl <- textGrob(slope.ttl_lang, gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
   space.grb <- textGrob("")
   
   # Add title to slopechart
   top_left.grb <- plot_grid(slope.ttl,
                          slope.plt,
                          space.grb,
-                         nrow=3,rel_heights = c(1,11.5,0.5))
+                         nrow = 3,
+                         rel_heights = c(1,11.5,0.5))
   
   #----
   ## RIGHT: Create top negative and postive shifts
@@ -249,7 +251,7 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
     select(INDICATORID,INDICATOR_lang,QUESTION,TITLE_lang,
            unitcode,abbr_lang,DESCRIP_lang,SURVEYR,SCORE100,AGREE) %>%
     spread(SURVEYR,SCORE100) %>%
-    mutate(delta = `2018`-`2017`)
+    mutate(delta = `2018` - `2017`)
   
   # Get the the 10 best and the 10 worst deltas
   best10deltas <- filter(sectorDeltas, unitcode == thisUnitcode & delta > 0) %>%
@@ -278,7 +280,7 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
     # Remove x & y tick marks
     theme(axis.ticks       = element_blank()),
     # Format title & subtitle
-    theme(text = element_text(colour="grey30")),
+    theme(text = element_text(colour = "grey30")),
     theme(plot.title       = element_text(size = 8, hjust = 0.5)),
     theme(plot.subtitle    = element_text(hjust = 0.5)),
     # Put facet labels on the left and horizontal
@@ -297,7 +299,7 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
     geom_col(aes(x = abbr_lang, y = `2018`), fill = "#f7f7f7", width = 0.8) +
     geom_hline(aes(yintercept = `2017`), colour = "grey60", linetype = 3) +
     geom_hline(aes(yintercept = `2018`, colour = delta)) +
-    geom_point(aes(x = abbr_lang, y = (`2017`+delta/2), colour = delta), shape = 62, size = 2) +
+    geom_point(aes(x = abbr_lang, y = (`2017` + delta/2), colour = delta), shape = 62, size = 2) +
     geom_text(aes(label = `2017`, x = abbr_lang, y = `2017`),
               size = 3, colour = "grey30", fontface = "plain", hjust = 1.3, vjust = 0.5) +
     geom_text(aes(label = `2018`, x = abbr_lang, y = `2018`),
@@ -321,7 +323,7 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
     geom_col(aes(x = abbr_lang, y = `2018`), fill = "#f7f7f7", width = 0.8) +
     geom_hline(aes(yintercept = `2017`), colour = "grey60", linetype = 3) +
     geom_hline(aes(yintercept = `2018`, colour = delta)) +
-    geom_point(aes(x = abbr_lang, y = (`2017`+delta/2), colour = delta), shape = 60, size = 2) +
+    geom_point(aes(x = abbr_lang, y = (`2017` + delta/2), colour = delta), shape = 60, size = 2) +
     geom_text(aes(label = `2017`, x = abbr_lang, y = `2017`),
               size = 3, colour = "grey30", fontface = "plain", hjust = -0.3, vjust = 0.5) +
     geom_text(aes(label = `2018`, x = abbr_lang, y = `2018`),

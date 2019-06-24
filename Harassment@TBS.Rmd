@@ -6,11 +6,9 @@ output: html_document
 ```{r setup, include=FALSE, echo=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(forcats)
-library(stringr)
+source("pses2018.R")
+
+library(tidyverse)
 library(grid)
 library(gridExtra)
 library(cowplot)
@@ -20,9 +18,11 @@ library(broom)
 
 theme_set(theme_minimal())
 
-metaQ <- read.csv("datasets//Question_Mappings.csv", na.strings=9999)
-metaHarQ <- read.csv("datasets//Harassment_Question_Mappings.csv", encoding = "UTF-8", na.strings=9999)
-PSESdata <- read.csv("datasets//2017_PSES_SAFF_Subset-5_Sous-ensemble-5.csv", na.strings=9999)
+metaQ <- read.csv("datasets//Question_Mappings.csv", na.strings = 9999)
+metaHarQ <- read.csv("datasets//Harassment_Question_Mappings.csv", 
+                     encoding = "UTF-8", na.strings = 9999)
+PSESdata <- read.csv("datasets//2017_PSES_SAFF_Subset-5_Sous-ensemble-5.csv", 
+                     na.strings = 9999)
 ```
 
 ## Retrieve TBS data and merge with metadata files
@@ -37,7 +37,7 @@ TBSdata <- PSESdata %>%
   #filter(QSection_E == "Harassment")
 ```
 
-## Create a graph plotting answeres to Question 63 on harassment and order from highest to lowest agreement. 
+## Create a graph plotting answers to Question 63 on harassment and order from highest to lowest agreement. 
 
 ```{r echo=FALSE}
 TBS63 <- filter(TBSdata, QUESTION %in% c("G_Q63")) %>%

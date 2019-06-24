@@ -269,7 +269,7 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
     theme(panel.border     = element_blank()),
     # Remove just about everything from the y axis
     theme(axis.title.y     = element_blank()),
-    theme(axis.text.y      = element_blank()),
+    theme(axis.text.y      = element_blank()), 
     theme(panel.grid.major.y = element_blank()) +
       theme(panel.grid.minor.y = element_blank()),
     # Remove a few things from the x axis and increase font size
@@ -289,10 +289,53 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
     #theme(panel.background = element_rect(fill = "grey95")) +
   )
   
+  deltaTheme2 <- list( 
+    theme_bw(),
+    # Format tweaks
+    # Remove the legend
+    theme(legend.position = "none"),
+    # Remove the panel border
+    theme(panel.border     = element_blank()),
+    # Remove just about everything from the y axis
+    theme(axis.title.y     = element_blank()),
+    #theme(axis.text.y      = element_blank()), 
+    theme(panel.grid.major.y = element_blank()) +
+      theme(panel.grid.minor.y = element_blank()),
+    # Remove a few things from the x axis and increase font size
+    theme(axis.title.x     = element_blank()),
+    theme(panel.grid.minor.x = element_blank()),
+    theme(panel.grid.major.x = element_blank()),
+    theme(axis.text.x      = element_text(size = 6)),
+    # Remove x & y tick marks
+    theme(axis.ticks       = element_blank()),
+    # Format title & subtitle
+    theme(text = element_text(colour = "grey30")),
+    theme(plot.title       = element_text(size = 8, hjust = 0.5)),
+    theme(plot.subtitle    = element_text(hjust = 0.5)),
+    # Put facet labels on the left and horizontal
+    theme(strip.text.y = element_text(angle = 180, size = 6, hjust = 0)),
+    theme(strip.background = element_blank())
+    #theme(panel.background = element_rect(fill = "grey95")) +
+  )
+  
+  
   # Use the 10 best deltas to build the data for the "Most postive shifts"
   bestData <- sectorDeltas %>%
     inner_join(select(best10deltas,QUESTION), by = "QUESTION") %>%
-    filter(unitcode == thisUnitcode)
+    filter(unitcode == thisUnitcode) # ORIGINAL "BEST" CHART - Sector only
+  
+  bestData2 <- sectorDeltas %>%
+    inner_join(select(best10deltas,QUESTION), by = "QUESTION") %>%
+    mutate(ind_question = paste0(
+      INDICATOR_lang, ": Q", substr(TITLE_lang,10,140)
+      )) %>%
+    mutate(ind_question = str_wrap(ind_question, width = 60)) %>% 
+    mutate(org_level = ifelse(unitcode == "dept","dept","sector")) %>% 
+    select(ind_question,org_level, y2017 = `2017`, y2018 = `2018`, delta) %>% 
+    nest(y2017, y2018, delta, .key = "value_col") %>%
+    spread(key = org_level, value = value_col) %>% 
+    unnest(sector,dept, .sep = "_") %>% 
+    mutate(ind_question = fct_reorder(ind_question, sector_delta, .desc = TRUE))
   
   # Build the "Most postive shifts" chart
   best.plt <- ggplot(data = bestData, x = abbr_lang, group = abbr_lang) +
@@ -313,10 +356,49 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
     scale_y_continuous(limits = c(0,100), breaks = c(0,25,50,75,100), expand = expand_scale(add = c(0,5))) +
     deltaTheme
   
+  # ORIGINAL "BEST" CHART - Sector only
+  best2.plt <- ggplot(data = bestData2, x = ind_question) +
+    geom_col(aes(x = ind_question, y = sector_y2018), fill = "#f7f7f7", width = 0.8) +
+    geom_segment(aes(x = as.numeric(ind_question) - .2, xend = as.numeric(ind_question) - .2, y = dept_y2017, yend = dept_y2018, colour = dept_delta),
+                 position = position_dodge(width = 1)) +
+    geom_point(aes(x = as.numeric(ind_question) - .2, y = dept_y2017, colour = dept_delta),
+               position = position_dodge(width = 1), shape = 21, fill = "white") +
+    geom_point(aes(x = as.numeric(ind_question) - .2, y = dept_y2018, colour = dept_delta),
+               position = position_dodge(width = 1)) +
+    geom_errorbar(aes(x = ind_question, ymin = sector_y2017, ymax = sector_y2017), colour = "grey60", linetype = 3) +
+    geom_errorbar(aes(x = ind_question, ymin = sector_y2018, ymax = sector_y2018, colour = sector_delta)) +
+    geom_point(aes(x = ind_question, y = (sector_y2017 + sector_delta/2),
+                   colour = sector_delta), shape = 62, size = 2) +
+    geom_text(aes(label = sector_y2017, x = ind_question, y = sector_y2017),
+              size = 3, colour = "grey30", fontface = "plain", hjust = 1.3, vjust = 0.5) +
+    geom_text(aes(label = sector_y2018, x = ind_question, y = sector_y2018),
+              size = 3, colour = "grey30", fontface = "bold", hjust = -0.3, vjust = 0.5) +
+    geom_text(aes(label = paste0("+",sector_delta), x = ind_question, y = 0, colour = sector_delta),
+              size = 3, fontface = "bold", hjust = 0, vjust = 0.5) +
+    coord_flip() +
+    #facet_grid(fct_reorder(paste0(INDICATOR_lang,": Q",substr(TITLE_lang,10,140)),
+    #                       delta,.desc=TRUE)~.,switch = "y", labeller = label_wrap_gen(60)) +
+    scale_colour_gradient2(high = "#0571b0", mid = "#bcbcbc", low = "#ca0020") +
+    scale_y_continuous(limits = c(0,100), breaks = c(0,25,50,75,100), expand = expand_scale(add = c(0,5))) +
+    deltaTheme2
+
   # Use the 10 worst deltas to build the data for the "Most negative shifts"
   worstData <- sectorDeltas %>%
     inner_join(select(worst10deltas,QUESTION), by = "QUESTION") %>%
     filter(unitcode == thisUnitcode)
+  
+  worstData2 <- sectorDeltas %>%
+    inner_join(select(worst10deltas,QUESTION), by = "QUESTION") %>%
+    mutate(ind_question = paste0(
+      INDICATOR_lang, ": Q", substr(TITLE_lang,10,140)
+    )) %>%
+    mutate(ind_question = str_wrap(ind_question, width = 60)) %>% 
+    mutate(org_level = ifelse(unitcode == "dept","dept","sector")) %>% 
+    select(ind_question,org_level, y2017 = `2017`, y2018 = `2018`, delta) %>% 
+    nest(y2017, y2018, delta, .key = "value_col") %>%
+    spread(key = org_level, value = value_col) %>% 
+    unnest(sector,dept, .sep = "_") %>% 
+    mutate(ind_question = fct_reorder(ind_question, sector_delta))
   
   # Build the "Most negative shifts" chart
   worst.plt <- ggplot(data = worstData, x = abbr_lang, group = abbr_lang) +
@@ -336,6 +418,31 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
     scale_colour_gradient2(high = "#0571b0", mid = "#bcbcbc", low = "#ca0020") +
     scale_y_continuous(limits = c(0,100), breaks = c(0,25,50,75,100), expand = expand_scale(add = c(0,5))) +
     deltaTheme
+  
+  worst2.plt <- ggplot(data = worstData2, x = ind_question) +
+    geom_col(aes(x = ind_question, y = sector_y2018), fill = "#f7f7f7", width = 0.8) +
+    geom_segment(aes(x = as.numeric(ind_question) - .2, xend = as.numeric(ind_question) - .2, y = dept_y2017, yend = dept_y2018, colour = dept_delta),
+                 position = position_dodge(width = 1)) +
+    geom_point(aes(x = as.numeric(ind_question) - .2, y = dept_y2017, colour = dept_delta),
+               position = position_dodge(width = 1), shape = 21, fill = "white") +
+    geom_point(aes(x = as.numeric(ind_question) - .2, y = dept_y2018, colour = dept_delta),
+               position = position_dodge(width = 1)) +
+    geom_errorbar(aes(x = ind_question, ymin = sector_y2017, ymax = sector_y2017), colour = "grey60", linetype = 3) +
+    geom_errorbar(aes(x = ind_question, ymin = sector_y2018, ymax = sector_y2018, colour = sector_delta)) +
+    geom_point(aes(x = ind_question, y = (sector_y2017 + sector_delta/2),
+                   colour = sector_delta), shape = 60, size = 2) +
+    geom_text(aes(label = sector_y2017, x = ind_question, y = sector_y2017),
+              size = 3, colour = "grey30", fontface = "plain", hjust = -0.3, vjust = 0.5) +
+    geom_text(aes(label = sector_y2018, x = ind_question, y = sector_y2018),
+              size = 3, colour = "grey30", fontface = "bold", hjust = 1.3, vjust = 0.5) +
+    geom_text(aes(label = paste0(sector_delta), x = ind_question, y = 0, colour = sector_delta),
+              size = 3, fontface = "bold", hjust = 0, vjust = 0.5) +
+    coord_flip() +
+    #facet_grid(fct_reorder(paste0(INDICATOR_lang,": Q",substr(TITLE_lang,10,140)),
+    #                       delta,.desc=TRUE)~.,switch = "y", labeller = label_wrap_gen(60)) +
+    scale_colour_gradient2(high = "#0571b0", mid = "#bcbcbc", low = "#ca0020") +
+    scale_y_continuous(limits = c(0,100), breaks = c(0,25,50,75,100), expand = expand_scale(add = c(0,5))) +
+    deltaTheme2
   
   # Create chart titles
   best.ttl_lang <- case_when(

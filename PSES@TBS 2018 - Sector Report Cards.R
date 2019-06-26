@@ -270,8 +270,8 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
     # Remove just about everything from the y axis
     theme(axis.title.y     = element_blank()),
     theme(axis.text.y      = element_blank()), 
-    theme(panel.grid.major.y = element_blank()) +
-      theme(panel.grid.minor.y = element_blank()),
+    theme(panel.grid.major.y = element_blank()),
+    theme(panel.grid.minor.y = element_blank()),
     # Remove a few things from the x axis and increase font size
     theme(axis.title.x     = element_blank()),
     theme(panel.grid.minor.x = element_blank()),
@@ -299,8 +299,8 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
     # Remove just about everything from the y axis
     theme(axis.title.y     = element_blank()),
     theme(axis.text.y      = element_text(size = 6, hjust = 0)), 
-    theme(panel.grid.major.y = element_blank()) +
-      theme(panel.grid.minor.y = element_blank()),
+    theme(panel.grid.major.y = element_blank()),
+    theme(panel.grid.minor.y = element_blank()),
     # Remove a few things from the x axis and increase font size
     theme(axis.title.x     = element_blank()),
     theme(panel.grid.minor.x = element_blank()),
@@ -319,6 +319,7 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
   )
   
   offset2 <- -0.3
+
   
   # Use the 10 best deltas to build the data for the "Most postive shifts"
   bestData <- sectorDeltas %>%

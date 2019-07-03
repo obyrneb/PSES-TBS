@@ -1,0 +1,39 @@
+---
+title: "EE Groups on all Questions"
+output: html_notebook
+---
+
+
+
+```{r, fig.height= 4, fig.width=16}
+source("pses2018.R")
+
+library(tidyverse)
+
+ee_data <- pses2018 %>% 
+  filter(LEVEL1ID == 26, 
+         DemoQ %in% c("Q88","dept"),
+         SURVEYR == 2018) %>% 
+  select(QUESTION,POSITIVE,
+         DESCRIP_E,DESCRIP_F,BYCOND,
+         DemoQ,DemoQ_E,DemoQ_F,
+         INDICATORID,INDICATOR_E,INDICATOR_F) %>%
+  arrange(desc(DESCRIP_E),desc(POSITIVE)) %>%
+  mutate(QUESTION = str_sub(QUESTION, start = 2)) %>% 
+  mutate(QUESTION = fct_inorder(QUESTION)) %>% 
+  filter(DemoQ != "dept") %>% 
+  drop_na(POSITIVE)
+
+ee_plot <- ggplot(ee_data, aes(x = QUESTION, y = POSITIVE,
+                               group = DESCRIP_E, colour = DESCRIP_E)) +
+  geom_line() +
+  theme_classic() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(angle = 90))
+  #facet_grid(rows = vars(DemoQ_E),#cols = vars(INDICATOR_E),
+  #          scales = "free", space = "free")
+
+ee_plot 
+
+```
+

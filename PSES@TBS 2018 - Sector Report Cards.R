@@ -320,24 +320,11 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
   
   offset2 <- -0.3
 
-  
+  ## ORIGINAL - not used
   # Use the 10 best deltas to build the data for the "Most postive shifts"
   bestData <- sectorDeltas %>%
     inner_join(select(best10deltas,QUESTION), by = "QUESTION") %>%
     filter(unitcode == thisUnitcode) # ORIGINAL "BEST" CHART - Sector only
-  
-  bestData2 <- sectorDeltas %>%
-    inner_join(select(best10deltas,QUESTION), by = "QUESTION") %>%
-    mutate(ind_question = paste0(
-      INDICATOR_lang, ": Q", substr(TITLE_lang,10,140)
-      )) %>%
-    mutate(ind_question = str_wrap(ind_question, width = 60)) %>% 
-    mutate(org_level = ifelse(unitcode == "dept","dept","sector")) %>% 
-    select(ind_question,org_level, y2017 = `2017`, y2018 = `2018`, delta) %>% 
-    nest(y2017, y2018, delta, .key = "value_col") %>%
-    spread(key = org_level, value = value_col) %>% 
-    unnest(sector,dept, .sep = "_") %>% 
-    mutate(ind_question = fct_reorder(ind_question, sector_delta, .desc = FALSE))
   
   # Build the "Most postive shifts" chart
   best.plt <- ggplot(data = bestData, x = abbr_lang, group = abbr_lang) +
@@ -358,7 +345,22 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
     scale_y_continuous(limits = c(0,100), breaks = c(0,25,50,75,100), expand = expand_scale(add = c(0,5))) +
     deltaTheme
   
-  # ORIGINAL "BEST" CHART - Sector only
+  ## REVISED- used
+  bestData2 <- sectorDeltas %>%
+    inner_join(select(best10deltas,QUESTION), by = "QUESTION") %>%
+    mutate(ind_question = paste0(
+      INDICATOR_lang, ": Q", substr(TITLE_lang,10,140)
+    )) %>%
+    mutate(ind_question = str_wrap(ind_question, width = 60)) %>% 
+    mutate(org_level = ifelse(unitcode == "dept","dept","sector")) %>% 
+    select(ind_question,org_level, y2017 = `2017`, y2018 = `2018`, delta) %>% 
+    nest(y2017, y2018, delta, .key = "value_col") %>%
+    spread(key = org_level, value = value_col) %>% 
+    unnest(sector,dept, .sep = "_") %>% 
+    #mutate(ind_question = fct_reorder(ind_question, sector_delta, .desc = FALSE))
+    arrange(sector_delta, sector_y2018) %>% 
+    mutate(ind_question = fct_inorder(ind_question))
+  
   best2.plt <- ggplot(data = bestData2, x = ind_question) +
     geom_col(aes(x = ind_question, y = sector_y2018), fill = "#f7f7f7", width = 0.8) +
     geom_errorbar(aes(x = ind_question, ymin = sector_y2017, ymax = sector_y2017), colour = "grey60", linetype = 3) +
@@ -384,23 +386,11 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
     scale_y_continuous(limits = c(0,100), breaks = c(0,25,50,75,100), expand = expand_scale(add = c(0,5))) +
     deltaTheme2
 
+  ## ORIGINAL - not used
   # Use the 10 worst deltas to build the data for the "Most negative shifts"
   worstData <- sectorDeltas %>%
     inner_join(select(worst10deltas,QUESTION), by = "QUESTION") %>%
     filter(unitcode == thisUnitcode)
-  
-  worstData2 <- sectorDeltas %>%
-    inner_join(select(worst10deltas,QUESTION), by = "QUESTION") %>%
-    mutate(ind_question = paste0(
-      INDICATOR_lang, ": Q", substr(TITLE_lang,10,140)
-    )) %>%
-    mutate(ind_question = str_wrap(ind_question, width = 60)) %>% 
-    mutate(org_level = ifelse(unitcode == "dept","dept","sector")) %>% 
-    select(ind_question,org_level, y2017 = `2017`, y2018 = `2018`, delta) %>% 
-    nest(y2017, y2018, delta, .key = "value_col") %>%
-    spread(key = org_level, value = value_col) %>% 
-    unnest(sector,dept, .sep = "_") %>% 
-    mutate(ind_question = fct_reorder(ind_question, sector_delta, .desc = TRUE))
   
   # Build the "Most negative shifts" chart
   worst.plt <- ggplot(data = worstData, x = abbr_lang, group = abbr_lang) +
@@ -420,6 +410,23 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
     scale_colour_gradient2(high = "#0571b0", mid = "#bcbcbc", low = "#ca0020") +
     scale_y_continuous(limits = c(0,100), breaks = c(0,25,50,75,100), expand = expand_scale(add = c(0,5))) +
     deltaTheme
+  
+  
+  ## REVISED - used
+  worstData2 <- sectorDeltas %>%
+    inner_join(select(worst10deltas,QUESTION), by = "QUESTION") %>%
+    mutate(ind_question = paste0(
+      INDICATOR_lang, ": Q", substr(TITLE_lang,10,140)
+    )) %>%
+    mutate(ind_question = str_wrap(ind_question, width = 60)) %>% 
+    mutate(org_level = ifelse(unitcode == "dept","dept","sector")) %>% 
+    select(ind_question,org_level, y2017 = `2017`, y2018 = `2018`, delta) %>% 
+    nest(y2017, y2018, delta, .key = "value_col") %>%
+    spread(key = org_level, value = value_col) %>% 
+    unnest(sector,dept, .sep = "_") %>% 
+    #mutate(ind_question = fct_reorder(ind_question, sector_delta, .desc = TRUE))
+    arrange(desc(sector_delta), desc(sector_y2018)) %>% 
+    mutate(ind_question = fct_inorder(ind_question))
   
   worst2.plt <- ggplot(data = worstData2, x = ind_question) +
     geom_col(aes(x = ind_question, y = sector_y2018), fill = "#f7f7f7", width = 0.8) +
@@ -449,13 +456,13 @@ report_card <- function(thisUnitcode, lang, customName = NULL, customAbbr = NULL
   # Create chart titles
   best.ttl_lang <- case_when(
     lang == "E" ~ paste0("Top 10 Positive Shifts for ",thisAbbr," from 2017 to 2018 (Score 100)"),
-    lang == "F" ~ paste0("Les 10 changements plus positifs pour ",thisAbbr," de 2017 à 2018 (Score 100)"))
+    lang == "F" ~ paste0("Les 10 changements les plus positifs pour ",thisAbbr," de 2017 à 2018 (Score 100)"))
   best.ttl <- textGrob(best.ttl_lang,
                        gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
   
   worst.ttl_lang <- case_when(
     lang == "E" ~ paste0("Top 10 Negative Shifts for ",thisAbbr," from 2017 to 2018 (Score 100)"),
-    lang == "F" ~ paste0("Les 10 changements plus négatifs pour ",thisAbbr," de 2017 à 2018 (Score 100)"))
+    lang == "F" ~ paste0("Les 10 changements les plus négatifs pour ",thisAbbr," de 2017 à 2018 (Score 100)"))
   worst.ttl <- textGrob(worst.ttl_lang,
                         gp = gpar(fontsize = 10, fontface = "bold", col = "grey30"))
   

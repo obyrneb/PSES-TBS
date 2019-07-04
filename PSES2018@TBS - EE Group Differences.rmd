@@ -3,12 +3,15 @@ title: "EE Groups on all Questions"
 output: html_notebook
 ---
 
-
-
-```{r, fig.height= 4, fig.width=16}
+```{r setup}
 source("pses2018.R")
 
 library(tidyverse)
+library(cowplot)
+
+```
+
+```{r Disability Status Line Graph, fig.height= 5, fig.width=17}
 
 ee_data <- pses2018 %>% 
   filter(LEVEL1ID == 26, 
@@ -20,20 +23,61 @@ ee_data <- pses2018 %>%
          INDICATORID,INDICATOR_E,INDICATOR_F) %>%
   arrange(desc(DESCRIP_E),desc(POSITIVE)) %>%
   mutate(QUESTION = str_sub(QUESTION, start = 2)) %>% 
-  mutate(QUESTION = fct_inorder(QUESTION)) %>% 
+  #mutate(QUESTION = fct_inorder(QUESTION)) %>% 
   filter(DemoQ != "dept") %>% 
-  drop_na(POSITIVE)
+  drop_na(POSITIVE) %>% 
+  group_by(QUESTION) %>% 
+  mutate(delta = diff(POSITIVE)*-1) %>% 
+  ungroup() %>% 
+  mutate(Difference = fct_rev(ifelse(delta >= 0, "Advantage for persons with a disability", "Disadvantage for persons with a disability"))) %>%
+  mutate(DESCRIP_E = fct_rev(DESCRIP_E)) %>%
+  mutate(DESCRIP_F = fct_rev(DESCRIP_F)) %>% 
+  mutate(INDICATOR_E = fct_reorder(INDICATOR_E, INDICATORID)) %>% 
+  mutate(INDICATOR_F = fct_reorder(INDICATOR_F, INDICATORID))
+  #mutate(QUESTION = fct_reorder(QUESTION,delta))
 
-ee_plot <- ggplot(ee_data, aes(x = QUESTION, y = POSITIVE,
-                               group = DESCRIP_E, colour = DESCRIP_E)) +
+line_plot <- ggplot(ee_data, aes(x = QUESTION, y = POSITIVE,
+                               group = DESCRIP_E, colour = DESCRIP_E,shape = DESCRIP_E)) +
+  scale_shape_manual(values = c(16,21)) +
   geom_line() +
+  geom_point(fill = "white") +
+  labs(colour = NULL, shape = NULL, x = "PSES question number", y = "Positive responses (%)") +
+  facet_grid(cols = vars(INDICATOR_E), #rows = vars(DemoQ_E),
+            scales = "free", space = "free") +
   theme_classic() +
-  theme(legend.position = "bottom",
-        axis.text.x = element_text(angle = 90))
-  #facet_grid(rows = vars(DemoQ_E),#cols = vars(INDICATOR_E),
-  #          scales = "free", space = "free")
+  theme(legend.position = c(.07,.2),
+        axis.text.x = element_text(angle = 90, vjust = 0.5),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        #panel.background = element_rect(fill = NA, colour = "black"),
+        #strip.background = element_rect(colour = NA, fill = "grey90"),
+        strip.background = element_blank(),
+        strip.text = element_text(size = 8),
+        axis.title = element_text(size = 10),
+        axis.title.x = element_blank())
 
-ee_plot 
+diff_plot <- ggplot(ee_data, aes(x = QUESTION, y = delta/2, fill = Difference, colour = Difference)) +
+  geom_col(width = 0.3) +
+  geom_hline(yintercept = 0, colour = "grey30") +
+  labs(colour = NULL, fill = NULL, x = "PSES question number", y = "Delta (disability - no disability)") +
+  facet_grid(cols = vars(INDICATOR_E), #rows = vars(DemoQ_E),
+            scales = "free", space = "free") +
+  scale_y_continuous(expand = expand_scale(add = c(2,6))) +
+  theme_classic() +
+  theme(legend.position = c(.09,.2),
+        axis.text.x = element_text(angle = 90, vjust = 0.5),
+        axis.text.y = element_text(angle = 90, hjust = 0.5),
+        #panel.background = element_rect(fill = NA, colour = "black"),
+        strip.background = element_blank(),
+        strip.text = element_blank(),
+        axis.title = element_text(size = 10))
 
+dis_plot <- cowplot::plot_grid(line_plot,diff_plot,ncol = 1)
+
+dis_plot
+
+barb_plot <- ggplot(ee_data, aes(x = QUESTION, y = POSITIVE)) +
+  geom_point(aes(fill = DESCRIP_E, colour = DESCRIP_E)) +
+  geom_line(aes(x = QUESTION, y = POSITIVE, group = QUESTION,
+                colour = Difference))
 ```
 

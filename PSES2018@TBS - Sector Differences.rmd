@@ -16,7 +16,7 @@ library(cowplot)
 
 ```
 
-```{r Sector line graph, fig.height= 3.5, fig.width=16 }
+```{r Sector line graph, fig.height= 6, fig.width=18.5 }
 
 sector_qs <- pses2018 %>% 
   filter(LEVEL1ID %in% c(0,26), 
@@ -33,7 +33,7 @@ sector_qs <- pses2018 %>%
     TRUE ~ "Other TBS Sectors"
   )) %>% 
   select(QUESTION,SCORE100, highlight,
-         DESCRIP_E,DESCRIP_F,BYCOND,
+         DESCRIP_E,DESCRIP_F,unitcode,BYCOND,
          DemoQ,DemoQ_E,DemoQ_F,
          INDICATORID,INDICATOR_E,INDICATOR_F) %>%
   arrange(desc(DESCRIP_E),desc(SCORE100)) %>%
@@ -42,33 +42,52 @@ sector_qs <- pses2018 %>%
   mutate(INDICATOR_E = fct_reorder(INDICATOR_E, INDICATORID)) %>% 
   mutate(INDICATOR_F = fct_reorder(INDICATOR_F, INDICATORID))
 
-colours <- c("Public Service" = "#37424A",
+deltas <- sector_qs %>% 
+  filter(unitcode %in% c(26,310)) %>% 
+  select(QUESTION,INDICATOR_E,INDICATOR_F,INDICATORID,unitcode,SCORE100) %>%
+  spread(unitcode,SCORE100) %>% 
+  rename(dept = 5, sector = 6) %>% 
+  mutate(delta = sector - dept)
+
+colours <- c("Public Service" = "grey50",
              "Treasury Board Secretariat" = "#3095B4",
              "Corporate Services Sector" = "#CD202C",
-             "Other TBS Sectors" = "grey60")
-shapes <- c("Public Service" = 16,
+             "Other TBS Sectors" = "grey92")
+shapes <- c("Public Service" = 18,
              "Treasury Board Secretariat" = 16,
              "Corporate Services Sector" = 21,
              "Other TBS Sectors" = 16)
-linetypes <- c("Public Service" = 3,
-             "Treasury Board Secretariat" = 2,
+linetypes <- c("Public Service" = 2,
+             "Treasury Board Secretariat" = 1,
              "Corporate Services Sector" = 1,
              "Other TBS Sectors" = 1)
 
-line_plot_e <- ggplot(sector_qs, aes(x = QUESTION, y = SCORE100,
-                               group = DESCRIP_E, colour = highlight, shape = highlight, linetype = highlight)) +
+line_plot_e <- ggplot(sector_qs, aes(x = QUESTION, y = SCORE100)) +
+  geom_line(data = filter(sector_qs, highlight == "Other TBS Sectors"),
+            aes(group = DESCRIP_E, colour = highlight, linetype = highlight)) +
+  geom_point(data = filter(sector_qs, highlight == "Other TBS Sectors"), fill = "white",
+            aes(group = DESCRIP_E, colour = highlight, shape = highlight)) +
+  geom_line(data = filter(sector_qs, highlight != "Other TBS Sectors"),
+            aes(group = DESCRIP_E, colour = highlight, linetype = highlight)) +
+  geom_point(data = filter(sector_qs, highlight != "Other TBS Sectors"), fill = "white",
+            aes(group = DESCRIP_E, colour = highlight, shape = highlight)) +
   scale_colour_manual(values = colours) +
   scale_shape_manual(values = shapes) +
   scale_linetype_manual(values = linetypes) +
-  geom_line() +
-  geom_point(fill = "white") +
-  labs(colour = NULL, shape = NULL, linetype = NULL,
+  geom_hline(yintercept = 0, colour = "#3095B4") +
+  geom_segment(data = deltas, aes(x = QUESTION, xend = QUESTION, y = 0, yend = delta), colour = "grey70") +
+  geom_point(data = deltas, aes(x = QUESTION, y = 0), colour = "#3095B4") +
+  geom_point(data = deltas, aes(x = QUESTION, y = delta), shape = 21, fill = "white", colour = "#CD202C") +
+  labs(colour = NULL, shape = NULL, linetype = NULL, 
+       title = "PSES 2018 - Comparison of Corporate Services Sector (CSS) and Treasury Board Secretariat (TBS)",
+       subtitle = "The top graph displays the \"Score 100\" for all TBS sectors, TBS and the Public Service. The bottom graph displays the postive and negative differences between TBS scores (flat line) and CSS scores.",
        x = "Public Service Employee Survey questions", y = "Score 100") +
+  scale_y_continuous(breaks = c(-5,0,5,25,50,75,100)) +
   facet_grid(cols = vars(INDICATOR_E), #rows = vars(DemoQ_E),
             scales = "free", space = "free",
             labeller = label_wrap_gen(15)) +
   theme_classic() +
-  theme(legend.position = c(.08,.2),
+  theme(legend.position = c(.08,.3),
         line = element_line(colour = "grey30"),
         text = element_text(colour = "grey30"),
         axis.text.x = element_text(angle = 90, vjust = 0.5),
@@ -80,35 +99,13 @@ line_plot_e <- ggplot(sector_qs, aes(x = QUESTION, y = SCORE100,
         axis.title = element_text(size = 10))
         #axis.title.x = element_blank())
 
-line_plot_f <- ggplot(ee_data, aes(x = QUESTION, y = POSITIVE,
-                               group = DESCRIP_F, colour = DESCRIP_F, shape = DESCRIP_F)) +
-  scale_colour_manual(values = c("#CD202C","#3095B4")) +
-  scale_shape_manual(values = c(16,21)) +
-  geom_line() +
-  geom_point(fill = "white") +
-  labs(colour = NULL, shape = NULL, x = "Questions du Sondage auprès des fonctionnaires fédéraux", y = "Résponses positives (%)") +
-  facet_grid(cols = vars(INDICATOR_F), #rows = vars(DemoQ_E),
-            scales = "free", space = "free",
-            labeller = label_wrap_gen(20)) +
-  theme_classic() +
-  theme(legend.position = c(.08,.2),
-        line = element_line(colour = "grey30"),
-        text = element_text(colour = "grey30"),
-        axis.text.x = element_text(angle = 90, vjust = 0.5),
-        axis.text.y = element_text(angle = 90, hjust = 0.5),
-        #panel.background = element_rect(fill = NA, colour = "black"),
-        #strip.background = element_rect(colour = NA, fill = "grey90"),
-        strip.background = element_blank(),
-        strip.text = element_text(size = 8),
-        axis.title = element_text(size = 10))
-
 line_plot_e
-line_plot_f
+
 
 ggsave(file.path(mainDir,plotDir,"PSES2018@TBS - Sector Line Chart (CSS).svg"),
-       plot = line_plot_e, height = 3.5, width = 16)
+       plot = line_plot_e, height = 6, width = 18.5)
 
-ggsave(file.path(mainDir,plotDir,"SAFF2018@TBS - Graphique linéaire des secteurs (SSC).svg"),
-       plot = line_plot_f, height = 3.5, width = 16)
+#ggsave(file.path(mainDir,plotDir,"SAFF2018@TBS - Graphique linéaire des secteurs (SSC).svg"),
+#       plot = line_plot_f, height = 3.5, width = 16)
 
 ```

@@ -836,14 +836,21 @@ for (i in sectorList$unitcode) {
 # CIOB has been rechristened OCIO, following elevation of the CIO to DM status.
 # These lines ensure the new OCIO descriptors are used for CIOB's unitcode (301).
 pdf(file.path(mainDir,plotDir,"PSES2018 Report Cards (EN&FR) - Office of the Chief Information Officer.pdf"),
-    height = 8.5, width = 14, useDingbats=FALSE)
+    height = 8.5, width = 14, useDingbats = FALSE)
 report_card(301, "E", "Office of the Chief Information Officer", "OCIO", question100s, score100s)
 report_card(301, "F", "Bureau du Dirigeant Principal de l'information", "BDPI", question100s, score100s)
 dev.off()
 
 # GOS - 307
 pdf(file.path(mainDir,plotDir,"PSES2018 Report Cards (EN&FR) - Government Operations Sector.pdf"),
-    height = 8.5, width = 14, useDingbats=FALSE)
+    height = 8.5, width = 14, useDingbats = FALSE)
 report_card(307, "E", question100s = question100s, score100s = score100s)
 report_card(307, "F", question100s = question100s, score100s = score100s)
+dev.off()
+
+# CSS - 310
+pdf(file.path(mainDir,plotDir,"PSES2018 Report Cards (EN&FR) - Corporate Services Sector.pdf"),
+    height = 8.5, width = 14, useDingbats = FALSE)
+report_card(310, "E", question100s = question100s, score100s = score100s)
+report_card(310, "F", question100s = question100s, score100s = score100s)
 dev.off()

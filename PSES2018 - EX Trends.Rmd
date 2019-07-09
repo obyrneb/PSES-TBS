@@ -24,31 +24,31 @@ ex_qs <- pses2018 %>%
          substr(DESCRIP_E,1,3) == "EX-",
          SURVEYR %in% c(2017,2018)) %>% 
   select(DESCRIP_E,QUESTION,TITLE_E,TITLE_F,
-         SCORE100, SURVEYR, ANSCOUNT,
+         POSITIVE, SURVEYR, ANSCOUNT,
          INDICATORID,INDICATOR_E,INDICATOR_F) %>%
   mutate(SURVEYR = as.factor(SURVEYR)) %>% 
   group_by(DESCRIP_E, QUESTION) %>% 
   #mutate(years = n()) %>% 
   filter(n() > 1) %>% 
   ungroup() %>% 
-  drop_na(SCORE100) %>% 
+  drop_na(POSITIVE) %>% 
   mutate_at(vars(INDICATOR_E,INDICATOR_F), ~fct_reorder(.,INDICATORID)) %>% 
   arrange(desc(SURVEYR))
   
 ex_deltas <- ex_qs %>%
-  nest(SCORE100, ANSCOUNT, .key = "value_col") %>% 
+  nest(POSITIVE, ANSCOUNT, .key = "value_col") %>% 
   spread(SURVEYR,  value_col) %>%
   rename(y2017 = `2017`, y2018 = `2018`) %>%
   #mutate(arlg = array_length(y2017)) %>% 
   unnest(y2017, y2018, .sep = "_") %>% 
-  mutate(score_delta = y2018_SCORE100 - y2017_SCORE100)
+  mutate(positive_delta = y2018_POSITIVE - y2017_POSITIVE)
   
 colours <- c("2017" = "grey70",
              "2018" = "#CD202C")
 shapes <- c("2017" = 16,
             "2018" = 21)
 
-ex_plot_e <- ggplot(ex_qs, aes(x = QUESTION, y = SCORE100)) +
+ex_plot_e <- ggplot(ex_qs, aes(x = QUESTION, y = POSITIVE)) +
   geom_line(data = filter(ex_qs, SURVEYR == 2017), aes(group = SURVEYR, colour = SURVEYR)) +
   geom_line(data = filter(ex_qs, SURVEYR == 2018), aes(group = SURVEYR, colour = SURVEYR)) +
   geom_point(data = filter(ex_qs, SURVEYR == 2017), aes(group = SURVEYR, colour = SURVEYR, shape = SURVEYR), fill = "white") +
@@ -56,13 +56,13 @@ ex_plot_e <- ggplot(ex_qs, aes(x = QUESTION, y = SCORE100)) +
   scale_colour_manual(values = colours) +
   scale_shape_manual(values = shapes) +
   geom_hline(yintercept = 0, colour = colours[["2017"]]) +
-  geom_segment(data = ex_deltas, aes(x = QUESTION, xend = QUESTION, y = 0, yend = score_delta), colour = "grey70") +
+  geom_segment(data = ex_deltas, aes(x = QUESTION, xend = QUESTION, y = 0, yend = positive_delta), colour = "grey70") +
   geom_point(data = ex_deltas, aes(x = QUESTION, y = 0), colour = colours[["2017"]]) +
-  geom_point(data = ex_deltas, aes(x = QUESTION, y = score_delta), shape = 21, fill = "white", colour = colours[["2018"]]) +
+  geom_point(data = ex_deltas, aes(x = QUESTION, y = positive_delta), shape = 21, fill = "white", colour = colours[["2018"]]) +
   labs(colour = NULL, shape = NULL, linetype = NULL, 
        title = "PSES 2018 - Comparison of EX levels across the Public Service",
-       subtitle = "The top graphs displays the \"Score 100\" for all PSES questions by survey year. The bottom graph displays the postive and negative differences between 2017 scores (flat line) and 2018 scores.",
-       x = "Public Service Employee Survey questions", y = "Score 100") +
+       subtitle = "The top graphs displays the positive percentage of responses for all PSES questions by survey year. The bottom graph displays the postive and negative differences between 2017 scores (flat line) and 2018 scores.",
+       x = "Public Service Employee Survey questions", y = "Positive %") +
   scale_y_continuous(breaks = c(-5,0,5,25,50,75,100)) +
   facet_grid(cols = vars(INDICATOR_E), rows = vars(DESCRIP_E),
             scales = "free", space = "free",
@@ -83,5 +83,7 @@ ex_plot_e
 
 ggsave(file.path(mainDir,plotDir,"PSES@EX - 2017-2018 Comparisons by Level.svg"),
        plot = ex_plot_e, height = 18, width = 18.5)
+
+write_csv(ex_deltas,"PSES@EX - 2017-2018 Comparisons by Level.csv")
 
 ```

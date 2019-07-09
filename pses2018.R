@@ -36,21 +36,24 @@ if (!exists("pses2018")) {
   ss3_2018 <- read.csv(ss3File_2018, na.strings = "9999")
   ss4_2018 <- read.csv(ss4File_2018, na.strings = "9999")
   ss5_2018 <- read.csv(ss5File_2018, na.strings = "9999")
-  indicatorMap <- read.csv(file.path(mainDir,dataDir,
-                                     "PSES2018_Indicator_Mapping.csv")) %>%
-    
-    select(-TITLE_E,-TITLE_F)
-  demoMap <- read.csv(file.path(mainDir,dataDir,
-                                "PSES2018_Demographic_Mapping.csv"))
-  sectorAbbr <- read.csv(file.path(mainDir,dataDir,
-                                   "PSES2018_TBS_Sector_Abbreviations.csv")) 
-  pses2018 <- bind_rows(ss1_2018,ss2_2018,ss3_2018,ss4_2018,ss5_2018) %>%
-    mutate(DemoQ = ifelse(is.na(BYCOND),"dept",
-                          ifelse(startsWith(BYCOND, "LEVEL"),"org",
-                                 word(BYCOND, 1, sep = " =")))) %>% 
-    left_join(indicatorMap, by = "QUESTION") %>% 
-    left_join(sectorAbbr, by = "DESCRIP_E") %>%
-    left_join(demoMap, by = "DemoQ")
 }
+
+
+# Load addtional metadata files  
+indicatorMap <- read.csv(file.path(mainDir,dataDir,"PSES2018_Indicator_Mapping.csv")) %>%
+  select(-TITLE_E,-TITLE_F)
+
+demoMap <- read.csv(file.path(mainDir,dataDir,"PSES2018_Demographic_Mapping.csv"))
+
+sectorAbbr <- read.csv(file.path(mainDir,dataDir,"PSES2018_TBS_Sector_Abbreviations.csv")) 
+
+# Build the PSES 2018 dataframe and add metadata via joins
+pses2018 <- bind_rows(ss1_2018,ss2_2018,ss3_2018,ss4_2018,ss5_2018) %>%
+  mutate(DemoQ = ifelse(is.na(BYCOND),"dept",
+                        ifelse(startsWith(BYCOND, "LEVEL"),"org",
+                               word(BYCOND, 1, sep = " =")))) %>% 
+  left_join(indicatorMap, by = "QUESTION") %>% 
+  left_join(sectorAbbr, by = "DESCRIP_E") %>%
+  left_join(demoMap, by = "DemoQ")
 
 # Load demo

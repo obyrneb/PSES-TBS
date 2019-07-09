@@ -18,6 +18,9 @@ library(cowplot)
 
 ```{r Sector line graph, fig.height= 6, fig.width=18.5 }
 
+this_unitcode <- 310
+lang = "e"
+
 sector_qs <- pses2018 %>% 
   filter(LEVEL1ID %in% c(0,26), 
          DemoQ %in% c("org","dept"),
@@ -25,12 +28,33 @@ sector_qs <- pses2018 %>%
   mutate(unitcode = ifelse(is.na(BYCOND),
                            LEVEL1ID,
                            word(BYCOND, 2, sep = " = "))) %>%
-  filter(unitcode %in% c(000,026,203,300,301,302,400,401,402,403,404,405,406,407,408,305,306,307,308,309,310,311,312,313,314,315)) %>%
+  filter(unitcode %in% c(000,026,203,300,301,302,400,401,402,403,404,405,406,407,408,305,306,307,308,309,310,311,312,313,314,315))
+
+subttl_width <- 200
+
+this_sector <- c(e = filter(sector_qs, unitcode == this_unitcode) %>% pull(DESCRIP_E) %>% pluck(1),
+                 f = filter(sector_qs, unitcode == this_unitcode) %>% pull(DESCRIP_F) %>% pluck(1))
+PS <- c(e = filter(sector_qs, unitcode == 0) %>% pull(DESCRIP_E) %>% pluck(1),
+        f = filter(sector_qs, unitcode == 0) %>% pull(DESCRIP_F) %>% pluck(1))
+dept <- c(e = filter(sector_qs, unitcode == 26) %>% pull(DESCRIP_E) %>% pluck(1),
+          f = filter(sector_qs, unitcode == 26) %>% pull(DESCRIP_F) %>% pluck(1))
+other_sectors <- c(e = "Other Sectors",
+           f = "Autres secteurs")
+ttl <- c(e = paste0("PSES 2018 - Comparison of ",this_sector[["e"]]," and ",dept[["e"]]),
+         f = paste0("SAFF 2018 - Comparaison de ",this_sector[["f"]]," et ",dept[["f"]]))
+subttl <- c(e = str_wrap(paste0("The top graph displays the \"Score 100\" for all sectors, the department and the Public Service. The bottom graph displays the positive and negative differences between ",dept[["e"]]," scores (flat line) and ",this_sector[["e"]]," scores."), width = subttl_width),
+            f = str_wrap(paste0("Le graphique du haut affiche les « scores 100 » pour tous les secteurs, le ministère et la fonction publique. Le graphique du bas affiche les différences positives et négatives entre les scores de ",dept[["f"]]," (ligne plate) et les scores de ",this_sector[["f"]],"."), width = subttl_width))
+x_dim <- c(e = "Public Service Employee Survey questions",
+           f = "Questions du Sondage auprès des fonctionnaires fédéraux")
+y_dim <- c(e = "Score 100",
+           f = "Score 100")
+
+sector_qs <- sector_qs %>% 
   mutate(highlight = case_when(
-    unitcode == 0 ~ "Public Service",
-    unitcode == 26 ~ "Treasury Board Secretariat",
-    unitcode == 310 ~ "Corporate Services Sector",
-    TRUE ~ "Other TBS Sectors"
+    unitcode == 0 ~ PS[[lang]],
+    unitcode == 26 ~ dept[[lang]],
+    unitcode == 310 ~ this_sector[[lang]],
+    TRUE ~ other_sectors[[lang]]
   )) %>% 
   select(QUESTION,SCORE100, highlight,
          DESCRIP_E,DESCRIP_F,unitcode,BYCOND,
@@ -49,27 +73,23 @@ deltas <- sector_qs %>%
   rename(dept = 5, sector = 6) %>% 
   mutate(delta = sector - dept)
 
-colours <- c("Public Service" = "grey50",
-             "Treasury Board Secretariat" = "#3095B4",
-             "Corporate Services Sector" = "#CD202C",
-             "Other TBS Sectors" = "grey92")
-shapes <- c("Public Service" = 18,
-             "Treasury Board Secretariat" = 16,
-             "Corporate Services Sector" = 21,
-             "Other TBS Sectors" = 16)
-linetypes <- c("Public Service" = 2,
-             "Treasury Board Secretariat" = 1,
-             "Corporate Services Sector" = 1,
-             "Other TBS Sectors" = 1)
+aes_names <- c(PS[[lang]],dept[[lang]],this_sector[[lang]],other_sectors[[lang]])
+colours <- c("grey50", "#3095B4","#CD202C","grey92")
+shapes <- c(18,16,21,16)
+linetypes <- c(2,1,1,1)
 
+names(colours) <- aes_names
+names(shapes) <- aes_names 
+names(linetypes) <-  aes_names
+            
 line_plot_e <- ggplot(sector_qs, aes(x = QUESTION, y = SCORE100)) +
-  geom_line(data = filter(sector_qs, highlight == "Other TBS Sectors"),
+  geom_line(data = filter(sector_qs, highlight == other_sectors[[lang]]),
             aes(group = DESCRIP_E, colour = highlight, linetype = highlight)) +
-  geom_point(data = filter(sector_qs, highlight == "Other TBS Sectors"), fill = "white",
+  geom_point(data = filter(sector_qs, highlight == other_sectors[[lang]]), fill = "white",
             aes(group = DESCRIP_E, colour = highlight, shape = highlight)) +
-  geom_line(data = filter(sector_qs, highlight != "Other TBS Sectors"),
+  geom_line(data = filter(sector_qs, highlight != other_sectors[[lang]]),
             aes(group = DESCRIP_E, colour = highlight, linetype = highlight)) +
-  geom_point(data = filter(sector_qs, highlight != "Other TBS Sectors"), fill = "white",
+  geom_point(data = filter(sector_qs, highlight != other_sectors[[lang]]), fill = "white",
             aes(group = DESCRIP_E, colour = highlight, shape = highlight)) +
   scale_colour_manual(values = colours) +
   scale_shape_manual(values = shapes) +
@@ -79,11 +99,12 @@ line_plot_e <- ggplot(sector_qs, aes(x = QUESTION, y = SCORE100)) +
   geom_point(data = deltas, aes(x = QUESTION, y = 0), colour = "#3095B4") +
   geom_point(data = deltas, aes(x = QUESTION, y = delta), shape = 21, fill = "white", colour = "#CD202C") +
   labs(colour = NULL, shape = NULL, linetype = NULL, 
-       title = "PSES 2018 - Comparison of Corporate Services Sector (CSS) and Treasury Board Secretariat (TBS)",
-       subtitle = "The top graph displays the \"Score 100\" for all TBS sectors, TBS and the Public Service. The bottom graph displays the postive and negative differences between TBS scores (flat line) and CSS scores.",
-       x = "Public Service Employee Survey questions", y = "Score 100") +
+       title = ttl[[lang]],
+       subtitle = subttl[[lang]],
+       x = x_dim[[lang]], 
+       y = y_dim[[lang]]) +
   scale_y_continuous(breaks = c(-5,0,5,25,50,75,100)) +
-  facet_grid(cols = vars(INDICATOR_E), #rows = vars(DemoQ_E),
+  facet_grid(cols = vars(matches(paste0('INDICATOR_',lang),ignore.case = TRUE)), #rows = vars(DemoQ_E),
             scales = "free", space = "free",
             labeller = label_wrap_gen(15)) +
   theme_classic() +

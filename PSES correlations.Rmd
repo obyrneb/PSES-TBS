@@ -48,7 +48,7 @@ PSEScorr <- function(PSESdata) {
   correlations.rcorr <- rcorr(data.mx, type="pearson")
   
   
-  # correlations.df <- tidy(correlations.rcorr,FALSE) %>% rename(var1 = column1, var2 = column2)
+  correlations.df <- tidy(correlations.rcorr,FALSE) %>% rename(var1 = column1, var2 = column2)
   
   correlations.df
   }

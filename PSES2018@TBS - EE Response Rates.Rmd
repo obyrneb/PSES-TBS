@@ -1,0 +1,78 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r Numbers, fig.width = 6, fig.height=8}
+library(tidyverse)
+
+tbs_respondents <- pses2018 %>% 
+  filter(LEVEL1ID == 26, DemoQ %in% c("Q86","Q87","Q88","Q89")) %>% 
+  select(SURVEYR,QUESTION,BYCOND,DemoQ,DemoQ_E,DESCRIP_E,ANSCOUNT) %>% 
+  mutate(SURVEYR = as.factor(SURVEYR)) %>% 
+  group_by(SURVEYR,DemoQ,BYCOND,DemoQ_E,DESCRIP_E) %>% 
+  summarise(max_resp = max(ANSCOUNT)) %>% 
+  ungroup()
+
+ggplot(tbs_respondents, aes(x = SURVEYR, y = max_resp, group = DESCRIP_E, colour = DESCRIP_E)) +
+  geom_line() +
+  geom_point() +
+  geom_text(aes(label = max_resp), vjust = -0.3, show.legend = FALSE, nudge_y = 50) +
+  geom_text(data = filter(tbs_respondents, SURVEYR == 2018),
+            aes(label = DESCRIP_E), hjust = 0, vjust = 0.5, nudge_x = 0.3) +
+  #coord_cartesian(clip = "off") +
+  facet_wrap(vars(DemoQ_E), ncol = 1) +
+  scale_y_continuous(limits = c(0,2000)) +
+  scale_x_discrete(expand = expand_scale(mult = c(0.1,0.8))) +
+  labs(title = "PSES Demographic Response Rates @ TBS", y = "Respondents", x = "Survey Year", colour = "Demographic Group") +
+  theme_classic() +
+  theme(strip.background = element_blank()) +
+  theme(legend.position = "none") +
+  theme(axis.line.x = element_blank())
+
+ggsave(file.path(mainDir,plotDir,"PSES Demographic Response rates @ TBS.svg"), height = 8, width = 6)
+
+```
+
+```{r Rates, fig.width = 6, fig.height=4}
+library(tidyverse)
+
+tbs_respondents_2018 <- pses2018 %>% 
+  filter(LEVEL1ID == 26, BYCOND %in% c("Q86 = 2","Q87 = 1","Q88 = 1","Q89 = 1"), SURVEYR == 2018) %>% 
+  select(SURVEYR,QUESTION,BYCOND,DemoQ,DemoQ_E,DESCRIP_E,ANSCOUNT) %>% 
+  mutate(SURVEYR = as.factor(SURVEYR)) %>% 
+  group_by(SURVEYR,DemoQ,BYCOND,DemoQ_E,DESCRIP_E) %>% 
+  summarise(max_resp = max(ANSCOUNT)) %>% 
+  ungroup() %>% 
+  add_column(self_identified = c(1123,49,97,354))
+
+ggplot(tbs_respondents_2018, aes(x = DESCRIP_E, fill = DESCRIP_E)) +
+  geom_col(aes(y = self_identified), alpha = 0.7) +
+  geom_col(aes(y = max_resp)) +
+  geom_text(aes(label = self_identified, y = self_identified), show.legend = FALSE, nudge_y = 50) +
+  geom_text(aes(label = max_resp, y = max_resp), show.legend = FALSE, nudge_y = -50) +
+  #geom_text(data = filter(tbs_respondents_2018, SURVEYR == 2018),
+  #          aes(label = DESCRIP_E), hjust = 0, vjust = 0.5, nudge_x = 0.3) +
+  #coord_cartesian(clip = "off") +
+  scale_y_continuous(limits = c(0,1300)) +
+  #scale_x_discrete(expand = expand_scale(mult = c(0.1,0.8))) +
+  labs(title = "PSES 2018 Demographic Response Rates @ TBS",
+       y = "Respondents", x = "Demographic Group", colour = "Demographic Group") +
+  theme_classic() +
+  theme(strip.background = element_blank()) +
+  theme(legend.position = "none") +
+  theme(axis.line.x = element_blank())
+
+#ggsave(file.path(mainDir,plotDir,"PSES Demographic Response rates @ TBS.svg"), height = 8, width = 6)
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

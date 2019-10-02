@@ -18,7 +18,7 @@ library(cowplot)
 
 ```{r Sector line graph, fig.height= 6, fig.width=18.5 }
 
-this_unitcode <- 310
+this_unitcode <- 300
 this_deptcode <- 26
 lang = "e"
 

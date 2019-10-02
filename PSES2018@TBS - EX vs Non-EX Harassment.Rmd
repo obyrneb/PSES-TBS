@@ -1,0 +1,103 @@
+---
+title: "Harassment differences between EXs and non-EXs"
+output: html_notebook
+---
+
+```{r setup}
+source("pses2018.R")
+
+library(tidyverse)
+library(cowplot)
+```
+
+```{r}
+topic_map <- tribble(
+  ~QUESTION, ~topic, ~item,
+  "Q48", "", "Harassment",
+  "Q49a", "Source", "Co-workers",
+  "Q49b", "Source", "Authority over me",
+  "Q49c", "Source", "Working for me",
+  "Q49d", "Source", "Custodial responsbility",
+  "Q49e", "Source", "From other departments",
+  "Q49f", "Source", "Members of the public",
+  "Q49g", "Source", "Other source",
+  "Q50a", "Nature", "Aggressive behaviour",
+  "Q50b", "Nature", "Excessive control",
+  "Q50c", "Nature", "Excluded or ignored",
+  "Q50d", "Nature", "Humiliation",
+  "Q50e", "Nature", "Interference / resources withheld",
+  "Q50f", "Nature", "Offensive remark",
+  "Q50g", "Nature", "Personal attack",
+  "Q50h", "Nature", "Physical violence",
+  "Q50i", "Nature", "Sexual comment or gesture",
+  "Q50j", "Nature", "Threat",
+  "Q50k", "Nature", "Unfair treatment",
+  "Q50l", "Nature", "Yelling / shouting",
+  "Q50m", "Nature", "Other nature",
+  "Q51a", "Action", "Discuss with manager",
+  "Q51b", "Action", "Discuss with source",
+  "Q51c", "Action", "Contacted an HR advisor",
+  "Q51d", "Action", "Contacted a union rep",
+  "Q51e", "Action", "Used informal conflict resolution",
+  "Q51f", "Action", "Filed a grievance or complaint",
+  "Q51g", "Action", "Resolved informally by victim",
+  "Q51h", "Action", "Other action",
+  "Q51i", "Action", "No action taken",
+  "Q52a", "Reason for no action", "Issue resolved",
+  "Q52b", "Reason for no action", "Not serious enough",
+  "Q52c", "Reason for no action", "Behaviour stopped",
+  "Q52d", "Reason for no action", "Individual apologized",
+  "Q52e", "Reason for no action", "Managemnt intervened",
+  "Q52f", "Reason for no action", "Source left",
+  "Q52g", "Reason for no action", "Victim changed jobs",
+  "Q52h", "Reason for no action", "Did not know what to do",
+  "Q52i", "Reason for no action", "Too distraught",
+  "Q52j", "Reason for no action", "Concerns about process",
+  "Q52k", "Reason for no action", "Advised against complaint",
+  "Q52l", "Reason for no action", "Afraid of reprisal",
+  "Q52m", "Reason for no action", "Threatened by someone",
+  "Q52n", "Reason for no action", "Believed it would not work",
+  "Q52o", "Reason for no action", "Still intend to take action",
+  "Q52p", "Reason for no action", "Other reason"
+)
+```
+
+```{r, fig.width=7, fig.height=10}
+har_data <- pses2018 %>% 
+  filter(LEVEL1ID == 26,
+         SURVEYR == 2018,
+         DemoQ == "Q78A",
+         SUBINDICATORID == 12) %>% 
+  mutate(exec = ifelse(DESCRIP_E == "EX", "EX", "non-EX"),
+         n_agree = AGREE/100 * ANSCOUNT) %>%
+  group_by(QUESTION, TITLE_E,exec) %>% 
+  summarise(n_agree = sum(n_agree),
+            anscount = sum(ANSCOUNT),
+            prop_agree = (n_agree / anscount * 100) %>% round(0)) %>% 
+  ungroup() %>%
+  full_join(topic_map, by = "QUESTION") %>% 
+  mutate(sub_question = QUESTION,
+         QUESTION = str_sub(QUESTION,1,3)) %>% 
+  select(QUESTION,sub_question,everything()) %>% 
+  arrange(desc(exec), QUESTION, prop_agree) %>% 
+  mutate(item = fct_inorder(item),
+         topic = fct_inorder(topic))
+
+ggplot(data = filter(har_data, !is.na(topic)), aes(x = item, y = prop_agree)) +
+  geom_col(fill = "#3095B4") +
+  geom_text(aes(label = paste0(prop_agree,"%")), vjust = 0.5, hjust = -0.2) +
+  coord_flip() +
+  scale_y_continuous(breaks = c(0, 50, 100), limits = c(0,100)) +
+  facet_grid(rows = vars(topic), cols = vars(exec), scales = "free_y", space = "free") +
+  theme_minimal_vgrid() +
+  labs(title = "Experiences of harassment") +
+  theme(axis.title = element_blank(),
+        axis.text.x = element_blank())
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

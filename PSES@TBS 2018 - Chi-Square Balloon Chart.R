@@ -128,7 +128,7 @@ TBS_Xsq <- TBS_Xsq %>%
 # CREATE INTERACTIVE GRAPHIC
 #------------
 balloon <- TBS_Xsq %>%
-  filter(p.value <= 0.05 & 
+  filter(p.value <= 0.01 & 
            .stdres >= 2) %>%
   left_join(sectorAbbr, by = "DESCRIP_E") %>%
   mutate(DESCRIP_E = ifelse(startsWith(BYCOND,"LEVEL"),
@@ -151,7 +151,7 @@ bp <- ggplot(balloon,aes(x = descrip_e_cut, y = QUESTION,
                          ))) +
   geom_point(aes(size = .observed, colour = sentiment,alpha = prop), shape = 18) +
   scale_colour_brewer(palette = "Set1") +
-  facet_grid(rows = vars(INDICATOR_E), cols = vars(DemoQ_E), switch = "both", scales = "free",space = "free") +
+  #facet_grid(rows = vars(INDICATOR_E), cols = vars(DemoQ_E), switch = "both", scales = "free",space = "free") +
   labs(title = "PSES@TBS 2018 - Sentiment by Question and Demographic",
        subtitle = "Results of chi-square tests on sentiment responses by demogrphic for every PSES question at TBS.\nEach dot represents a significant finding (p < 0.05, standardized residual > 2).\nColours denote sentiment, size correspond to standardized residuals, opaqueness relfects the p-value.",
        caption = "Data from the 2018 Public Service Employee Survey") + 
